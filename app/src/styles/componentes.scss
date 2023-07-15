@@ -1,0 +1,98 @@
+// TODO, Componentes SCSS
+
+// ? VARIABLES
+$color-fondo: #282c34;
+$color-barra: rgb(35, 45, 77);
+$color-letra: white;
+$color-letra-seleccionada: rgb(240, 229, 194);
+$sombra-item-seleccionado: 0 0 10px rgb(240, 198, 84);
+
+// * BARRA SUPERIOR
+.barra-superior {
+    min-height: 10vh;
+    background: $color-barra;
+
+    .container {
+        background: $color-barra;
+        background-color: $color-barra;
+    }
+
+    .icono-principal {
+        margin-right: 10px;
+    }
+
+    .navbar-brand {
+        color: $color-letra;
+        font-size: 1.6rem;
+        font-weight: bold;
+        .icono-bootstrap {
+            margin-right: 10px;
+        }
+        &:hover,
+        &:focus {
+            color: $color-letra;
+            text-shadow: $sombra-item-seleccionado;
+        }
+    }
+
+    .nav-link {
+        font-size: 1.3rem;
+        color: $color-letra;
+        font-weight: bold;
+        &:hover,
+        &:focus {
+            color: $color-letra-seleccionada;
+            text-shadow: $sombra-item-seleccionado;
+        }
+        &.active {
+            color: $color-letra;
+        }
+    }
+}
+
+// * PAGINA DEL INICIO
+
+.contenedor-inicio {
+    display: flex;
+    color: $color-letra;
+    align-items: start;
+
+    .derecha,
+    .izquierda {
+        align-self: start;
+
+        .container {
+            display: inline;
+            align-items: start;
+            width: 100%;
+            min-width: 100%;
+        }
+    }
+
+    .derecha {
+        .card {
+            background-color: rgb(212, 178, 83, 0.9);
+            color: $color-letra;
+        }
+    }
+}
+
+// * PIE DE PAGINA
+.pie-de-pagina {
+    background-color: $color-fondo;
+    color: $color-letra;
+    position: relative;
+
+    .linea-blanca {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: #fff;
+    }
+
+    .link {
+        color: $color-letra;
+    }
+}

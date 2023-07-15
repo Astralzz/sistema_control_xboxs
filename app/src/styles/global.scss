@@ -1,0 +1,45 @@
+$color-fondo: #282c34;
+
+.app {
+  text-align: center;
+  background-color: $color-fondo;
+  min-height: 90vh;
+  // display: flex;
+  // flex-direction: column;
+  // align-items: center;
+  // justify-content: center;
+  // font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.modal-izquierdo {
+  background-color: $color-fondo;
+  color: white;
+}
+
+.icono {
+  transition: transform 0.3s;
+}
+
+.icono:hover {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.contenedor-centrado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  width: 100%;
+  height: 90vh;
+}
+
+.icono-error {
+  /* Agrega estilos adicionales según tus necesidades */
+  transition: transform 1s;
+}
+
+.rotar-icono {
+  transform: rotate(360deg);
+}
