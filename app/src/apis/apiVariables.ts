@@ -14,6 +14,9 @@ export interface RespuestaApi {
   // Listas
   listaXboxs?: Xbox[];
   listaRentas?: Renta[];
+  // Datos
+  mensaje?: string;
+  xbox?: Xbox;
 }
 
 // * Respuesta axios

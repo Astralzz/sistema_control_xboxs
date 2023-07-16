@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
-import IconoBootstrap from "../IconoBootstrap";
+import IconoBootstrap from "./IconoBootstrap";
 
 // * Data error
 export interface DataError {

@@ -3,7 +3,7 @@ import { Button, Card, Row, Col, Form, Toast } from "react-bootstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
 import ModalXbox from "./ModalXbox";
-import IconoBootstrap from "../../components/IconoBootstrap";
+import IconoBootstrap from "../../components/Global/IconoBootstrap";
 
 // * Seleccionar tiempos
 interface SelectTiempo {
@@ -46,7 +46,7 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
   const [isTiempoCorriendo, setTiempoCorriendo] = useState<boolean>(false);
   const [tiempoRestante, setTiempoRestante] = useState<number>(0);
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
-  const [key, setKey] = useState<number>(0);
+  const [keyTemporizador, setKeyTemporizador] = useState<number>(0);
 
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
@@ -66,7 +66,7 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
     setTiempoCorriendo(false);
     setTiempoSeleccionado(-1);
     setTiempoRestante(0);
-    setKey((prevKey) => prevKey + 1);
+    setKeyTemporizador((prevKey) => prevKey + 1);
   };
 
   // * Aumentar tiempo
@@ -129,7 +129,7 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
                     {/* -------- TEMPORIZADOR */}
                     <div className="mb-4 d-flex justify-content-center">
                       <CountdownCircleTimer
-                        key={key}
+                        key={keyTemporizador}
                         isPlaying={isTiempoCorriendo}
                         duration={tiempoRestante}
                         colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
@@ -233,7 +233,11 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
         </Card.Body>
       </Card>
       {/* CANVAS DE INFORMACIÓN */}
-      <ModalXbox xbox={xbox} acción={cerrarModal} estado={isEstadoModal} />
+      <ModalXbox
+        xbox={xbox}
+        cerrarModal={cerrarModal}
+        estadoModal={isEstadoModal}
+      />
     </>
   );
 };

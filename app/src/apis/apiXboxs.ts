@@ -4,8 +4,8 @@ import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
 // * Variables
 const intermedio: string = "xboxs";
 
-// * Obtener xboxs
-async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
+// * Obtener lista de xboxs
+export async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
   try {
     // Ruta
     let url = API_URL + `${intermedio}/lista`;
@@ -25,4 +25,24 @@ async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
   }
 }
 
-export default apiObtenerListaXboxs;
+// * Crear nuevo xbox
+export async function apiCrearNuevoXbox(data: FormData): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/crear`;
+
+    // Enviamos
+    const res = await axios.post(url, data);
+
+    // * Éxito
+    return {
+      estado: true,
+      xbox: res.data.xbox ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}

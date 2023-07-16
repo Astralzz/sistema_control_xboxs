@@ -2,7 +2,7 @@ import React from "react";
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
-import IconoBootstrap from "./IconoBootstrap";
+import IconoBootstrap from "./Global/IconoBootstrap";
 import { Link } from "react-router-dom";
 
 interface Ruta {
