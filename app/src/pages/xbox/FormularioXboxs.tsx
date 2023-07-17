@@ -1,21 +1,17 @@
 import React, { Dispatch, useEffect, useState } from "react";
 import Xbox from "../../models/Xbox";
-import { Alert, Button, Form, Modal } from "react-bootstrap";
+import { Button, Form, Modal } from "react-bootstrap";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiCrearNuevoXbox } from "../../apis/apiXboxs";
-
-// * Alerta
-interface Alerta {
-  estado: boolean;
-  variante: "success" | "danger";
-  mensaje: string;
-}
+import Swal from "sweetalert2";
+import ComponenteCargando from "../../components/Global/ComponenteCargando";
 
 // * Props
 interface Props {
   xbox?: Xbox;
   cerrarModal: Dispatch<void>;
   estadoModal: boolean;
+  aumentarXbox?: (x: Xbox) => void;
 }
 
 // * ERS
@@ -27,15 +23,11 @@ const regexDescripcion: RegExp =
 const FormularioXboxs: React.FC<Props> = (props) => {
   // * Variables
   const [nombre, setNombre] = useState<string | null>(null);
+  const [isCargando, setCargando] = useState<boolean>(false);
   const [estado, setEstado] = useState<"DISPONIBLE" | "NO DISPONIBLE">(
     "DISPONIBLE"
   );
   const [descripcion, setDescripcion] = useState<string | null>(null);
-  const [alerta, setAlerta] = useState<Alerta>({
-    estado: false,
-    mensaje: "Mensaje por defecto",
-    variante: "danger",
-  });
 
   // * Crear nuevo xbox
   const crearNuevoXbox = async (data: FormData): Promise<void> => {
@@ -44,20 +36,22 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
     // ? salio mal
     if (!res.estado) {
-      setAlerta({
-        estado: true,
-        mensaje: res.detalles_error
+      Swal.fire(
+        "Error!",
+        res.detalles_error
           ? String(res.detalles_error)
-          : "Ocurrió un al crear xbox, intenta mas tarde",
-        variante: "danger",
-      });
+          : "Ocurrió un error al crear el xbox, intenta mas tarde",
+        "error"
+      );
+      return;
     }
 
-    setAlerta({
-      estado: true,
-      mensaje: res.mensaje ?? "Xbox guardado correctamente",
-      variante: "success",
-    });
+    // ? Se puede aumentar
+    if (res.xbox && props.aumentarXbox) {
+      props.aumentarXbox(res.xbox);
+    }
+
+    Swal.fire("Éxito!", res.mensaje ?? "Xbox creado correctamente", "success");
   };
 
   // * Preparar data
@@ -91,7 +85,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
     // ? Descripcion existe
     if (descripcion && descripcion?.length > 0) {
-      formData.append("descripcion", estado);
+      formData.append("descripcion", descripcion);
     }
 
     return formData;
@@ -99,11 +93,6 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
   // * Limpiar
   const limpiar = (): void => {
-    setAlerta({
-      estado: false,
-      mensaje: "Mensaje por defecto",
-      variante: "danger",
-    });
     setNombre(null);
     setEstado("DISPONIBLE");
     setDescripcion(null);
@@ -119,6 +108,8 @@ const FormularioXboxs: React.FC<Props> = (props) => {
   // * Al aceptar
   const accionAceptar = async (): Promise<void> => {
     try {
+      setCargando(true);
+
       // * Obtenemos data
       const data: FormData = prepararData();
 
@@ -129,11 +120,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
       // ? Existe xbox
       if (props.xbox) {
-        setAlerta({
-          estado: true,
-          mensaje: "Xbox actualizado correctamente",
-          variante: "success",
-        });
+        Swal.fire("Éxito!", "Xbox actualizado correctamente", "success");
         return;
       }
 
@@ -142,13 +129,16 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
       // ! Error
     } catch (error: unknown) {
-      setAlerta({ estado: true, mensaje: String(error), variante: "danger" });
+      Swal.fire("Error!", String(error), "error");
+    } finally {
+      setCargando(false);
     }
   };
 
   // * Al cerrar
   const accionAlCerrar = (): void => {
     limpiar();
+    setCargando(false);
     props.cerrarModal();
   };
 
@@ -173,83 +163,86 @@ const FormularioXboxs: React.FC<Props> = (props) => {
   };
 
   return (
-    <Modal show={props.estadoModal} onHide={accionAlCerrar}>
-      {/* ENCABEZADO */}
-      <Modal.Header closeButton>
-        {/* Titulo */}
-        <Modal.Title>
-          {props.xbox ? `Actualizar ${props.xbox.nombre}` : " Crear nuevo xbox"}
-        </Modal.Title>
-      </Modal.Header>
-      {/* CUERPO */}
-      <Modal.Body>
-        {/* Alerta */}
-        {alerta.estado && (
-          <Alert variant={alerta.variante}>{alerta.mensaje}</Alert>
-        )}
+    <>
+      {/* MODAL FORMULARIO */}
+      <Modal show={props.estadoModal} onHide={accionAlCerrar}>
+        {/* ENCABEZADO */}
+        <Modal.Header closeButton>
+          {/* Titulo */}
+          <Modal.Title>
+            {props.xbox
+              ? `Actualizar ${props.xbox.nombre}`
+              : " Crear nuevo xbox"}
+          </Modal.Title>
+        </Modal.Header>
+        {/* CUERPO */}
+        <Modal.Body>
+          {/* Formulario */}
+          <Form>
+            {/* Nombre */}
+            <Form.Group className="mb-3" controlId="form-grupo1">
+              <Form.Label>Nombre del xbox</Form.Label>
+              <Form.Control
+                onChange={(e) => setNombre(e.target.value)}
+                value={nombre ?? ""}
+                type="text"
+                autoFocus
+                maxLength={60}
+              />
+            </Form.Group>
 
-        {/* Formulario */}
-        <Form>
-          {/* Nombre */}
-          <Form.Group className="mb-3" controlId="form-grupo1">
-            <Form.Label>Nombre del xbox</Form.Label>
-            <Form.Control
-              onChange={(e) => setNombre(e.target.value)}
-              value={nombre ?? ""}
-              type="text"
-              autoFocus
-              maxLength={60}
-            />
-          </Form.Group>
+            {/* Estado */}
+            <Form.Group className="mb-3" controlId="estado">
+              <Form.Label>Estado del xbox</Form.Label>
+              <Form.Select
+                value={estado ?? "DISPONIBLE"}
+                aria-label="Estado de xbox"
+                onChange={(e) =>
+                  setEstado(
+                    e.target.value === "DISPONIBLE" ||
+                      e.target.value === "NO DISPONIBLE"
+                      ? e.target.value
+                      : "DISPONIBLE"
+                  )
+                }
+              >
+                <option value="DISPONIBLE">DISPONIBLE</option>
+                <option value="NO DISPONIBLE">NO DISPONIBLE</option>
+              </Form.Select>
+            </Form.Group>
 
-          {/* Estado */}
-          <Form.Group className="mb-3" controlId="estado">
-            <Form.Label>Estado del xbox</Form.Label>
-            <Form.Select
-              value={estado ?? "DISPONIBLE"}
-              aria-label="Estado de xbox"
-              onChange={(e) =>
-                setEstado(
-                  e.target.value === "DISPONIBLE" ||
-                    e.target.value === "NO DISPONIBLE"
-                    ? e.target.value
-                    : "DISPONIBLE"
-                )
-              }
-            >
-              <option value="DISPONIBLE">DISPONIBLE</option>
-              <option value="NO DISPONIBLE">NO DISPONIBLE</option>
-            </Form.Select>
-          </Form.Group>
+            {/* Descripcion */}
+            <Form.Group className="mb-3" controlId="descripcion">
+              <Form.Label>Descripcion</Form.Label>
+              <Form.Control
+                onChange={(e) => setDescripcion(e.target.value)}
+                value={descripcion ?? ""}
+                as="textarea"
+                maxLength={699}
+                rows={4}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          {/* Boton de cerrar */}
+          <Button variant="secondary" onClick={() => accionAlCerrar()}>
+            Cerrar
+          </Button>
+          {/* Boton de guardar | actualizar */}
+          <Button
+            variant="success"
+            disabled={bloquearBoton()}
+            onClick={() => accionAceptar()}
+          >
+            {props.xbox ? "Actualizar" : " Guardar"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-          {/* Descripcion */}
-          <Form.Group className="mb-3" controlId="descripcion">
-            <Form.Label>Descripcion</Form.Label>
-            <Form.Control
-              onChange={(e) => setDescripcion(e.target.value)}
-              value={descripcion ?? ""}
-              as="textarea"
-              maxLength={699}
-              rows={4}
-            />
-          </Form.Group>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        {/* Boton de cerrar */}
-        <Button variant="secondary" onClick={() => accionAlCerrar()}>
-          Cerrar
-        </Button>
-        {/* Boton de guardar | actualizar */}
-        <Button
-          variant="success"
-          disabled={bloquearBoton()}
-          onClick={() => accionAceptar()}
-        >
-          {props.xbox ? "Actualizar" : " Guardar"}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+      {/* MODAL CARGANDO */}
+      <ComponenteCargando tipo={"spin"} estadoModal={isCargando} />
+    </>
   );
 };
 

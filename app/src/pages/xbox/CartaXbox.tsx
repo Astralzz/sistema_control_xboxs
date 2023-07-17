@@ -1,9 +1,20 @@
 import React, { useState } from "react";
-import { Button, Card, Row, Col, Form, Toast } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Row,
+  Col,
+  Toast,
+  DropdownButton,
+  Dropdown,
+  ButtonGroup,
+} from "react-bootstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
 import ModalXbox from "./ModalXbox";
 import IconoBootstrap from "../../components/Global/IconoBootstrap";
+import { formatearTiempo } from "../../functions/funcionesGlobales";
+import Swal from "sweetalert2";
 
 // * Seleccionar tiempos
 interface SelectTiempo {
@@ -39,14 +50,22 @@ const selectsTiempo: SelectTiempo[] = [
   },
 ];
 
+// * Props
+interface Props {
+  xbox: Xbox;
+  eliminarXbox: (id: number) => void;
+  actualizarXbox: (id: number, xboxActualizado: Xbox) => void;
+}
+
 // Todo, Carta de xbox
-const CartaXbox: React.FC<Xbox> = (xbox) => {
+const CartaXbox: React.FC<Props> = (props) => {
   // * Variables
   const [tiempoSeleccionado, setTiempoSeleccionado] = useState<number>(-1);
   const [isTiempoCorriendo, setTiempoCorriendo] = useState<boolean>(false);
   const [tiempoRestante, setTiempoRestante] = useState<number>(0);
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [keyTemporizador, setKeyTemporizador] = useState<number>(0);
+  const [tiempoTotal, setTiempoTotal] = useState<number>(0);
 
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
@@ -71,6 +90,7 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
 
   // * Aumentar tiempo
   const aumentarTiempo = (valor: number): void => {
+    setTiempoTotal((prevTiempo) => prevTiempo + valor * 60);
     setTiempoRestante((prevTiempo) => prevTiempo + valor * 60);
   };
 
@@ -82,17 +102,13 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
     }
 
     // * Tiempo restante
-    const minutes = Math.floor(remainingTime / 60);
-    const seconds = remainingTime % 60;
-    const formattedTime = `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}`;
+    const tiempoFormat: string = formatearTiempo(remainingTime);
 
     return (
       <div className="timer">
         <div className="text">Tiempo restante:</div>
         <div className="value">
-          {remainingTime > 0 ? formattedTime : "00:00"}
+          {tiempoFormat !== "0" ? tiempoFormat : "00:00"}
         </div>
       </div>
     );
@@ -105,7 +121,7 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
         {/* ENCABEZADO DE LA TABLA */}
         <Card.Header className="d-flex align-items-center justify-content-between">
           {/* Titulo */}
-          {xbox.nombre}
+          {props.xbox.nombre}
 
           {/* INFORMACIÓN */}
           <IconoBootstrap
@@ -119,114 +135,197 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
         {/* CUERPO DE LA CARTA */}
         <Card.Body>
           <Row>
+            {/* IZQUIERDA */}
             <Col xs={6}>
               <Toast
                 animation
                 style={{ backgroundColor: "rgba(240, 240, 240, 0.2)" }}
               >
+                {/* CUERPO */}
                 <Toast.Body>
-                  <div className="d-flex flex-column">
-                    {/* -------- TEMPORIZADOR */}
-                    <div className="mb-4 d-flex justify-content-center">
+                  {props.xbox.estado !== "NO DISPONIBLE" ? (
+                    <div className="d-flex justify-content-center h-100">
                       <CountdownCircleTimer
+                        rotation="clockwise"
                         key={keyTemporizador}
                         isPlaying={isTiempoCorriendo}
                         duration={tiempoRestante}
-                        colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-                        colorsTime={[7, 5, 2, 0]}
+                        colors={["#3C9B2C", "#FAB200", "#F2961C", "#A30000"]}
+                        colorsTime={[tiempoSeleccionado, 5, 2, 0]}
                         onComplete={alTerminar}
                       >
                         {renderizarTiempo}
                       </CountdownCircleTimer>
                     </div>
-                    <div className="mb-2">
-                      <Button
-                        disabled={isTiempoCorriendo || tiempoSeleccionado < 0}
-                        onClick={iniciarTemporizador}
-                      >
-                        Iniciar
-                      </Button>
+                  ) : (
+                    // No disponible
+                    <div className="d-flex flex-column justify-content-center h-100">
+                      <br />
+                      <br />
+                      <br />
+                      <h4>XBOX NO DISPONIBLE</h4>
+                      <br />
+                      <br />
+                      <br />
                     </div>
-                  </div>
+                  )}
                 </Toast.Body>
               </Toast>
             </Col>
+            {/* DERECHA */}
             <Col xs={6}>
-              {/* -------- BOTONES */}
+              {/* -------- CUERPO */}
               <div className="d-flex flex-column">
+                <h5>
+                  {"Tiempo total: " +
+                    (tiempoTotal > 0
+                      ? formatearTiempo(tiempoTotal)
+                      : "ninguno")}
+                </h5>
                 <br />
-                {/* -------- SELECCIONAR TIEMPO */}
-                <Form.Select
-                  onChange={(e) =>
-                    setTiempoSeleccionado(Number(e.target.value) * 60)
-                  }
-                  aria-label="seleccionar tiempo"
-                  className={
-                    "mb-2 " + (isTiempoCorriendo ? " bg-danger text-white" : "")
-                  }
-                  disabled={isTiempoCorriendo}
-                  value={tiempoSeleccionado < 0 ? tiempoSeleccionado / 60 : -1}
-                >
-                  <option value={-1}>Seleccionar tiempo</option>
-                  {selectsTiempo.map((select, i) => {
-                    return (
-                      <option key={i} value={select.tiempo}>
-                        {select.leyenda}
-                      </option>
-                    );
-                  })}
-                </Form.Select>
-                {/* -------- INICIAR TEMPORIZADOR */}
-                <Button
-                  className="mb-2"
-                  disabled={isTiempoCorriendo || tiempoSeleccionado < 0}
-                  onClick={iniciarTemporizador}
-                  variant={
-                    isTiempoCorriendo || tiempoSeleccionado < 0
-                      ? "danger"
-                      : "success"
-                  }
-                >
-                  Iniciar
-                </Button>
-                {/* -------- PAUSAR TEMPORIZADOR */}
-                <Button
-                  className="mb-2"
-                  disabled={!isTiempoCorriendo}
-                  onClick={pausarTemporizador}
-                >
-                  Pausar
-                </Button>
-                {/* -------- AUMENTAR TIEMPO */}
-                <Form.Select
-                  onChange={(e) => {
-                    if (Number(e.target.value) < 1 && tiempoRestante < 1) {
-                      return;
+                {/* -------- SELECCIONAR */}
+                <div className="d-flex flex-row justify-content-between">
+                  {/* Tiempo inicial */}
+                  <div className="mb-2">
+                    <DropdownButton
+                      align="start"
+                      title="Seleccionar tiempo"
+                      variant={
+                        isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                          ? "danger"
+                          : "success"
+                      }
+                      disabled={
+                        isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                      }
+                      onSelect={(e) => {
+                        setTiempoTotal(Number(e) * 60);
+                        setTiempoSeleccionado(Number(e) * 60);
+                      }}
+                      key={-1}
+                    >
+                      {selectsTiempo.map((select, i) => {
+                        return (
+                          <Dropdown.Item key={i} eventKey={select.tiempo}>
+                            {select.leyenda}
+                          </Dropdown.Item>
+                        );
+                      })}
+                    </DropdownButton>
+                  </div>
+
+                  {/* Aumentar tiempo */}
+                  <div className="mb-2">
+                    <DropdownButton
+                      align="end"
+                      title="Aumentar"
+                      variant={
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                          ? "danger"
+                          : "success"
+                      }
+                      disabled={
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                      }
+                      onSelect={(e) => {
+                        if (Number(e) < 1 && tiempoRestante < 1) {
+                          return;
+                        }
+                        aumentarTiempo(Number(e));
+                      }}
+                      id="-1"
+                    >
+                      {selectsTiempo.map((select, i) => {
+                        return (
+                          <Dropdown.Item key={i} eventKey={select.tiempo}>
+                            {select.leyenda}
+                          </Dropdown.Item>
+                        );
+                      })}
+                    </DropdownButton>
+                  </div>
+                </div>
+
+                {/* -------- BOTONES */}
+                <ButtonGroup aria-label="Grupo-botones" className="mb-2">
+                  {/* -------- Iniciar */}
+                  <Button
+                    disabled={
+                      isTiempoCorriendo ||
+                      tiempoSeleccionado < 0 ||
+                      props.xbox.estado === "NO DISPONIBLE"
                     }
-                    aumentarTiempo(Number(e.target.value));
-                  }}
-                  aria-label="aumentar tiempo"
-                  className="mb-2"
-                  disabled={!isTiempoCorriendo}
-                  value={-1}
-                >
-                  <option value={-1}>Aumentar tiempo</option>
-                  {selectsTiempo.map((select, i) => {
-                    return (
-                      <option key={i} value={select.tiempo}>
-                        {select.leyenda}
-                      </option>
-                    );
-                  })}
-                </Form.Select>
-                {/* -------- TERMINAR TEMPORIZADOR */}
-                <Button
-                  className="mb-2"
-                  disabled={!isTiempoCorriendo}
-                  onClick={alTerminar}
-                >
-                  Terminar
-                </Button>
+                    onClick={iniciarTemporizador}
+                    variant={
+                      isTiempoCorriendo ||
+                      tiempoSeleccionado < 0 ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                        ? "danger"
+                        : "success"
+                    }
+                  >
+                    {props.xbox.estado !== "NO DISPONIBLE"
+                      ? "Iniciar"
+                      : "No disponible"}
+                  </Button>
+                  {/* -------- Pausar */}
+                  <Button
+                    variant={
+                      !isTiempoCorriendo ||
+                      tiempoSeleccionado < 0 ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                        ? "danger"
+                        : "success"
+                    }
+                    disabled={
+                      !isTiempoCorriendo ||
+                      tiempoSeleccionado < 0 ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                    }
+                    onClick={pausarTemporizador}
+                  >
+                    Pausar
+                  </Button>
+                  {/* -------- Terminar */}
+                  <Button
+                    disabled={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                    }
+                    variant={
+                      !isTiempoCorriendo ||
+                      tiempoSeleccionado < 0 ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                        ? "danger"
+                        : "success"
+                    }
+                    onClick={() => {
+                      // Alerta
+                      Swal.fire({
+                        title: "¿Seguro?",
+                        text: "Quieres terminar este temporizador!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#53AB28",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Si, terminar",
+                        cancelButtonText: "Cancelar",
+                      }).then((result) => {
+                        // ? Dijo que si
+                        if (result.isConfirmed) {
+                          // Terminamos
+                          alTerminar();
+                        }
+                      });
+                    }}
+                  >
+                    Terminar
+                  </Button>
+                </ButtonGroup>
               </div>
             </Col>
           </Row>
@@ -234,9 +333,10 @@ const CartaXbox: React.FC<Xbox> = (xbox) => {
       </Card>
       {/* CANVAS DE INFORMACIÓN */}
       <ModalXbox
-        xbox={xbox}
+        xbox={props.xbox}
         cerrarModal={cerrarModal}
         estadoModal={isEstadoModal}
+        eliminarXbox={props.eliminarXbox}
       />
     </>
   );

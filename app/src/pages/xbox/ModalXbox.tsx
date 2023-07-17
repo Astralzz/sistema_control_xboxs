@@ -10,6 +10,9 @@ import ComponentError, {
 } from "../../components/Global/ComponentError";
 import FormularioXboxs from "./FormularioXboxs";
 import IconoBootstrap from "../../components/Global/IconoBootstrap";
+import { apiEliminarXbox } from "../../apis/apiXboxs";
+import Swal from "sweetalert2";
+import ComponenteCargando from "../../components/Global/ComponenteCargando";
 
 // * Columnas
 const columnas: ColumnasRenta = {
@@ -24,6 +27,7 @@ interface Props {
   xbox: Xbox;
   cerrarModal: Dispatch<void>;
   estadoModal: boolean;
+  eliminarXbox?: (id: number) => void;
 }
 
 // Todo, Modal de xbox
@@ -31,6 +35,7 @@ const ModalXbox: React.FC<Props> = (props) => {
   // * Variables
   const [listaRentas, setListaRentas] = useState<Renta[]>([]);
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
+  const [isCargando, setCargando] = useState<boolean>(false);
   const [isError, setError] = useState<DataError>({
     estado: false,
   });
@@ -61,6 +66,78 @@ const ModalXbox: React.FC<Props> = (props) => {
     setListaRentas(res.listaRentas ?? []);
   }, [props.xbox.id]);
 
+  //* Eliminar xbox
+  const eliminarXbox = async (): Promise<void> => {
+    try {
+      setCargando(true);
+
+      // Obtenemos id
+      const idXbox: number = props.xbox.id;
+
+      // Enviamos
+      const res: RespuestaApi = await apiEliminarXbox(idXbox);
+
+      // ? salio mal
+      if (!res.estado) {
+        Swal.fire(
+          "Error!",
+          res.detalles_error
+            ? String(res.detalles_error)
+            : "Ocurrió un error al eliminar el xbox, intenta mas tarde",
+          "error"
+        );
+        return;
+      }
+
+      // Cerramos
+      alCerrar();
+
+      // ? Se puede disminuir
+      if (props.eliminarXbox) {
+        props.eliminarXbox(props.xbox.id);
+      }
+
+      Swal.fire(
+        "Éxito!",
+        res.mensaje ?? "Xbox eliminado correctamente",
+        "success"
+      );
+
+      // ! Error
+    } catch (error: unknown) {
+      Swal.fire("Error!", String(error), "error");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  //* Pre eliminar xbox
+  const preEliminarXbox = (): void => {
+    // Alerta
+    Swal.fire({
+      title: "Estas seguro?",
+      text: "Si eliminas este xbox ya no podrás restaurar sus datos!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#53AB28",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, eliminar xbox",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      // ? Dijo que si
+      if (result.isConfirmed) {
+        // Eliminamos
+        eliminarXbox();
+      }
+    });
+  };
+
+  // * Al cerrar
+  const alCerrar = (): void => {
+    setCargando(false);
+    props.cerrarModal();
+  };
+
   // * Buscamos
   useEffect(() => {
     obtenerUltimasVentas();
@@ -69,7 +146,7 @@ const ModalXbox: React.FC<Props> = (props) => {
   return (
     <>
       {/* CUERPO */}
-      <Offcanvas show={props.estadoModal} onHide={props.cerrarModal}>
+      <Offcanvas show={props.estadoModal} onHide={alCerrar}>
         {/* ENCABEZADO */}
         <Offcanvas.Header
           className="modal-izquierdo"
@@ -87,8 +164,17 @@ const ModalXbox: React.FC<Props> = (props) => {
                 size={20}
               />
             </div>
-            {/* Titulo */}
+            {/* Eliminar */}
             <div className="p-2">
+              <IconoBootstrap
+                onClick={preEliminarXbox}
+                nombre="Trash2Fill"
+                color="white"
+                size={20}
+              />
+            </div>
+            {/* Titulo */}
+            <div className="p-2 ms-auto">
               <Offcanvas.Title>{props.xbox.nombre}</Offcanvas.Title>
             </div>
           </Stack>
@@ -100,6 +186,7 @@ const ModalXbox: React.FC<Props> = (props) => {
             <ComponentError
               titulo={isError.titulo}
               detalles={isError.detalles}
+              accionVoid={() => obtenerUltimasVentas()}
             />
           ) : (
             <>
@@ -131,6 +218,9 @@ const ModalXbox: React.FC<Props> = (props) => {
         estadoModal={isEstadoModal}
         cerrarModal={cerrarModal}
       />
+
+      {/* MODAL CARGANDO */}
+      <ComponenteCargando tipo={"spin"} estadoModal={isCargando} />
     </>
   );
 };

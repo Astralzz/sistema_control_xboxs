@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Tab, Tabs } from "react-bootstrap";
+import { Card, Container, Tab, Tabs } from "react-bootstrap";
 import CartaXbox from "./CartaXbox";
 import Xbox from "../../models/Xbox";
 import { apiObtenerListaXboxs } from "../../apis/apiXboxs";
@@ -12,12 +12,27 @@ import FormularioXboxs from "./FormularioXboxs";
 // TODO, Pagina de los xbox
 const PaginaXboxs: React.FC = () => {
   // * Variables
-  const [key, setKey] = useState<string | null>(null);
+  const [keyTab, setKeyTab] = useState<string | null>(null);
   const [listaXboxs, setListaXboxs] = useState<Xbox[]>([]);
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [isError, setError] = useState<DataError>({
     estado: false,
   });
+
+  // * Acciones xbox
+  const aumentarXbox = (x: Xbox) =>
+    setListaXboxs((prevLista) => [...prevLista, x]);
+  const eliminarXbox = (id: number) => {
+    // Cambiamos key
+    setKeyTab("xbox-0");
+
+    // Eliminamos
+    setListaXboxs((prevLista) => prevLista.filter((xbox) => xbox.id !== id));
+  };
+  const actualizarXbox = (id: number, xboxActualizado: Xbox) =>
+    setListaXboxs((prevLista) =>
+      prevLista.map((xbox) => (xbox.id === id ? xboxActualizado : xbox))
+    );
 
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
@@ -53,11 +68,11 @@ const PaginaXboxs: React.FC = () => {
       abrirModal();
 
       // Es nulo
-      setKey(null);
+      setKeyTab(null);
       return;
     }
 
-    setKey(k);
+    setKeyTab(k);
   };
 
   // * Buscamos
@@ -86,27 +101,30 @@ const PaginaXboxs: React.FC = () => {
         {/* Es un arreglo y no esta vació */}
         {Array.isArray(listaXboxs) && listaXboxs.length > 0 ? (
           <Tabs
-            defaultActiveKey={key ?? "xbox-0"}
+            defaultActiveKey={keyTab ?? "xbox-0"}
             transition={false}
-            activeKey={key ?? "xbox-0"}
+            activeKey={keyTab ?? "xbox-0"}
             onSelect={abrirFormulario}
             id="id-tab-xbox"
           >
             {/* Lista de xboxs */}
             {listaXboxs.map((xbox, i) => {
-              // ? No esta disponible
-              if (xbox.estado === "NO DISPONIBLE") {
-                return <React.Fragment key={i} />;
-              }
               // Xbox
               return (
                 <Tab
-                  tabClassName="tab-xbox"
+                  tabClassName={
+                    "tab-xbox" +
+                    (xbox.estado === "NO DISPONIBLE" ? "-invalido" : "")
+                  }
                   key={i}
                   eventKey={"xbox-" + i}
                   title={i + 1}
                 >
-                  <CartaXbox {...xbox} />
+                  <CartaXbox
+                    xbox={xbox}
+                    actualizarXbox={actualizarXbox}
+                    eliminarXbox={eliminarXbox}
+                  />
                 </Tab>
               );
             })}
@@ -118,7 +136,11 @@ const PaginaXboxs: React.FC = () => {
         )}
       </Container>
       {/* MODAL */}
-      <FormularioXboxs estadoModal={isEstadoModal} cerrarModal={cerrarModal} />
+      <FormularioXboxs
+        estadoModal={isEstadoModal}
+        cerrarModal={cerrarModal}
+        aumentarXbox={aumentarXbox}
+      />
     </>
   );
 };

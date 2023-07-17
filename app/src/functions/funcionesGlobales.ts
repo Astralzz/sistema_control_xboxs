@@ -45,28 +45,37 @@ export function formatearHoraSinSegundos(hora: string): string | null {
   }
 }
 
+// * Formatear tiempo
+export function formatearTiempo(t: number): string {
+  const minutos = Math.floor(t / 60);
+  const segundos = t % 60;
+  return `${minutos.toString().padStart(2, "0")}:${segundos
+    .toString()
+    .padStart(2, "0")}`;
+}
+
 // * Crear color claro
 export function generarColorClaroAleatorio(opacidad: number): string {
-  const r = Math.floor(Math.random() * 156) + 100; 
-  const g = Math.floor(Math.random() * 156) + 100; 
-  const b = Math.floor(Math.random() * 156) + 100; 
+  const r = Math.floor(Math.random() * 156) + 100;
+  const g = Math.floor(Math.random() * 156) + 100;
+  const b = Math.floor(Math.random() * 156) + 100;
 
   return `rgb(${r}, ${g}, ${b}, ${opacidad})`;
 }
 
 // * Crear color medio
 export function generarColorMedioAleatorio(opacidad: number): string {
-  const r = Math.floor(Math.random() * 100) + 50; 
-  const g = Math.floor(Math.random() * 100) + 50; 
-  const b = Math.floor(Math.random() * 100) + 50; 
+  const r = Math.floor(Math.random() * 100) + 50;
+  const g = Math.floor(Math.random() * 100) + 50;
+  const b = Math.floor(Math.random() * 100) + 50;
 
   return `rgb(${r}, ${g}, ${b}, ${opacidad})`;
 }
 
 // * Crear color oscuro
 export function generarColorOscuroAleatorio(opacidad: number): string {
-  const r = Math.floor(Math.random() * 100); 
-  const g = Math.floor(Math.random() * 100); 
+  const r = Math.floor(Math.random() * 100);
+  const g = Math.floor(Math.random() * 100);
   const b = Math.floor(Math.random() * 100);
 
   return `rgb(${r}, ${g}, ${b}, ${opacidad})`;
