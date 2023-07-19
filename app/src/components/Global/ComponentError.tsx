@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import IconoBootstrap from "./IconoBootstrap";
+import * as icons from "react-bootstrap-icons";
 
 // * Data error
 export interface DataError {
@@ -9,15 +10,15 @@ export interface DataError {
 }
 
 // * props
-interface Props {
+interface Props extends icons.IconProps {
   titulo?: string;
   detalles?: string;
   accionVoid?: Dispatch<SetStateAction<void>>;
+  icono?: keyof typeof icons;
 }
 
 // Todo, Tabla Rentas
 const ComponentError: React.FC<Props> = (props) => {
-
   // * Variables
   const [iconoRotado, setIconoRotado] = useState(false);
 
@@ -41,7 +42,7 @@ const ComponentError: React.FC<Props> = (props) => {
         {props.accionVoid && (
           <IconoBootstrap
             onClick={rotarIcono}
-            nombre="ArrowClockwise"
+            nombre={props.icono ? props.icono : "ArrowClockwise"}
             color="white"
             size={30}
             className={`icono-error ${iconoRotado ? "rotar-icono" : ""}`}

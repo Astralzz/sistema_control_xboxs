@@ -13,8 +13,12 @@ import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
 import ModalXbox from "./ModalXbox";
 import IconoBootstrap from "../../components/Global/IconoBootstrap";
-import { formatearTiempo } from "../../functions/funcionesGlobales";
-import Swal from "sweetalert2";
+import {
+  alertaSwal,
+  confirmacionSwal,
+  formatearTiempo,
+  seleccionarTiempoManual,
+} from "../../functions/funcionesGlobales";
 
 // * Seleccionar tiempos
 interface SelectTiempo {
@@ -46,7 +50,7 @@ const selectsTiempo: SelectTiempo[] = [
   },
   {
     leyenda: "Otra cantidad",
-    tiempo: 0,
+    tiempo: -1,
   },
 ];
 
@@ -67,6 +71,9 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [keyTemporizador, setKeyTemporizador] = useState<number>(0);
   const [tiempoTotal, setTiempoTotal] = useState<number>(0);
 
+  // * Restante bandera
+  let restanteBandera: number = 0;
+
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
   const abrirModal = () => setEstadoModal(true);
@@ -77,6 +84,9 @@ const CartaXbox: React.FC<Props> = (props) => {
     setTiempoCorriendo(true);
   };
 
+  // * Continuar temporizador
+  const continuarTemporizador = (): void => setTiempoCorriendo(true);
+
   // * Pausar temporizador
   const pausarTemporizador = (): void => setTiempoCorriendo(false);
 
@@ -86,6 +96,7 @@ const CartaXbox: React.FC<Props> = (props) => {
     setTiempoSeleccionado(-1);
     setTiempoRestante(0);
     setKeyTemporizador((prevKey) => prevKey + 1);
+    restanteBandera = 0;
   };
 
   // * Aumentar tiempo
@@ -94,22 +105,48 @@ const CartaXbox: React.FC<Props> = (props) => {
     setTiempoRestante((prevTiempo) => prevTiempo + valor * 60);
   };
 
+  // * Disminuir tiempo
+  const disminuirTiempo = (valor: number): void => {
+    // ? Es mayor al restante
+    if (valor * 60 >= restanteBandera) {
+      alertaSwal(
+        "Error!",
+        "El numero proporcionado no puede ser mayor al tiempo restante",
+        "error"
+      );
+      return;
+    }
+
+    // Convertimos a negativo * 60
+    const valorNegativo: number = valor * -1 * 60;
+
+    // Ponemos
+    setTiempoTotal((prevTiempo) => prevTiempo + valorNegativo);
+    setTiempoRestante((prevTiempo) => prevTiempo + valorNegativo);
+  };
+
   // * Renderizar tiempo
   const renderizarTiempo = ({ remainingTime }: any) => {
     // ? Es menor a 1
     if (remainingTime < 1) {
-      return <div>¡Tiempo terminado!</div>;
+      return (
+        <div>
+          <h4>¡Tiempo terminado!</h4>
+        </div>
+      );
     }
 
-    // * Tiempo restante
-    const tiempoFormat: string = formatearTiempo(remainingTime);
+    // Tiempo restante
+    const restante: string = formatearTiempo(remainingTime);
+    // Tiempo transcurrido
+    const trascurrido: string = formatearTiempo(tiempoRestante - remainingTime);
+    //  Bandera
+    restanteBandera = remainingTime;
 
     return (
       <div className="timer">
-        <div className="text">Tiempo restante:</div>
-        <div className="value">
-          {tiempoFormat !== "0" ? tiempoFormat : "00:00"}
-        </div>
+        <h2>{restante}</h2>
+        <h2>{trascurrido}</h2>
       </div>
     );
   };
@@ -136,10 +173,14 @@ const CartaXbox: React.FC<Props> = (props) => {
         <Card.Body>
           <Row>
             {/* IZQUIERDA */}
-            <Col xs={6}>
+            <Col xs={5}>
               <Toast
                 animation
-                style={{ backgroundColor: "rgba(240, 240, 240, 0.2)" }}
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  boxShadow: "none",
+                }}
               >
                 {/* CUERPO */}
                 <Toast.Body>
@@ -173,9 +214,10 @@ const CartaXbox: React.FC<Props> = (props) => {
               </Toast>
             </Col>
             {/* DERECHA */}
-            <Col xs={6}>
+            <Col xs={7}>
               {/* -------- CUERPO */}
               <div className="d-flex flex-column">
+                {/* Tiempo total escogido */}
                 <h5>
                   {"Tiempo total: " +
                     (tiempoTotal > 0
@@ -189,7 +231,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                   <div className="mb-2">
                     <DropdownButton
                       align="start"
-                      title="Seleccionar tiempo"
+                      title="Seleccionar"
                       variant={
                         isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
@@ -200,9 +242,29 @@ const CartaXbox: React.FC<Props> = (props) => {
                         isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
                       }
-                      onSelect={(e) => {
-                        setTiempoTotal(Number(e) * 60);
-                        setTiempoSeleccionado(Number(e) * 60);
+                      onSelect={async (e) => {
+                        // Convertimos
+                        const en: number = Number(e);
+
+                        // ? Menor a 1
+                        if (Number(en) < 1) {
+                          // Alerta
+                          const n: number = await seleccionarTiempoManual(
+                            "seleccionado"
+                          );
+
+                          // ? Es negativo
+                          if (n < 1) {
+                            return;
+                          }
+
+                          setTiempoTotal(n * 60);
+                          setTiempoSeleccionado(n * 60);
+                          return;
+                        }
+
+                        setTiempoTotal(en * 60);
+                        setTiempoSeleccionado(en * 60);
                       }}
                       key={-1}
                     >
@@ -231,11 +293,87 @@ const CartaXbox: React.FC<Props> = (props) => {
                         !isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
                       }
-                      onSelect={(e) => {
-                        if (Number(e) < 1 && tiempoRestante < 1) {
+                      onSelect={async (e) => {
+                        // ? Menor a 1
+                        if (tiempoRestante < 1) {
                           return;
                         }
-                        aumentarTiempo(Number(e));
+
+                        // Convertimos
+                        const en: number = Number(e);
+
+                        // ? Menor a 1
+                        if (en < 1) {
+                          // Alerta
+                          const n: number = await seleccionarTiempoManual(
+                            "aumentado"
+                          );
+
+                          // ? Es negativo
+                          if (n < 1) {
+                            return;
+                          }
+
+                          aumentarTiempo(n);
+                          return;
+                        }
+
+                        aumentarTiempo(en);
+                      }}
+                      id="-1"
+                    >
+                      {selectsTiempo.map((select, i) => {
+                        return (
+                          <Dropdown.Item key={i} eventKey={select.tiempo}>
+                            {select.leyenda}
+                          </Dropdown.Item>
+                        );
+                      })}
+                    </DropdownButton>
+                  </div>
+
+                  {/* Disminuir tiempo */}
+                  <div className="mb-2">
+                    <DropdownButton
+                      align="end"
+                      title="disminuir"
+                      variant={
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                          ? "danger"
+                          : "success"
+                      }
+                      disabled={
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                      }
+                      onSelect={async (e) => {
+                        // ? Menor a 1
+                        if (tiempoRestante < 1) {
+                          return;
+                        }
+
+                        // Convertimos
+                        const en: number = Number(e);
+
+                        // ? Menor a 1
+                        if (en < 1) {
+                          // Alerta
+                          const n: number = await seleccionarTiempoManual(
+                            "disminuido"
+                          );
+
+                          // ? Es negativo
+                          if (n < 1) {
+                            return;
+                          }
+
+                          // Disminuimos
+                          disminuirTiempo(n);
+                          return;
+                        }
+
+                        disminuirTiempo(en);
                       }}
                       id="-1"
                     >
@@ -259,7 +397,15 @@ const CartaXbox: React.FC<Props> = (props) => {
                       tiempoSeleccionado < 0 ||
                       props.xbox.estado === "NO DISPONIBLE"
                     }
-                    onClick={iniciarTemporizador}
+                    onClick={() => {
+                      // ? Es menor a 1
+                      if (tiempoRestante > 1) {
+                        continuarTemporizador();
+                        return;
+                      }
+
+                      iniciarTemporizador();
+                    }}
                     variant={
                       isTiempoCorriendo ||
                       tiempoSeleccionado < 0 ||
@@ -303,24 +449,18 @@ const CartaXbox: React.FC<Props> = (props) => {
                         ? "danger"
                         : "success"
                     }
-                    onClick={() => {
-                      // Alerta
-                      Swal.fire({
-                        title: "¿Seguro?",
-                        text: "Quieres terminar este temporizador!",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#53AB28",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Si, terminar",
-                        cancelButtonText: "Cancelar",
-                      }).then((result) => {
-                        // ? Dijo que si
-                        if (result.isConfirmed) {
-                          // Terminamos
-                          alTerminar();
-                        }
-                      });
+                    onClick={async () => {
+                      // Confirmacion
+                      const res = await confirmacionSwal(
+                        "Estas seguro?",
+                        "Quieres terminar este temporizador!",
+                        "Si, terminar"
+                      );
+
+                      // ? Si
+                      if (res) {
+                        alTerminar();
+                      }
                     }}
                   >
                     Terminar
@@ -337,6 +477,10 @@ const CartaXbox: React.FC<Props> = (props) => {
         cerrarModal={cerrarModal}
         estadoModal={isEstadoModal}
         eliminarXbox={props.eliminarXbox}
+        actualizarXbox={(id: number, xbox: Xbox) => {
+          alTerminar();
+          props.actualizarXbox(id, xbox);
+        }}
       />
     </>
   );

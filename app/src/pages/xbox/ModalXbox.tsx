@@ -11,8 +11,11 @@ import ComponentError, {
 import FormularioXboxs from "./FormularioXboxs";
 import IconoBootstrap from "../../components/Global/IconoBootstrap";
 import { apiEliminarXbox } from "../../apis/apiXboxs";
-import Swal from "sweetalert2";
 import ComponenteCargando from "../../components/Global/ComponenteCargando";
+import {
+  alertaSwal,
+  confirmacionSwal,
+} from "../../functions/funcionesGlobales";
 
 // * Columnas
 const columnas: ColumnasRenta = {
@@ -27,7 +30,8 @@ interface Props {
   xbox: Xbox;
   cerrarModal: Dispatch<void>;
   estadoModal: boolean;
-  eliminarXbox?: (id: number) => void;
+  eliminarXbox: (id: number) => void;
+  actualizarXbox: (id: number, xboxActualizado: Xbox) => void;
 }
 
 // Todo, Modal de xbox
@@ -49,7 +53,7 @@ const ModalXbox: React.FC<Props> = (props) => {
     // * Buscamos
     const res: RespuestaApi = await apiObtenerListaRentasPorXbox(props.xbox.id);
 
-    // ? Es falso
+    // ? salio mal
     if (!res.estado) {
       setError({
         estado: true,
@@ -79,25 +83,20 @@ const ModalXbox: React.FC<Props> = (props) => {
 
       // ? salio mal
       if (!res.estado) {
-        Swal.fire(
-          "Error!",
+        throw new Error(
           res.detalles_error
             ? String(res.detalles_error)
-            : "Ocurrió un error al eliminar el xbox, intenta mas tarde",
-          "error"
+            : "Ocurrió un error al eliminar el xbox, intenta mas tarde"
         );
-        return;
       }
 
       // Cerramos
       alCerrar();
 
-      // ? Se puede disminuir
-      if (props.eliminarXbox) {
-        props.eliminarXbox(props.xbox.id);
-      }
+      // * Terminamos
+      props.eliminarXbox(props.xbox.id);
 
-      Swal.fire(
+      alertaSwal(
         "Éxito!",
         res.mensaje ?? "Xbox eliminado correctamente",
         "success"
@@ -105,31 +104,25 @@ const ModalXbox: React.FC<Props> = (props) => {
 
       // ! Error
     } catch (error: unknown) {
-      Swal.fire("Error!", String(error), "error");
+      alertaSwal("Error!", String(error), "error");
     } finally {
       setCargando(false);
     }
   };
 
   //* Pre eliminar xbox
-  const preEliminarXbox = (): void => {
-    // Alerta
-    Swal.fire({
-      title: "Estas seguro?",
-      text: "Si eliminas este xbox ya no podrás restaurar sus datos!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#53AB28",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Si, eliminar xbox",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      // ? Dijo que si
-      if (result.isConfirmed) {
-        // Eliminamos
-        eliminarXbox();
-      }
-    });
+  const preEliminarXbox = async (): Promise<void> => {
+    // Confirmacion
+    const res = await confirmacionSwal(
+      "Estas seguro?",
+      "Si eliminas este xbox ya no podrás restaurar sus datos!",
+      "Si, eliminar xbox"
+    );
+
+    // ? Si
+    if (res) {
+      eliminarXbox();
+    }
   };
 
   // * Al cerrar
@@ -217,6 +210,7 @@ const ModalXbox: React.FC<Props> = (props) => {
         xbox={props.xbox}
         estadoModal={isEstadoModal}
         cerrarModal={cerrarModal}
+        actualizarXbox={props.actualizarXbox}
       />
 
       {/* MODAL CARGANDO */}

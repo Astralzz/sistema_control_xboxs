@@ -1,4 +1,4 @@
-$color-fondo: #282c34;
+@import "variables";
 
 .app {
   text-align: center;
@@ -9,12 +9,12 @@ $color-fondo: #282c34;
   // align-items: center;
   // justify-content: center;
   // font-size: calc(10px + 2vmin);
-  color: white;
+  color: $color-letra;
 }
 
 .modal-izquierdo {
   background-color: $color-fondo;
-  color: white;
+  color: $color-letra;
 }
 
 .icono {
@@ -36,10 +36,23 @@ $color-fondo: #282c34;
 }
 
 .icono-error {
-  /* Agrega estilos adicionales según tus necesidades */
   transition: transform 1s;
+}
+
+.icono-error:hover {
+  cursor: pointer;
 }
 
 .rotar-icono {
   transform: rotate(360deg);
+}
+
+.color-fondo {
+  background-color: $color-fondo;
+  background: $color-fondo;
+  color: $color-letra;
+}
+.global-tabla {
+  background-color: $color-fondo;
+  color: $color-cancelar;
 }

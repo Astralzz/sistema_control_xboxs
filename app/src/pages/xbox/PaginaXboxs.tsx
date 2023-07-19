@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Container, Tab, Tabs } from "react-bootstrap";
+import { Container, Tab, Tabs } from "react-bootstrap";
 import CartaXbox from "./CartaXbox";
 import Xbox from "../../models/Xbox";
 import { apiObtenerListaXboxs } from "../../apis/apiXboxs";
@@ -43,7 +43,7 @@ const PaginaXboxs: React.FC = () => {
     // * Buscamos
     const res: RespuestaApi = await apiObtenerListaXboxs();
 
-    // ? Es falso
+    // ? salio mal
     if (!res.estado) {
       setError({
         estado: true,
@@ -132,7 +132,11 @@ const PaginaXboxs: React.FC = () => {
             <Tab tabClassName="tab-xbox" title="+" eventKey={"add-xbox"} />
           </Tabs>
         ) : (
-          <ComponentError titulo={"Lista vacía"} />
+          <ComponentError
+            titulo={"Lista vacía"}
+            accionVoid={() => abrirModal()}
+            icono={"PlusSquare"}
+          />
         )}
       </Container>
       {/* MODAL */}

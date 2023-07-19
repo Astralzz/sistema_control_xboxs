@@ -2,9 +2,15 @@ import React, { Dispatch, useEffect, useState } from "react";
 import Xbox from "../../models/Xbox";
 import { Button, Form, Modal } from "react-bootstrap";
 import { RespuestaApi } from "../../apis/apiVariables";
-import { apiCrearNuevoXbox } from "../../apis/apiXboxs";
-import Swal from "sweetalert2";
+import { apiActualizarXbox, apiCrearNuevoXbox } from "../../apis/apiXboxs";
 import ComponenteCargando from "../../components/Global/ComponenteCargando";
+import { alertaSwal } from "../../functions/funcionesGlobales";
+
+// * Estilos
+const styles: React.CSSProperties = {
+  backgroundColor: "var(--color-fondo)",
+  color: "var(--color-letra)",
+};
 
 // * Props
 interface Props {
@@ -12,6 +18,7 @@ interface Props {
   cerrarModal: Dispatch<void>;
   estadoModal: boolean;
   aumentarXbox?: (x: Xbox) => void;
+  actualizarXbox?: (id: number, xboxActualizado: Xbox) => void;
 }
 
 // * ERS
@@ -36,22 +43,61 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
     // ? salio mal
     if (!res.estado) {
-      Swal.fire(
-        "Error!",
+      throw new Error(
         res.detalles_error
           ? String(res.detalles_error)
-          : "Ocurrió un error al crear el xbox, intenta mas tarde",
-        "error"
+          : "Ocurrió un error al crear el xbox, intenta mas tarde"
+      );
+    }
+
+    // ? No se puede aumentar
+    if (!props.aumentarXbox || !res.xbox) {
+      alertaSwal(
+        "Casi éxito!",
+        "El xbox se creo correctamente pero no se vera reflejado el cambio asta que reinicie el programa",
+        "warning"
       );
       return;
     }
 
-    // ? Se puede aumentar
-    if (res.xbox && props.aumentarXbox) {
-      props.aumentarXbox(res.xbox);
+    // * Terminamos
+    props.aumentarXbox(res.xbox);
+    alertaSwal("Éxito!", res.mensaje ?? "Xbox creado correctamente", "success");
+    limpiar();
+  };
+
+  // * Actualizar nuevo xbox
+  const actualizarXbox = async (data: FormData): Promise<void> => {
+    // ? No existe id
+    if (!props.xbox?.id) {
+      throw new Error("No se encontró el ID del xbox");
     }
 
-    Swal.fire("Éxito!", res.mensaje ?? "Xbox creado correctamente", "success");
+    // Enviamos
+    const res: RespuestaApi = await apiActualizarXbox(data, props.xbox.id);
+
+    // ? salio mal
+    if (!res.estado) {
+      throw new Error(
+        res.detalles_error
+          ? String(res.detalles_error)
+          : "Ocurrió un error al actualizar el xbox, intenta mas tarde"
+      );
+    }
+
+    // ? No se puede aumentar
+    if (!props.actualizarXbox || !res.xbox) {
+      alertaSwal(
+        "Casi éxito!",
+        "El xbox se actualizo correctamente pero no se vera reflejado el cambio asta que reinicie el programa",
+        "warning"
+      );
+      return;
+    }
+
+    // * Terminamos
+    props.actualizarXbox(props.xbox.id, res.xbox);
+    alertaSwal("Éxito!", "Xbox actualizado correctamente", "success");
   };
 
   // * Preparar data
@@ -120,7 +166,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
       // ? Existe xbox
       if (props.xbox) {
-        Swal.fire("Éxito!", "Xbox actualizado correctamente", "success");
+        await actualizarXbox(data);
         return;
       }
 
@@ -129,7 +175,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
       // ! Error
     } catch (error: unknown) {
-      Swal.fire("Error!", String(error), "error");
+      alertaSwal("Error!", String(error), "error");
     } finally {
       setCargando(false);
     }
@@ -167,7 +213,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
       {/* MODAL FORMULARIO */}
       <Modal show={props.estadoModal} onHide={accionAlCerrar}>
         {/* ENCABEZADO */}
-        <Modal.Header closeButton>
+        <Modal.Header closeButton style={styles} closeVariant="white">
           {/* Titulo */}
           <Modal.Title>
             {props.xbox
@@ -176,18 +222,20 @@ const FormularioXboxs: React.FC<Props> = (props) => {
           </Modal.Title>
         </Modal.Header>
         {/* CUERPO */}
-        <Modal.Body>
+        <Modal.Body style={styles}>
           {/* Formulario */}
           <Form>
             {/* Nombre */}
             <Form.Group className="mb-3" controlId="form-grupo1">
               <Form.Label>Nombre del xbox</Form.Label>
               <Form.Control
+                style={styles}
                 onChange={(e) => setNombre(e.target.value)}
                 value={nombre ?? ""}
                 type="text"
                 autoFocus
                 maxLength={60}
+                autoComplete="off"
               />
             </Form.Group>
 
@@ -195,6 +243,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
             <Form.Group className="mb-3" controlId="estado">
               <Form.Label>Estado del xbox</Form.Label>
               <Form.Select
+                style={styles}
                 value={estado ?? "DISPONIBLE"}
                 aria-label="Estado de xbox"
                 onChange={(e) =>
@@ -215,18 +264,20 @@ const FormularioXboxs: React.FC<Props> = (props) => {
             <Form.Group className="mb-3" controlId="descripcion">
               <Form.Label>Descripcion</Form.Label>
               <Form.Control
+                style={styles}
                 onChange={(e) => setDescripcion(e.target.value)}
                 value={descripcion ?? ""}
                 as="textarea"
                 maxLength={699}
+                autoComplete="off"
                 rows={4}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer style={styles}>
           {/* Boton de cerrar */}
-          <Button variant="secondary" onClick={() => accionAlCerrar()}>
+          <Button variant="danger" onClick={() => accionAlCerrar()}>
             Cerrar
           </Button>
           {/* Boton de guardar | actualizar */}

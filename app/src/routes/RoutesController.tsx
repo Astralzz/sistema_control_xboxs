@@ -20,13 +20,13 @@ const RoutesController: React.FC = () => {
     <Container className="contenedor-inicio">
       <Row>
         {/* Parte izquierda */}
-        <Col lg={9} md={12} className="mb-4 derecha">
+        <Col lg={8} md={12} className="mb-4 derecha">
           {/* Pagina xboxs */}
           <PaginaXboxs />
         </Col>
 
         {/* Parte derecha */}
-        <Col lg={3} md={12} className="mb-4 izquierda">
+        <Col lg={4} md={12} className="mb-4 izquierda">
           {/* Rutas */}
           <Routes>
             <Route

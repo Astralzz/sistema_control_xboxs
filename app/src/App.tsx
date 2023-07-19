@@ -1,13 +1,16 @@
 import React from "react";
 import RoutesController from "./routes/RoutesController";
 
-// * Estilos
-import "./styles/global.scss";
-import "./styles/componentes.scss";
-import "bootstrap/dist/css/bootstrap.min.css";
+// * Paginas
 import { BrowserRouter } from "react-router-dom";
 import BarraSuperior from "./components/BarraSuperior";
 import PieDePagina from "./components/PieDePagina";
+
+// * Estilos
+import "./styles/_variables.scss";
+import "./styles/global.scss";
+import "./styles/componentes.scss";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 // TODO, App
 const App: React.FC = () => {

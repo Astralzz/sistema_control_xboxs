@@ -1,3 +1,11 @@
+import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
+
+// * Variables de estilos
+const colorFondo: string = "var(--color-fondo)";
+const colorLetra: string = "var(--color-letra)";
+const colorAceptar: string = "var(--color-confirmar)";
+const colorCancelar: string = "var(--color-cancelar)";
+
 // * Formatear fecha
 export function formatearFecha(fecha: string): string | null {
   try {
@@ -47,6 +55,11 @@ export function formatearHoraSinSegundos(hora: string): string | null {
 
 // * Formatear tiempo
 export function formatearTiempo(t: number): string {
+  // ? es 0
+  if (t < 1) {
+    return "00:00";
+  }
+
   const minutos = Math.floor(t / 60);
   const segundos = t % 60;
   return `${minutos.toString().padStart(2, "0")}:${segundos
@@ -80,3 +93,107 @@ export function generarColorOscuroAleatorio(opacidad: number): string {
 
   return `rgb(${r}, ${g}, ${b}, ${opacidad})`;
 }
+
+// * Alerta swal
+export const alertaSwal = (
+  titulo: string,
+  texto: string,
+  icono: SweetAlertIcon
+) =>
+  Swal.fire({
+    background: colorFondo,
+    color: colorLetra,
+    confirmButtonColor: colorAceptar,
+    cancelButtonColor: colorCancelar,
+    title: titulo,
+    text: texto,
+    icon: icono,
+  });
+
+// * Confirmación swal
+export const confirmacionSwal = (
+  titulo: string,
+  texto: string,
+  textoConfirmar: string
+): Promise<boolean> =>
+  new Promise((resolve) => {
+    Swal.fire({
+      title: titulo,
+      text: texto,
+      icon: "warning",
+      showCancelButton: true,
+      background: colorFondo,
+      color: colorLetra,
+      confirmButtonColor: colorAceptar,
+      cancelButtonColor: colorCancelar,
+      confirmButtonText: textoConfirmar,
+      cancelButtonText: "Cancelar",
+      // * Resultado
+    }).then((result) => resolve(result.isConfirmed));
+  });
+
+// * Tiempo manual
+type estadoSeleccion = "seleccionado" | "aumentado" | "disminuido";
+export const seleccionarTiempoManual = (
+  texSeleccion: estadoSeleccion
+): Promise<number> =>
+  new Promise((resolve) => {
+    Swal.fire({
+      text: `Escribe los minutos necesarios`,
+      input: "number",
+      background: colorFondo,
+      color: colorLetra,
+      inputAttributes: {
+        min: "1",
+        max: "1440",
+        step: "1",
+      },
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      confirmButtonText: "Aceptar",
+      confirmButtonColor: colorAceptar,
+      cancelButtonColor: colorCancelar,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      icon: "question",
+    })
+      // * Éxito
+      .then((resultado: SweetAlertResult<any>) => {
+        // ? Confirmado
+        if (resultado.isConfirmed) {
+          // Convertimos
+          const minutos = parseInt(resultado.value);
+
+          // ? Se puede formatear y es menor a 0
+          if (isNaN(minutos) || minutos < 0) {
+            alertaSwal(
+              "Error!",
+              "Por favor, ingresa un número válido.",
+              "error"
+            );
+
+            resolve(-1);
+            return;
+          }
+
+          // ? Son 24 horas
+          if (minutos > 1440) {
+            alertaSwal("Error!", "No puedes poner mas de 24 horas", "error");
+            resolve(-1);
+            return;
+          }
+
+          // * Éxito
+          alertaSwal(
+            "Éxito!",
+            `Se han ${texSeleccion} ${minutos} minutos.`,
+            "success"
+          );
+
+          resolve(minutos);
+          return;
+        }
+
+        resolve(-1);
+      });
+  });

@@ -1,11 +1,6 @@
 // TODO, Componentes SCSS
 
-// ? VARIABLES
-$color-fondo: #282c34;
-$color-barra: rgb(35, 45, 77);
-$color-letra: white;
-$color-letra-seleccionada: rgb(240, 229, 194);
-$sombra-item-seleccionado: 0 0 10px rgb(240, 198, 84);
+@import "variables";
 
 // * BARRA SUPERIOR
 .barra-superior {
@@ -70,32 +65,29 @@ $sombra-item-seleccionado: 0 0 10px rgb(240, 198, 84);
     }
 
     .derecha {
-        $color-tarjeta: rgb(212, 178, 83, 0.9);
-        $color-tarjeta-error: rgba(226, 119, 86, 0.9);
-
         .tab-xbox {
-            background-color: $color-tarjeta;
+            background-color: $color-tarjeta-xbox;
             color: $color-letra;
             border-radius: 0%;
 
             &:hover,
             &:focus,
             &:active {
-                background-color: rgba(114, 99, 58, 0.9);
+                background-color: $color-tab-seleccionado-xbox;
                 color: $color-letra;
                 border-radius: 10%;
             }
         }
 
         .tab-xbox-invalido {
-            background-color: $color-tarjeta-error;
+            background-color: $color-tab-error-xbox;
             color: $color-letra;
             border-radius: 0%;
 
             &:hover,
             &:focus,
             &:active {
-                background-color: rgba(216, 135, 110, 0.9);
+                background-color: $color-tab-error-seleccionado-xbox;
                 color: $color-letra;
                 border-radius: 10%;
             }
@@ -103,7 +95,7 @@ $sombra-item-seleccionado: 0 0 10px rgb(240, 198, 84);
 
         .card {
             border-radius: 0%;
-            background-color: $color-tarjeta;
+            background-color: $color-tarjeta-xbox;
             color: $color-letra;
         }
     }
