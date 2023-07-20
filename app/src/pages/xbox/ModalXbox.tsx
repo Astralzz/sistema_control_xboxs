@@ -3,7 +3,7 @@ import { Offcanvas, Stack } from "react-bootstrap";
 import Xbox from "../../models/Xbox";
 import Renta from "../../models/Renta";
 import { RespuestaApi } from "../../apis/apiVariables";
-import apiObtenerListaRentasPorXbox from "../../apis/apiRentas";
+import { apiObtenerListaRentasPorXbox } from "../../apis/apiRentas";
 import TablaRentas, { ColumnasRenta } from "../../components/Tablas/TablaRenta";
 import ComponentError, {
   DataError,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Button,
   Card,
@@ -15,10 +15,16 @@ import ModalXbox from "./ModalXbox";
 import IconoBootstrap from "../../components/Global/IconoBootstrap";
 import {
   alertaSwal,
+  calcularMontoRecaudado,
   confirmacionSwal,
+  fechaHoraActual,
   formatearTiempo,
   seleccionarTiempoManual,
 } from "../../functions/funcionesGlobales";
+import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
+import { RespuestaApi } from "../../apis/apiVariables";
+import Renta from "../../models/Renta";
+import ComponenteCargando from "../../components/Global/ComponenteCargando";
 
 // * Seleccionar tiempos
 interface SelectTiempo {
@@ -70,18 +76,150 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [keyTemporizador, setKeyTemporizador] = useState<number>(0);
   const [tiempoTotal, setTiempoTotal] = useState<number>(0);
+  const [rentaActual, setRentaActual] = useState<null | Renta>(null);
+  const [isCargando, setCargando] = useState<boolean>(false);
+  const [recaudado, setRecaudado] = useState<number>(0);
 
   // * Restante bandera
   let restanteBandera: number = 0;
+  let banderRecaudado: boolean = true;
+  let timeRecaudadoBandera: NodeJS.Timeout;
 
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
   const abrirModal = () => setEstadoModal(true);
 
+  // * Crear nueva renta
+  const crearNuevaRenta = async (data: FormData): Promise<void> => {
+    // Enviamos
+    const res: RespuestaApi = await apiCrearNuevaRenta(data);
+
+    // ? salio mal
+    if (!res.estado) {
+      // ! Error
+      throw new Error(
+        res.detalles_error
+          ? String(res.detalles_error)
+          : "Ocurrió un error al crear la renta, intenta mas tarde"
+      );
+    }
+
+    // ? No llego la renta
+    if (!res.renta) {
+      alertaSwal(
+        "Alerta!",
+        "La renta se creo correctamente pero esta no retorno, la hora de terminación no se vera reflejada",
+        "warning"
+      );
+      return;
+    }
+
+    // Ponemos renta actual
+    setRentaActual(res.renta);
+  };
+  // * Actualizar renta
+  const actualizarRenta = async (data: FormData): Promise<void> => {
+    // Enviamos
+    const res: RespuestaApi = await apiActualizarRenta(
+      data,
+      rentaActual?.id ?? -1
+    );
+
+    // ? salio mal
+    if (!res.estado) {
+      // ! Error
+      throw new Error(
+        res.detalles_error
+          ? String(res.detalles_error)
+          : "Ocurrió un error al actualizar la renta, intenta mas tarde"
+      );
+    }
+  };
+
   // * Iniciar temporizador
-  const iniciarTemporizador = (): void => {
-    setTiempoRestante(tiempoSeleccionado);
-    setTiempoCorriendo(true);
+  const iniciarTemporizador = async (): Promise<void> => {
+    try {
+      // Cargando
+      setCargando(true);
+
+      // Creamos data
+      const data: FormData = new FormData();
+
+      // Fecha hora
+      const { fecha, hora } = fechaHoraActual();
+
+      // Agregamos los datos a la data
+      data.append("id_xbox", String(props.xbox.id ?? -1));
+      data.append("fecha", fecha);
+      data.append("inicio", hora);
+
+      console.log("Datos a enviar:");
+      data.forEach((value, key) => {
+        console.log(key + ": " + value);
+      });
+
+      // Creamos
+      await crearNuevaRenta(data);
+
+      // Iniciamos conteos
+      setTiempoRestante(tiempoSeleccionado);
+      setTiempoCorriendo(true);
+
+      // ! Error
+    } catch (error: unknown) {
+      alertaSwal("Error!", String(error), "error");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // * Terminar temporizador
+  const terminarTemporizador = async (): Promise<void> => {
+    try {
+      // Cargando
+      setCargando(true);
+
+      // Creamos data
+      const data: FormData = new FormData();
+      // Fecha hora
+      const { fecha: fechaInicio, hora: horaInicio } = fechaHoraActual();
+      const { fecha: fechaFinal, hora: horaFinal } = fechaHoraActual();
+      // Recaudado
+      const recaudado: number = calcularMontoRecaudado(tiempoTotal);
+
+      // Agregamos los datos a la data
+      data.append(
+        "id_xbox",
+        String(rentaActual?.id_xbox ?? props.xbox.id ?? -1)
+      );
+      data.append("fecha", rentaActual?.fecha ?? fechaInicio);
+      data.append("inicio", rentaActual?.inicio ?? horaInicio);
+      data.append("final", horaFinal);
+      data.append("duracion", String(tiempoTotal / 60));
+      data.append("total", String(recaudado));
+
+      console.log("Datos a enviar:");
+      data.forEach((value, key) => {
+        console.log(key + ": " + value);
+      });
+
+      // Creamos
+      await actualizarRenta(data);
+
+      // ! Error
+    } catch (error: unknown) {
+      alertaSwal("Error!", String(error), "error");
+    } finally {
+      // Detenemos conteos
+      setRecaudado(calcularMontoRecaudado(tiempoTotal));
+      setRentaActual(null);
+      setTiempoCorriendo(false);
+      setTiempoSeleccionado(-1);
+      setTiempoRestante(0);
+      setKeyTemporizador((prevKey) => prevKey + 1);
+      restanteBandera = 0;
+      setCargando(false);
+    }
   };
 
   // * Continuar temporizador
@@ -89,15 +227,6 @@ const CartaXbox: React.FC<Props> = (props) => {
 
   // * Pausar temporizador
   const pausarTemporizador = (): void => setTiempoCorriendo(false);
-
-  // * Al completar
-  const alTerminar = (): void => {
-    setTiempoCorriendo(false);
-    setTiempoSeleccionado(-1);
-    setTiempoRestante(0);
-    setKeyTemporizador((prevKey) => prevKey + 1);
-    restanteBandera = 0;
-  };
 
   // * Aumentar tiempo
   const aumentarTiempo = (valor: number): void => {
@@ -136,11 +265,33 @@ const CartaXbox: React.FC<Props> = (props) => {
       );
     }
 
+    // TR / transcurrido
+    const tr = tiempoRestante - remainingTime;
+
     // Tiempo restante
     const restante: string = formatearTiempo(remainingTime);
     // Tiempo transcurrido
-    const trascurrido: string = formatearTiempo(tiempoRestante - remainingTime);
-    //  Bandera
+    const trascurrido: string = formatearTiempo(tr);
+
+    // ? es base 10
+    if (tr % 5 === 0 && banderRecaudado) {
+      // Ponemos false
+      banderRecaudado = false;
+
+      // Destruimos el time
+      clearTimeout(timeRecaudadoBandera);
+
+      // Accion en 2 s
+      timeRecaudadoBandera = setTimeout(() => {
+        // Recaudado
+        const r: number = calcularMontoRecaudado(tr);
+        // Ponemos valor
+        setRecaudado(r);
+        banderRecaudado = true;
+      }, 2000);
+    }
+
+    //  Restante bandera
     restanteBandera = remainingTime;
 
     return (
@@ -193,7 +344,9 @@ const CartaXbox: React.FC<Props> = (props) => {
                         duration={tiempoRestante}
                         colors={["#3C9B2C", "#FAB200", "#F2961C", "#A30000"]}
                         colorsTime={[tiempoSeleccionado, 5, 2, 0]}
-                        onComplete={alTerminar}
+                        onComplete={(): void => {
+                          terminarTemporizador();
+                        }}
                       >
                         {renderizarTiempo}
                       </CountdownCircleTimer>
@@ -219,10 +372,9 @@ const CartaXbox: React.FC<Props> = (props) => {
               <div className="d-flex flex-column">
                 {/* Tiempo total escogido */}
                 <h5>
-                  {"Tiempo total: " +
-                    (tiempoTotal > 0
-                      ? formatearTiempo(tiempoTotal)
-                      : "ninguno")}
+                  {`Tiempo total: ${
+                    tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "ninguno"
+                  } | recaudado: ${recaudado} $`}
                 </h5>
                 <br />
                 {/* -------- SELECCIONAR */}
@@ -459,7 +611,7 @@ const CartaXbox: React.FC<Props> = (props) => {
 
                       // ? Si
                       if (res) {
-                        alTerminar();
+                        terminarTemporizador();
                       }
                     }}
                   >
@@ -478,10 +630,12 @@ const CartaXbox: React.FC<Props> = (props) => {
         estadoModal={isEstadoModal}
         eliminarXbox={props.eliminarXbox}
         actualizarXbox={(id: number, xbox: Xbox) => {
-          alTerminar();
+          terminarTemporizador();
           props.actualizarXbox(id, xbox);
         }}
       />
+      {/* MODAL CARGANDO */}
+      <ComponenteCargando tipo={"spin"} estadoModal={isCargando} />
     </>
   );
 };

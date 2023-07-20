@@ -17,6 +17,7 @@ export interface RespuestaApi {
   // Datos
   mensaje?: string;
   xbox?: Xbox;
+  renta?: Renta;
 }
 
 // * Respuesta axios

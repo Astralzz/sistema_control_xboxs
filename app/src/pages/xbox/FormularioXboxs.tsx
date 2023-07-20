@@ -159,11 +159,6 @@ const FormularioXboxs: React.FC<Props> = (props) => {
       // * Obtenemos data
       const data: FormData = prepararData();
 
-      console.log("Datos a enviar:");
-      data.forEach((value, key) => {
-        console.log(key + ": " + value);
-      });
-
       // ? Existe xbox
       if (props.xbox) {
         await actualizarXbox(data);

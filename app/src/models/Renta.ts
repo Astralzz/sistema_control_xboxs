@@ -8,7 +8,7 @@ interface Renta {
     inicio: string;
     final: string | null;
     duracion: string | null;
-    total: number;
+    total: number | null;
     cliente: string | null;
     comentario: string | null;
     xbox: Xbox;

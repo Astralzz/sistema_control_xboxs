@@ -5,7 +5,9 @@ import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
 const intermedio: string = "rentas";
 
 // * Obtener xboxs
-async function apiObtenerListaRentasPorXbox(id: number): Promise<RespuestaApi> {
+export async function apiObtenerListaRentasPorXbox(
+  id: number
+): Promise<RespuestaApi> {
   try {
     //Ruta
     let url = API_URL + `${intermedio}/lista/xbox/${id}`;
@@ -25,4 +27,51 @@ async function apiObtenerListaRentasPorXbox(id: number): Promise<RespuestaApi> {
   }
 }
 
-export default apiObtenerListaRentasPorXbox;
+// * Crear nuevo xbox
+export async function apiCrearNuevaRenta(
+  data: FormData
+): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/crear`;
+
+    // Enviamos
+    const res = await axios.post(url, data);
+
+    // * Éxito
+    return {
+      estado: true,
+      renta: res.data.renta ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
+// * Actualizar renta
+export async function apiActualizarRenta(
+  data: FormData,
+  id: number
+): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/actualizar/${id}`;
+
+    // Enviamos
+    const res = await axios.post(url, data);
+
+    // * Éxito
+    return {
+      estado: true,
+      renta: res.data.renta ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}

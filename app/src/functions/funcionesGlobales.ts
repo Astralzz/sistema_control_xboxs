@@ -6,6 +6,46 @@ const colorLetra: string = "var(--color-letra)";
 const colorAceptar: string = "var(--color-confirmar)";
 const colorCancelar: string = "var(--color-cancelar)";
 
+// * Calcular monto recaudado
+export function calcularMontoRecaudado(m: number): number {
+  let minutos = m / 60;
+  const precioPorHora = 15;
+  const precioPorMediaHora = 9;
+  const precioPor3Minutos = 1;
+  const precioPor10Minutos = 3;
+
+  let precioTotal = 0;
+
+  // Calcular el precio por hora
+  const horasCompletas = Math.floor(minutos / 60);
+  precioTotal += horasCompletas * precioPorHora;
+  minutos -= horasCompletas * 60;
+
+  // Calcular el precio por media hora
+  const mediaHorasCompletas = Math.floor(minutos / 30);
+  precioTotal += mediaHorasCompletas * precioPorMediaHora;
+  minutos -= mediaHorasCompletas * 30;
+
+  // Calcular el precio por 10 minutos
+  const bloquesDe10Minutos = Math.floor(minutos / 10);
+  precioTotal += bloquesDe10Minutos * precioPor10Minutos;
+  minutos -= bloquesDe10Minutos * 10;
+
+  // Calcular el precio por 3 minutos restantes
+  const bloquesDe3Minutos = Math.floor(minutos / 3);
+  precioTotal += bloquesDe3Minutos * precioPor3Minutos;
+  minutos -= bloquesDe3Minutos * 3;
+
+  // Calcular el precio por minutos restantes
+  precioTotal += (minutos / 60) * precioPorHora;
+
+  return parseFloat(precioTotal.toFixed(2)); // Redondear a dos decimales
+}
+
+// for (let i = 0; i < 300; i++) {
+//   console.log(`${i + 1} son ${calcularMontoRecaudado((i + 1) * 60)}`);
+// }
+
 // * Formatear fecha
 export function formatearFecha(fecha: string): string | null {
   try {
@@ -92,6 +132,28 @@ export function generarColorOscuroAleatorio(opacidad: number): string {
   const b = Math.floor(Math.random() * 100);
 
   return `rgb(${r}, ${g}, ${b}, ${opacidad})`;
+}
+
+// * Fecha y hora actual
+type FechaHora = { fecha: string; hora: string };
+
+export function fechaHoraActual(): FechaHora {
+  const currentDate = new Date();
+
+  // Obtener los componentes de la fecha y hora
+  const year = currentDate.getFullYear().toString().padStart(4, "0");
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+  const day = currentDate.getDate().toString().padStart(2, "0");
+  const hours = currentDate.getHours().toString().padStart(2, "0");
+  const minutes = currentDate.getMinutes().toString().padStart(2, "0");
+  const seconds = currentDate.getSeconds().toString().padStart(2, "0");
+
+  const data: FechaHora = {
+    fecha: `${year}-${month}-${day}`,
+    hora: `${hours}:${minutes}:${seconds}`,
+  };
+
+  return data;
 }
 
 // * Alerta swal

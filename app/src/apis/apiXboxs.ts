@@ -8,7 +8,7 @@ const intermedio: string = "xboxs";
 export async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
   try {
     // Ruta
-    let url = API_URL + `${intermedio}/lista`;
+    let url = API_URL + `${intermedio}/lista/global`;
 
     // Enviamos
     const res = await axios.get(url);
@@ -29,7 +29,7 @@ export async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
 export async function apiCrearNuevoXbox(data: FormData): Promise<RespuestaApi> {
   try {
     // Ruta
-    let url = API_URL + `${intermedio}/crear`;
+    let url = API_URL + `${intermedio}/opciones/crear`;
 
     // Enviamos
     const res = await axios.post(url, data);
@@ -47,14 +47,14 @@ export async function apiCrearNuevoXbox(data: FormData): Promise<RespuestaApi> {
   }
 }
 
-// * Crear nuevo xbox
+// * Actualizar xbox
 export async function apiActualizarXbox(
   data: FormData,
   id: number
 ): Promise<RespuestaApi> {
   try {
     // Ruta
-    let url = API_URL + `${intermedio}/actualizar/${id}`;
+    let url = API_URL + `${intermedio}/opciones/actualizar/${id}`;
 
     // Enviamos
     const res = await axios.post(url, data);
@@ -76,7 +76,7 @@ export async function apiActualizarXbox(
 export async function apiEliminarXbox(id: number): Promise<RespuestaApi> {
   try {
     // Ruta
-    let url = API_URL + `${intermedio}/eliminar/${id}`;
+    let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
 
     // Enviamos
     const res = await axios.delete(url);
