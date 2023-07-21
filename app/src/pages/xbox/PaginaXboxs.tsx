@@ -6,7 +6,7 @@ import { apiObtenerListaXboxs } from "../../apis/apiXboxs";
 import { RespuestaApi } from "../../apis/apiVariables";
 import ComponentError, {
   DataError,
-} from "../../components/Global/ComponentError";
+} from "../../components/global/ComponentError";
 import FormularioXboxs from "./FormularioXboxs";
 
 // TODO, Pagina de los xbox

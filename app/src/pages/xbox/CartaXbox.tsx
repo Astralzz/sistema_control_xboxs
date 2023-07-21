@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Button,
   Card,
@@ -8,11 +8,15 @@ import {
   DropdownButton,
   Dropdown,
   ButtonGroup,
+  Form,
+  InputGroup,
+  OverlayTrigger,
+  Popover,
 } from "react-bootstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
 import ModalXbox from "./ModalXbox";
-import IconoBootstrap from "../../components/Global/IconoBootstrap";
+import IconoBootstrap from "../../components/global/IconoBootstrap";
 import {
   alertaSwal,
   calcularMontoRecaudado,
@@ -24,7 +28,8 @@ import {
 import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
 import { RespuestaApi } from "../../apis/apiVariables";
 import Renta from "../../models/Renta";
-import ComponenteCargando from "../../components/Global/ComponenteCargando";
+import ComponenteCargando from "../../components/global/ComponenteCargando";
+import { OverlayChildren } from "react-bootstrap/esm/Overlay";
 
 // * Seleccionar tiempos
 interface SelectTiempo {
@@ -60,6 +65,12 @@ const selectsTiempo: SelectTiempo[] = [
   },
 ];
 
+// * ERS
+const regexCliente: RegExp =
+  /^(?!\s)([a-zA-ZñÑáéíóúÁÉÍÓÚ_-\s\d]{2,60})(?<!\s)$/;
+const regexComentario: RegExp =
+  /^([\w\d][\w\d\sZñÑáéíóúÁÉÍÓÚ.,:;!?+_*¡¿/()[\]{}-]{0,360})?$/;
+
 // * Props
 interface Props {
   xbox: Xbox;
@@ -78,10 +89,14 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [tiempoTotal, setTiempoTotal] = useState<number>(0);
   const [rentaActual, setRentaActual] = useState<null | Renta>(null);
   const [isCargando, setCargando] = useState<boolean>(false);
+  const [cliente, setCliente] = useState<string | null>(null);
+  const [comentario, setComentario] = useState<string | null>(null);
   const [recaudado, setRecaudado] = useState<number>(0);
 
   // * Restante bandera
   let restanteBandera: number = 0;
+  let recaudadoBandera: number = 0;
+  let tiempoTotalBandera: number = 0;
   let banderRecaudado: boolean = true;
   let timeRecaudadoBandera: NodeJS.Timeout;
 
@@ -153,11 +168,6 @@ const CartaXbox: React.FC<Props> = (props) => {
       data.append("fecha", fecha);
       data.append("inicio", hora);
 
-      console.log("Datos a enviar:");
-      data.forEach((value, key) => {
-        console.log(key + ": " + value);
-      });
-
       // Creamos
       await crearNuevaRenta(data);
 
@@ -184,8 +194,6 @@ const CartaXbox: React.FC<Props> = (props) => {
       // Fecha hora
       const { fecha: fechaInicio, hora: horaInicio } = fechaHoraActual();
       const { fecha: fechaFinal, hora: horaFinal } = fechaHoraActual();
-      // Recaudado
-      const recaudado: number = calcularMontoRecaudado(tiempoTotal);
 
       // Agregamos los datos a la data
       data.append(
@@ -195,13 +203,23 @@ const CartaXbox: React.FC<Props> = (props) => {
       data.append("fecha", rentaActual?.fecha ?? fechaInicio);
       data.append("inicio", rentaActual?.inicio ?? horaInicio);
       data.append("final", horaFinal);
-      data.append("duracion", String(tiempoTotal / 60));
-      data.append("total", String(recaudado));
+      data.append("duracion", String(tiempoTotalBandera));
+      data.append("total", String(recaudadoBandera));
 
-      console.log("Datos a enviar:");
-      data.forEach((value, key) => {
-        console.log(key + ": " + value);
-      });
+      // ? Cliente valido
+      if (cliente && regexCliente.test(cliente)) {
+        data.append("cliente", cliente);
+      }
+
+      // ? Comentario valido
+      if (comentario && regexComentario.test(comentario)) {
+        data.append("comentario", comentario);
+      }
+
+      // console.log("Datos a enviar:");
+      // data.forEach((value, key) => {
+      //   console.log(key + ": " + value);
+      // });
 
       // Creamos
       await actualizarRenta(data);
@@ -210,15 +228,8 @@ const CartaXbox: React.FC<Props> = (props) => {
     } catch (error: unknown) {
       alertaSwal("Error!", String(error), "error");
     } finally {
-      // Detenemos conteos
-      setRecaudado(calcularMontoRecaudado(tiempoTotal));
-      setRentaActual(null);
-      setTiempoCorriendo(false);
-      setTiempoSeleccionado(-1);
-      setTiempoRestante(0);
-      setKeyTemporizador((prevKey) => prevKey + 1);
-      restanteBandera = 0;
       setCargando(false);
+      limpiarDatos();
     }
   };
 
@@ -293,6 +304,10 @@ const CartaXbox: React.FC<Props> = (props) => {
 
     //  Restante bandera
     restanteBandera = remainingTime;
+    // Recaudado
+    recaudadoBandera = calcularMontoRecaudado(tr);
+    // Total
+    tiempoTotalBandera = parseFloat((tr / 60).toFixed(2));
 
     return (
       <div className="timer">
@@ -300,6 +315,49 @@ const CartaXbox: React.FC<Props> = (props) => {
         <h2>{trascurrido}</h2>
       </div>
     );
+  };
+
+  // * Comentario
+  const ComentarioPop: OverlayChildren = (
+    <Popover id="popover-comentario">
+      <Popover.Header as="h3">Comentario</Popover.Header>
+      <Popover.Body>
+        <InputGroup>
+          <Form.Control
+            onChange={(e) => setComentario(e.target.value)}
+            value={comentario ?? ""}
+            maxLength={360}
+            autoComplete="off"
+            disabled={
+              !isTiempoCorriendo || props.xbox.estado === "NO DISPONIBLE"
+            }
+            as="textarea"
+            rows={3}
+            aria-label="area-comentario"
+            className={
+              comentario && regexComentario.test(comentario)
+                ? "is-valid"
+                : "is-invalid"
+            }
+          />
+        </InputGroup>
+      </Popover.Body>
+    </Popover>
+  );
+
+  // * Limpiar datos
+  const limpiarDatos = (): void => {
+    setRecaudado(calcularMontoRecaudado(tiempoTotal));
+    setCliente(null);
+    setComentario(null);
+    setRentaActual(null);
+    setTiempoCorriendo(false);
+    setTiempoSeleccionado(-1);
+    setTiempoRestante(0);
+    setKeyTemporizador((prevKey) => prevKey + 1);
+    restanteBandera = 0;
+    recaudadoBandera = 0;
+    tiempoTotalBandera = 0;
   };
 
   return (
@@ -372,8 +430,8 @@ const CartaXbox: React.FC<Props> = (props) => {
               <div className="d-flex flex-column">
                 {/* Tiempo total escogido */}
                 <h5>
-                  {`Tiempo total: ${
-                    tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "ninguno"
+                  {`Tiempo: ${
+                    tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
                   } | recaudado: ${recaudado} $`}
                 </h5>
                 <br />
@@ -541,7 +599,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                 </div>
 
                 {/* -------- BOTONES */}
-                <ButtonGroup aria-label="Grupo-botones" className="mb-2">
+                <ButtonGroup aria-label="Grupo-botones" className="mb-4">
                   {/* -------- Iniciar */}
                   <Button
                     disabled={
@@ -618,6 +676,46 @@ const CartaXbox: React.FC<Props> = (props) => {
                     Terminar
                   </Button>
                 </ButtonGroup>
+
+                {/* -------- CLIENTE */}
+                <InputGroup className="mb-2">
+                  <Form.Control
+                    className={
+                      cliente && regexCliente.test(cliente)
+                        ? "is-valid"
+                        : "is-invalid"
+                    }
+                    onChange={(e) => setCliente(e.target.value)}
+                    value={cliente ?? ""}
+                    type="text"
+                    autoFocus
+                    placeholder="Nombre del cliente"
+                    aria-label="Nombre del cliente"
+                    aria-describedby="Cliente que esta rentando actualmente"
+                    maxLength={60}
+                    autoComplete="off"
+                    disabled={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                    }
+                  />
+                  <OverlayTrigger
+                    rootClose
+                    placement="right"
+                    trigger="click"
+                    overlay={ComentarioPop}
+                  >
+                    <Button
+                      variant="success"
+                      disabled={
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                      }
+                    >
+                      <IconoBootstrap nombre={"PenFill"} />
+                    </Button>
+                  </OverlayTrigger>
+                </InputGroup>
               </div>
             </Col>
           </Row>
@@ -630,7 +728,7 @@ const CartaXbox: React.FC<Props> = (props) => {
         estadoModal={isEstadoModal}
         eliminarXbox={props.eliminarXbox}
         actualizarXbox={(id: number, xbox: Xbox) => {
-          terminarTemporizador();
+          limpiarDatos();
           props.actualizarXbox(id, xbox);
         }}
       />

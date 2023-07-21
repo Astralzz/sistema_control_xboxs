@@ -70,6 +70,20 @@ export function formatearFecha(fecha: string): string | null {
   }
 }
 
+// * Formatear fecha con días
+export function formatearFechaConDias(fecha: string): string {
+  const date = new Date(fecha);
+
+  const opciones: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  };
+
+  return date.toLocaleDateString("es-ES", opciones);
+}
+
 // * Formatear hora sin segundos
 export function formatearHoraSinSegundos(hora: string): string | null {
   try {

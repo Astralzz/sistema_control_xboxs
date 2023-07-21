@@ -3,7 +3,7 @@ import Xbox from "../../models/Xbox";
 import { Button, Form, Modal } from "react-bootstrap";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiActualizarXbox, apiCrearNuevoXbox } from "../../apis/apiXboxs";
-import ComponenteCargando from "../../components/Global/ComponenteCargando";
+import ComponenteCargando from "../../components/global/ComponenteCargando";
 import { alertaSwal } from "../../functions/funcionesGlobales";
 
 // * Estilos
@@ -67,7 +67,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
   };
 
   // * Actualizar nuevo xbox
-  const actualizarXbox = async (data: FormData): Promise<void> => {
+  const actualizarElXbox = async (data: FormData): Promise<void> => {
     // ? No existe id
     if (!props.xbox?.id) {
       throw new Error("No se encontró el ID del xbox");
@@ -161,7 +161,7 @@ const FormularioXboxs: React.FC<Props> = (props) => {
 
       // ? Existe xbox
       if (props.xbox) {
-        await actualizarXbox(data);
+        await actualizarElXbox(data);
         return;
       }
 
@@ -208,7 +208,11 @@ const FormularioXboxs: React.FC<Props> = (props) => {
       {/* MODAL FORMULARIO */}
       <Modal show={props.estadoModal} onHide={accionAlCerrar}>
         {/* ENCABEZADO */}
-        <Modal.Header closeButton style={styles} closeVariant="white">
+        <Modal.Header
+          closeButton
+          style={{ ...styles, border: "none" }}
+          closeVariant="white"
+        >
           {/* Titulo */}
           <Modal.Title>
             {props.xbox
@@ -231,6 +235,9 @@ const FormularioXboxs: React.FC<Props> = (props) => {
                 autoFocus
                 maxLength={60}
                 autoComplete="off"
+                className={
+                  regexNombre.test(nombre ?? "") ? "is-valid" : "is-invalid"
+                }
               />
             </Form.Group>
 
@@ -239,6 +246,11 @@ const FormularioXboxs: React.FC<Props> = (props) => {
               <Form.Label>Estado del xbox</Form.Label>
               <Form.Select
                 style={styles}
+                className={
+                  estado === "DISPONIBLE" || estado === "NO DISPONIBLE"
+                    ? "is-valid"
+                    : "is-invalid"
+                }
                 value={estado ?? "DISPONIBLE"}
                 aria-label="Estado de xbox"
                 onChange={(e) =>
@@ -261,6 +273,11 @@ const FormularioXboxs: React.FC<Props> = (props) => {
               <Form.Control
                 style={styles}
                 onChange={(e) => setDescripcion(e.target.value)}
+                className={
+                  regexDescripcion.test(descripcion ?? "")
+                    ? "is-valid"
+                    : "is-invalid"
+                }
                 value={descripcion ?? ""}
                 as="textarea"
                 maxLength={699}
@@ -270,7 +287,8 @@ const FormularioXboxs: React.FC<Props> = (props) => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer style={styles}>
+        {/* PIE */}
+        <Modal.Footer style={{ ...styles, border: "none" }}>
           {/* Boton de cerrar */}
           <Button variant="danger" onClick={() => accionAlCerrar()}>
             Cerrar

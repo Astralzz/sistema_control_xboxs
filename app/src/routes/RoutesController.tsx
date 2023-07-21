@@ -2,7 +2,8 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import PaginaXboxs from "../pages/xbox/PaginaXboxs";
 import { Col, Container, Row } from "react-bootstrap";
-import ComponentError from "../components/Global/ComponentError";
+import ComponentError from "../components/global/ComponentError";
+import PaginaProductos from "../pages/productos/PaginaProductos";
 
 const ContenedorPrueba = ({ titulo }: { titulo: string }) => {
   return (
@@ -20,23 +21,20 @@ const RoutesController: React.FC = () => {
     <Container className="contenedor-inicio">
       <Row>
         {/* Parte izquierda */}
-        <Col lg={8} md={12} className="mb-4 derecha">
+        <Col lg={9} md={12} className="mb-4 derecha">
           {/* Pagina xboxs */}
           <PaginaXboxs />
         </Col>
 
         {/* Parte derecha */}
-        <Col lg={4} md={12} className="mb-4 izquierda">
+        <Col lg={3} md={12} className="mb-4 izquierda">
           {/* Rutas */}
           <Routes>
             <Route
               path="/xboxs"
               element={<ContenedorPrueba titulo={"xboxs"} />}
             />
-            <Route
-              path="/ventas"
-              element={<ContenedorPrueba titulo="ventas" />}
-            />
+            <Route path="/ventas" element={<PaginaProductos />} />
             <Route
               path="/*"
               element={

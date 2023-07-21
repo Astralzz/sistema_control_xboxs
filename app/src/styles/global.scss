@@ -47,6 +47,10 @@
   transform: rotate(360deg);
 }
 
+.placeholder-blanco::placeholder {
+  color: $color-letra;
+}
+
 .color-fondo {
   background-color: $color-fondo;
   background: $color-fondo;

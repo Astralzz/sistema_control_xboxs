@@ -1,21 +1,27 @@
 import React, { Dispatch, useCallback, useEffect, useState } from "react";
-import { Offcanvas, Stack } from "react-bootstrap";
+import { Offcanvas, Placeholder, Stack } from "react-bootstrap";
 import Xbox from "../../models/Xbox";
 import Renta from "../../models/Renta";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiObtenerListaRentasPorXbox } from "../../apis/apiRentas";
-import TablaRentas, { ColumnasRenta } from "../../components/Tablas/TablaRenta";
+import TablaRentas, { ColumnasRenta } from "../../components/tablas/TablaRenta";
 import ComponentError, {
   DataError,
-} from "../../components/Global/ComponentError";
+} from "../../components/global/ComponentError";
 import FormularioXboxs from "./FormularioXboxs";
-import IconoBootstrap from "../../components/Global/IconoBootstrap";
+import IconoBootstrap from "../../components/global/IconoBootstrap";
 import { apiEliminarXbox } from "../../apis/apiXboxs";
-import ComponenteCargando from "../../components/Global/ComponenteCargando";
+import ComponenteCargando from "../../components/global/ComponenteCargando";
 import {
   alertaSwal,
   confirmacionSwal,
 } from "../../functions/funcionesGlobales";
+
+// * Arreglo números
+const ArregloCargando: number[] = Array.from(
+  { length: 20 },
+  (_, index) => index + 1
+);
 
 // * Columnas
 const columnas: ColumnasRenta = {
@@ -23,6 +29,7 @@ const columnas: ColumnasRenta = {
   inicio: true,
   duracion: true,
   total: true,
+  masInf: true,
 };
 
 // * Props
@@ -40,6 +47,7 @@ const ModalXbox: React.FC<Props> = (props) => {
   const [listaRentas, setListaRentas] = useState<Renta[]>([]);
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [isCargando, setCargando] = useState<boolean>(false);
+  const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
   const [isError, setError] = useState<DataError>({
     estado: false,
   });
@@ -50,24 +58,34 @@ const ModalXbox: React.FC<Props> = (props) => {
 
   // * Obtener xbox
   const obtenerUltimasVentas = useCallback(async () => {
-    // * Buscamos
-    const res: RespuestaApi = await apiObtenerListaRentasPorXbox(props.xbox.id);
+    try {
+      setCargandoTabla(true);
 
-    // ? salio mal
-    if (!res.estado) {
-      setError({
-        estado: true,
-        titulo: res.noEstado ? String(res.noEstado) : undefined,
-        detalles: res.detalles_error ? String(res.detalles_error) : undefined,
-      });
-      return;
+      // * Buscamos
+      const res: RespuestaApi = await apiObtenerListaRentasPorXbox(
+        props.xbox.id
+      );
+
+      // ? salio mal
+      if (!res.estado) {
+        setError({
+          estado: true,
+          titulo: res.noEstado ? String(res.noEstado) : undefined,
+          detalles: res.detalles_error ? String(res.detalles_error) : undefined,
+        });
+        return;
+      }
+
+      // * Sin errores
+      setError({ estado: false });
+
+      // Ponemos lista
+      setListaRentas(res.listaRentas ?? []);
+    } catch (error) {
+      console.error(String(error));
+    } finally {
+      setCargandoTabla(false);
     }
-
-    // * Sin errores
-    setError({ estado: false });
-
-    // Ponemos lista
-    setListaRentas(res.listaRentas ?? []);
   }, [props.xbox.id]);
 
   //* Eliminar xbox
@@ -133,8 +151,11 @@ const ModalXbox: React.FC<Props> = (props) => {
 
   // * Buscamos
   useEffect(() => {
-    obtenerUltimasVentas();
-  }, [obtenerUltimasVentas, props]);
+    // ? true
+    if (props.estadoModal) {
+      obtenerUltimasVentas();
+    }
+  }, [obtenerUltimasVentas, props.estadoModal]);
 
   return (
     <>
@@ -194,9 +215,24 @@ const ModalXbox: React.FC<Props> = (props) => {
 
               <h6>{"Últimas 10 rentas:"}</h6>
 
-              {/* Lista no vacía */}
-              {Array.isArray(listaRentas) && listaRentas.length > 0 && (
+              {/* Esta cargando*/}
+              {isCargandoTabla ? (
+                // Cargando
+                ArregloCargando.map((n) => {
+                  // n de 10 a 12
+                  const nr: number = Math.floor(Math.random() * 3) + 10;
+
+                  return (
+                    <Placeholder key={n} animation="glow">
+                      <Placeholder xs={nr} />
+                    </Placeholder>
+                  );
+                })
+              ) : // ? Lista vacía
+              Array.isArray(listaRentas) && listaRentas.length > 0 ? (
                 <TablaRentas lista={listaRentas} columnas={columnas} />
+              ) : (
+                <h6>La lista esta vacía</h6>
               )}
 
               <br />
