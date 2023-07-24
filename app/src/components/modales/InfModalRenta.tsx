@@ -15,6 +15,7 @@ import {
   formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
 import IconoBootstrap from "../global/IconoBootstrap";
+import TimePicker from "react-time-picker";
 
 // * Estilos
 const styles: React.CSSProperties = {
@@ -26,6 +27,8 @@ const styles: React.CSSProperties = {
 // * ERS
 const regexCliente: RegExp =
   /^(?!\s)([a-zA-ZñÑáéíóúÁÉÍÓÚ_-\s\d]{0,60})(?<!\s)$/;
+const regexComentario: RegExp =
+  /^([\w\d][\w\d\sZñÑáéíóúÁÉÍÓÚ.,:;!?+_*¡¿/()[\]{}-]{0,360})?$/;
 
 // * Props
 interface Props {
@@ -38,7 +41,13 @@ interface Props {
 const InfModalRenta: React.FC<Props> = (props) => {
   // * Variables
   const [isEditar, setEditar] = useState<boolean>(false);
+  const [inicio, setInicio] = useState<string | null>(
+    props.renta?.inicio ?? null
+  );
   const [cliente, setCliente] = useState<string>(props.renta?.cliente ?? "");
+  const [comentario, setComentario] = useState<string>(
+    props.renta?.comentario ?? ""
+  );
 
   // * Al cerrar
   const accionAlCerrar = (): void => {
@@ -51,6 +60,8 @@ const InfModalRenta: React.FC<Props> = (props) => {
   // * Restableces
   const restablecerDatos = (): void => {
     setCliente(props.renta?.cliente ?? "");
+    setComentario(props.renta?.comentario ?? "");
+    setInicio(props.renta?.inicio ?? null);
   };
 
   // * Cuerpo Información
@@ -58,7 +69,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
     return (
       <Row>
         {/* Lista derecha */}
-        <Col xs={7}>
+        <Col xs={6}>
           <ListGroup>
             {/* Xbox */}
             <ListGroup.Item style={styles}>{`Xbox: ${
@@ -77,29 +88,29 @@ const InfModalRenta: React.FC<Props> = (props) => {
           </ListGroup>
         </Col>
         {/* Lista izquierda */}
-        <Col xs={5}>
+        <Col xs={6}>
           <ListGroup>
             {/* Inicio */}
-            <ListGroup.Item style={styles}>{`Se inicio a las: ${
+            <ListGroup.Item style={styles}>{`Inicio:: ${
               props.renta?.inicio
                 ? formatearHoraSinSegundos(props.renta?.inicio)
                 : "N/A"
             }`}</ListGroup.Item>
 
             {/* Final */}
-            <ListGroup.Item style={styles}>{`Se termino a las: ${
+            <ListGroup.Item style={styles}>{`Final: ${
               props.renta?.final
                 ? formatearHoraSinSegundos(props.renta?.final)
                 : "N/A"
             }`}</ListGroup.Item>
 
             {/* Minutos */}
-            <ListGroup.Item style={styles}>{`Minutos totales: ${
+            <ListGroup.Item style={styles}>{`Minutos: ${
               props.renta?.duracion ?? "00:00"
             }`}</ListGroup.Item>
 
             {/* Total */}
-            <ListGroup.Item style={styles}>{`Precio total: ${
+            <ListGroup.Item style={styles}>{`Precio: ${
               props.renta?.total ?? "0.00$"
             }`}</ListGroup.Item>
           </ListGroup>
@@ -140,7 +151,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
         ) : (
           <Row>
             {/* Lista derecha */}
-            <Col xs={7}>
+            <Col xs={6}>
               <ListGroup>
                 {/* Xbox */}
                 <ListGroup.Item style={styles}>{`Xbox: ${
@@ -148,7 +159,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
                 }`}</ListGroup.Item>
 
                 {/* Cliente */}
-                <InputGroup style={styles}>
+                <InputGroup className="mb-2" style={styles}>
                   <InputGroup.Text style={styles}>Cliente</InputGroup.Text>
                   <Form.Control
                     style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
@@ -164,19 +175,43 @@ const InfModalRenta: React.FC<Props> = (props) => {
                   />
                 </InputGroup>
 
+                <br />
+
                 {/* Comentario */}
-                <ListGroup.Item style={styles}>{`Comentario: ${
-                  props.renta?.comentario ?? "ninguno"
-                }`}</ListGroup.Item>
+                <InputGroup className="mb-2" style={styles}>
+                  <InputGroup.Text style={styles}>Comentario</InputGroup.Text>
+                  <Form.Control
+                    style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
+                    onChange={(e) => setComentario(e.target.value)}
+                    value={comentario ?? ""}
+                    aria-label="Comentario de renta"
+                    as="textarea"
+                    maxLength={699}
+                    rows={4}
+                    className={
+                      regexComentario.test(comentario ?? "")
+                        ? "is-valid"
+                        : "is-invalid"
+                    }
+                  />
+                </InputGroup>
               </ListGroup>
             </Col>
             {/* Lista izquierda */}
-            <Col xs={5}>
+            <Col xs={6}>
               <ListGroup>
+
                 {/* Inicio */}
-                <ListGroup.Item style={styles}>{`Hora de inicio: ${
-                  props.renta?.inicio ?? "N/A"
-                }`}</ListGroup.Item>
+                <InputGroup className="mb-2" style={styles}>
+                  <InputGroup.Text style={styles}>Inicio</InputGroup.Text>
+                  <TimePicker
+                    onChange={(t) => setInicio(t)}
+                    value={inicio}
+                    disableClock={true} // Reloj
+                    format="h:mm a" 
+                    className={"picker-tiempo"}
+                  />
+                </InputGroup>
 
                 {/* Final */}
                 <ListGroup.Item style={styles}>{`Hora final: ${
@@ -203,10 +238,15 @@ const InfModalRenta: React.FC<Props> = (props) => {
         <Button variant="danger" onClick={() => accionAlCerrar()}>
           Cerrar
         </Button>
-        {/* Aceptar */}
-        <Button variant="success" onClick={accionAlCerrar}>
-          Aceptar
-        </Button>
+        {!isEditar ? (
+          <Button variant="success" onClick={accionAlCerrar}>
+            Aceptar
+          </Button>
+        ) : (
+          <Button variant="success" disabled onClick={accionAlCerrar}>
+            Guardar
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

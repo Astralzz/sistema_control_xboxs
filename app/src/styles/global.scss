@@ -3,7 +3,7 @@
 .app {
   text-align: center;
   background-color: $color-fondo;
-  min-height: 90vh;
+  min-height: 100vh;
   // display: flex;
   // flex-direction: column;
   // align-items: center;
@@ -59,4 +59,10 @@
 .global-tabla {
   background-color: $color-fondo;
   color: $color-cancelar;
+}
+
+.picker-tiempo {
+  // display: flex;
+  // width: auto;
+  // background-color: aqua;
 }

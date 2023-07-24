@@ -90,7 +90,7 @@ const TablaRentas: React.FC<Props> = (props) => {
                 )}
                 {/* Duracion */}
                 {props.columnas.duracion && (
-                  <td>{renta.duracion ? renta.duracion : "N/A"}</td>
+                  <td>{renta.duracion ? parseInt(renta.duracion) : "N/A"}</td>
                 )}
                 {/* Total */}
                 {props.columnas.total && <td>{"$ " + renta.total}</td>}

@@ -5,31 +5,26 @@
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.38",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
+    "@types/react-howler": "^5.2.0",
     "axios": "^1.4.0",
     "bootstrap": "^5.3.0",
-    "bootstrap-icons": "^1.10.5",
-    "moment": "^2.29.4",
+    "eslint-config-react-app": "^7.0.1",
+    "howler": "^2.2.3",
     "react": "^18.2.0",
     "react-bootstrap": "^2.8.0",
     "react-bootstrap-icons": "^1.10.3",
-    "react-countdown": "^2.3.5",
     "react-countdown-circle-timer": "^3.2.1",
     "react-dom": "^18.2.0",
     "react-loading": "^2.0.3",
-    "react-pdf": "^7.1.2",
-    "react-router": "^6.14.1",
+    "react-router": "^6.14.2",
     "react-scripts": "5.0.1",
-    "react-table": "^7.8.0",
-    "react-timer-hook": "^3.0.6",
-    "sass": "^1.63.6",
-    "scss": "^0.2.4",
+    "react-time-picker": "^6.2.1",
+    "sass": "^1.64.1",
     "sweetalert2": "^11.7.18",
     "typescript": "^4.9.5",
+    "variables": "^1.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -57,7 +52,6 @@
     ]
   },
   "devDependencies": {
-    "@types/mysql": "^2.15.21",
-    "react-router-dom": "^6.14.1"
+    "react-router-dom": "^6.14.2"
   }
 }

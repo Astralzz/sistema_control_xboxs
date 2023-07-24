@@ -11,6 +11,8 @@ import "./styles/_variables.scss";
 import "./styles/global.scss";
 import "./styles/componentes.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
+import 'react-time-picker/dist/TimePicker.css';
+import 'react-clock/dist/Clock.css';
 
 // TODO, App
 const App: React.FC = () => {

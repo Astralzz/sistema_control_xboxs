@@ -10,6 +10,7 @@ interface Renta {
   final: string | null;
   duracion: string | null;
   total: number | null;
+  isPagado: boolean | string | null;
   cliente: string | null;
   comentario: string | null;
   xbox: Xbox;

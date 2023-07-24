@@ -120,3 +120,26 @@
         color: $color-letra;
     }
 }
+
+.img-alarma {
+    // background-color: $color-cancelar;
+    transition: transform 0.2s ease;
+    animation: palpitar 0.5s infinite;
+}
+
+.img-alarma:hover {
+    cursor: pointer; 
+}
+
+/* Definición de la animación "palpitar" */
+@keyframes palpitar {
+    0% {
+        transform: scale(1); /* Estado inicial (escala normal) */
+    }
+    50% {
+        transform: scale(1.1); /* Estado de escala aumentada al 50% de la animación */
+    }
+    100% {
+        transform: scale(1); /* Estado final (volver a la escala normal) */
+    }
+}

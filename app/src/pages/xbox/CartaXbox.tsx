@@ -12,6 +12,7 @@ import {
   InputGroup,
   OverlayTrigger,
   Popover,
+  Image,
 } from "react-bootstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
@@ -30,6 +31,8 @@ import { RespuestaApi } from "../../apis/apiVariables";
 import Renta from "../../models/Renta";
 import ComponenteCargando from "../../components/global/ComponenteCargando";
 import { OverlayChildren } from "react-bootstrap/esm/Overlay";
+import { detenerAlarma, reproducirAlarma } from "../../functions/alarma";
+import iconoAlarma from "../../assets/imgs/iconoAlarma.png";
 
 // * Seleccionar tiempos
 interface SelectTiempo {
@@ -92,6 +95,7 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [cliente, setCliente] = useState<string | null>(null);
   const [comentario, setComentario] = useState<string | null>(null);
   const [recaudado, setRecaudado] = useState<number>(0);
+  const [idAlarma, setIdAlarma] = useState<string | null>(null);
 
   // * Restante bandera
   let restanteBandera: number = 0;
@@ -184,10 +188,21 @@ const CartaXbox: React.FC<Props> = (props) => {
   };
 
   // * Terminar temporizador
-  const terminarTemporizador = async (): Promise<void> => {
+  const terminarTemporizador = async (
+    isAlarma: boolean = true
+  ): Promise<void> => {
     try {
       // Cargando
       setCargando(true);
+
+      // ? Sonar alarma
+      if (isAlarma && idAlarma === null) {
+        // Creamos alarma
+        const id: string = reproducirAlarma();
+        setIdAlarma(id);
+      } else {
+        setIdAlarma(null);
+      }
 
       // Creamos data
       const data: FormData = new FormData();
@@ -265,58 +280,6 @@ const CartaXbox: React.FC<Props> = (props) => {
     setTiempoRestante((prevTiempo) => prevTiempo + valorNegativo);
   };
 
-  // * Renderizar tiempo
-  const renderizarTiempo = ({ remainingTime }: any) => {
-    // ? Es menor a 1
-    if (remainingTime < 1) {
-      return (
-        <div>
-          <h4>¡Tiempo terminado!</h4>
-        </div>
-      );
-    }
-
-    // TR / transcurrido
-    const tr = tiempoRestante - remainingTime;
-
-    // Tiempo restante
-    const restante: string = formatearTiempo(remainingTime);
-    // Tiempo transcurrido
-    const trascurrido: string = formatearTiempo(tr);
-
-    // ? es base 10
-    if (tr % 5 === 0 && banderRecaudado) {
-      // Ponemos false
-      banderRecaudado = false;
-
-      // Destruimos el time
-      clearTimeout(timeRecaudadoBandera);
-
-      // Accion en 2 s
-      timeRecaudadoBandera = setTimeout(() => {
-        // Recaudado
-        const r: number = calcularMontoRecaudado(tr);
-        // Ponemos valor
-        setRecaudado(r);
-        banderRecaudado = true;
-      }, 2000);
-    }
-
-    //  Restante bandera
-    restanteBandera = remainingTime;
-    // Recaudado
-    recaudadoBandera = calcularMontoRecaudado(tr);
-    // Total
-    tiempoTotalBandera = parseFloat((tr / 60).toFixed(2));
-
-    return (
-      <div className="timer">
-        <h2>{restante}</h2>
-        <h2>{trascurrido}</h2>
-      </div>
-    );
-  };
-
   // * Comentario
   const ComentarioPop: OverlayChildren = (
     <Popover id="popover-comentario">
@@ -360,6 +323,85 @@ const CartaXbox: React.FC<Props> = (props) => {
     tiempoTotalBandera = 0;
   };
 
+  // Todo, Renderizar tiempo
+  const renderizarTiempo = ({ remainingTime }: any) => {
+    // ? Es menor a 1
+    if (remainingTime < 1) {
+      return (
+        <div>
+          {idAlarma !== null ? (
+            <>
+              <Col xs={6} md={4}>
+                <Image
+                  onClick={() => {
+                    // ? Es nulo
+                    if (!idAlarma) {
+                      alertaSwal(
+                        "Error",
+                        "No se puede detener la alarma reinicia el programa",
+                        "error"
+                      );
+                      return;
+                    }
+
+                    detenerAlarma(idAlarma);
+                    setIdAlarma(null);
+                  }}
+                  className="img-alarma"
+                  alt="alarma-terminada"
+                  src={iconoAlarma}
+                  roundedCircle
+                />
+              </Col>
+            </>
+          ) : (
+            <h4>TERMINADO</h4>
+          )}
+        </div>
+      );
+    }
+
+    // TR / transcurrido
+    const tr = tiempoRestante - remainingTime;
+
+    // Tiempo restante
+    const restante: string = formatearTiempo(remainingTime);
+    // Tiempo transcurrido
+    const trascurrido: string = formatearTiempo(tr);
+
+    // ? es base 10
+    if (tr % 5 === 0 && banderRecaudado) {
+      // Ponemos false
+      banderRecaudado = false;
+
+      // Destruimos el time
+      clearTimeout(timeRecaudadoBandera);
+
+      // Accion en 2 s
+      timeRecaudadoBandera = setTimeout(() => {
+        // Recaudado
+        const r: number = calcularMontoRecaudado(tr);
+        // Ponemos valor
+        setRecaudado(r);
+        banderRecaudado = true;
+      }, 2000);
+    }
+
+    //  Restante bandera
+    restanteBandera = remainingTime;
+    // Recaudado
+    recaudadoBandera = calcularMontoRecaudado(tr);
+    // Total
+    tiempoTotalBandera = parseFloat((tr / 60).toFixed(2));
+
+    return (
+      <div className="timer">
+        <h1>{restante}</h1>
+        <h1>{trascurrido}</h1>
+      </div>
+    );
+  };
+
   return (
     <>
       {/* TARJETA DE XBOX */}
@@ -382,7 +424,7 @@ const CartaXbox: React.FC<Props> = (props) => {
         <Card.Body>
           <Row>
             {/* IZQUIERDA */}
-            <Col xs={5}>
+            <Col xs={4}>
               <Toast
                 animation
                 style={{
@@ -394,13 +436,15 @@ const CartaXbox: React.FC<Props> = (props) => {
                 {/* CUERPO */}
                 <Toast.Body>
                   {props.xbox.estado !== "NO DISPONIBLE" ? (
-                    <div className="d-flex justify-content-center h-100">
+                    <div className="d-flex flex-column justify-content-center">
+                      <br className="mb-2" />
                       <CountdownCircleTimer
                         rotation="clockwise"
                         key={keyTemporizador}
                         isPlaying={isTiempoCorriendo}
                         duration={tiempoRestante}
                         colors={["#3C9B2C", "#FAB200", "#F2961C", "#A30000"]}
+                        size={230}
                         colorsTime={[tiempoSeleccionado, 5, 2, 0]}
                         onComplete={(): void => {
                           terminarTemporizador();
@@ -425,23 +469,24 @@ const CartaXbox: React.FC<Props> = (props) => {
               </Toast>
             </Col>
             {/* DERECHA */}
-            <Col xs={7}>
+            <Col xs={8}>
               {/* -------- CUERPO */}
               <div className="d-flex flex-column">
                 {/* Tiempo total escogido */}
-                <h5>
+                <h2>
                   {`Tiempo: ${
                     tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
                   } | recaudado: ${recaudado} $`}
-                </h5>
+                </h2>
                 <br />
-                {/* -------- SELECCIONAR */}
-                <div className="d-flex flex-row justify-content-between">
+
+                {/* -------- CONTROL DE TIEMPOS */}
+                <InputGroup className="mb-2">
                   {/* Tiempo inicial */}
                   <div className="mb-2">
                     <DropdownButton
                       align="start"
-                      title="Seleccionar"
+                      title="Seleccionar tiempo "
                       variant={
                         isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
@@ -492,7 +537,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                   <div className="mb-2">
                     <DropdownButton
                       align="end"
-                      title="Aumentar"
+                      title="Aumentar minutos "
                       variant={
                         !isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
@@ -546,7 +591,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                   <div className="mb-2">
                     <DropdownButton
                       align="end"
-                      title="disminuir"
+                      title="Disminuir minutos "
                       variant={
                         !isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
@@ -596,16 +641,17 @@ const CartaXbox: React.FC<Props> = (props) => {
                       })}
                     </DropdownButton>
                   </div>
-                </div>
+                </InputGroup>
 
-                {/* -------- BOTONES */}
-                <ButtonGroup aria-label="Grupo-botones" className="mb-4">
+                {/* -------- BOTONES DE ESTADOS */}
+                <ButtonGroup aria-label="grupo-botones" className="mb-4">
                   {/* -------- Iniciar */}
                   <Button
                     disabled={
                       isTiempoCorriendo ||
                       tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE"
+                      props.xbox.estado === "NO DISPONIBLE" ||
+                      idAlarma !== null
                     }
                     onClick={() => {
                       // ? Es menor a 1
@@ -619,7 +665,8 @@ const CartaXbox: React.FC<Props> = (props) => {
                     variant={
                       isTiempoCorriendo ||
                       tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE"
+                      props.xbox.estado === "NO DISPONIBLE" ||
+                      idAlarma !== null
                         ? "danger"
                         : "success"
                     }
@@ -669,7 +716,7 @@ const CartaXbox: React.FC<Props> = (props) => {
 
                       // ? Si
                       if (res) {
-                        terminarTemporizador();
+                        terminarTemporizador(false);
                       }
                     }}
                   >
@@ -677,11 +724,54 @@ const CartaXbox: React.FC<Props> = (props) => {
                   </Button>
                 </ButtonGroup>
 
-                {/* -------- CLIENTE */}
-                <InputGroup className="mb-2">
+                {/* -------- PAGO Y CONTROLES */}
+                <InputGroup className="mb-3">
+                  {/* Renta pagada */}
+                  <InputGroup.Text className="bg-secondary text-white">
+                    ¿Renta pagada?
+                  </InputGroup.Text>
+                  <Form.Select
+                    aria-label="Pago la renta"
+                    value={"0"}
+                    disabled={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                    }
+                    className={"is-valid"}
+                  >
+                    <option value="1">SI</option>
+                    <option value="0">NO</option>
+                  </Form.Select>
+
+                  {/* Numero de controles */}
+                  <InputGroup.Text className="bg-secondary text-white">
+                    ¿Cuantos controles?
+                  </InputGroup.Text>
+                  <Form.Select
+                    aria-label="Controles de renta"
+                    value={"1"}
+                    disabled={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                    }
+                    className={"is-valid"}
+                  >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                  </Form.Select>
+                </InputGroup>
+
+                {/* -------- CLIENTE Y COMENTARIO */}
+                <InputGroup className="mb-3">
+                  {/* Cliente */}
+                  <InputGroup.Text className="bg-secondary text-white">
+                    Cliente
+                  </InputGroup.Text>
                   <Form.Control
                     className={
-                      cliente && regexCliente.test(cliente)
+                      cliente === "" || !cliente
+                        ? ""
+                        : cliente && regexCliente.test(cliente)
                         ? "is-valid"
                         : "is-invalid"
                     }
@@ -699,6 +789,11 @@ const CartaXbox: React.FC<Props> = (props) => {
                       props.xbox.estado === "NO DISPONIBLE"
                     }
                   />
+
+                  {/* Comentario */}
+                  <InputGroup.Text className="bg-secondary text-white">
+                    Comentario
+                  </InputGroup.Text>
                   <OverlayTrigger
                     rootClose
                     placement="right"
