@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Table } from "react-bootstrap";
 import Renta from "../../models/Renta";
 import {
+  alertaSwal,
   formatearFecha,
   formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
@@ -44,6 +45,16 @@ const TablaRentas: React.FC<Props> = (props) => {
 
   // * Seleccionar renta
   const seleccionarRenta = (renta: Renta): void => {
+    // ? No acaba
+    if (!renta.final) {
+      alertaSwal(
+        "ERROR!",
+        "Tienes que esperar a que se termine la renta",
+        "error"
+      );
+      return;
+    }
+
     setRentaSeleccionada(renta);
     abrirModal();
   };

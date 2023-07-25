@@ -7,12 +7,13 @@ interface Renta {
   id_xbox: number;
   fecha: string;
   inicio: string;
-  final: string | null;
-  duracion: string | null;
-  total: number | null;
-  isPagado: boolean | string | null;
-  cliente: string | null;
-  comentario: string | null;
+  final?: string;
+  duracion?: string;
+  total: string;
+  noControles: number;
+  isPagado: number;
+  cliente?: string;
+  comentario?: string;
   xbox: Xbox;
 }
 

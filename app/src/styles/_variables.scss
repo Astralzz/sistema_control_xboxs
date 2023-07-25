@@ -3,6 +3,8 @@ $color-fondo: #282c34;
 $color-letra: #ffff;
 $color-confirmar: #198754;
 $color-cancelar: #dc3545;
+$color-aceptado: #198754;
+$color-no-aceptado: #dc3545;
 
 // * Barra
 $color-barra: rgb(22, 26, 41);
@@ -27,4 +29,6 @@ $color-tab-error-seleccionado-xbox: rgba(216, 135, 110, 0.9);
     --color-letra: white;
     --color-confirmar: #198754;
     --color-cancelar: #dc3545;
+    --color-aceptado: #198754;
+    --color-no-aceptado: #dc3545;
 }

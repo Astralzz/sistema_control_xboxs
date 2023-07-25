@@ -43,6 +43,10 @@ interface SelectTiempo {
 // * Tiempos establecidos
 const selectsTiempo: SelectTiempo[] = [
   {
+    leyenda: "Ninguno",
+    tiempo: 0,
+  },
+  {
     leyenda: "15 minutos",
     tiempo: 15,
   },
@@ -89,13 +93,16 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [tiempoRestante, setTiempoRestante] = useState<number>(0);
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [keyTemporizador, setKeyTemporizador] = useState<number>(0);
-  const [tiempoTotal, setTiempoTotal] = useState<number>(0);
   const [rentaActual, setRentaActual] = useState<null | Renta>(null);
   const [isCargando, setCargando] = useState<boolean>(false);
+  const [idAlarma, setIdAlarma] = useState<string | null>(null);
+  // * Datos de la BD
+  const [isPagado, setPagado] = useState<boolean>(false);
+  const [noControles, setNoControles] = useState<number>(1);
+  const [tiempoTotal, setTiempoTotal] = useState<number>(0);
   const [cliente, setCliente] = useState<string | null>(null);
   const [comentario, setComentario] = useState<string | null>(null);
   const [recaudado, setRecaudado] = useState<number>(0);
-  const [idAlarma, setIdAlarma] = useState<string | null>(null);
 
   // * Restante bandera
   let restanteBandera: number = 0;
@@ -153,6 +160,43 @@ const CartaXbox: React.FC<Props> = (props) => {
           : "Ocurrió un error al actualizar la renta, intenta mas tarde"
       );
     }
+  };
+
+  // * Seleccionar tiempo inicial
+  const seleccionarTiempoInicial = async (e: string | null): Promise<void> => {
+    // ?  nulo
+    if (!e) {
+      alertaSwal("ERROR!", "Ocurrió un error inesperado", "error");
+      return;
+    }
+
+    // Convertimos
+    const en: number = Number(e);
+
+    // ? es 0
+    if (en === 0) {
+      setTiempoTotal(0);
+      setTiempoSeleccionado(-1);
+      return;
+    }
+
+    // ? Menor a 0
+    if (en < 0) {
+      // Alerta
+      const n: number = await seleccionarTiempoManual("seleccionado");
+
+      // ? Es negativo
+      if (n < 1) {
+        return;
+      }
+
+      setTiempoTotal(n * 60);
+      setTiempoSeleccionado(n * 60);
+      return;
+    }
+
+    setTiempoTotal(en * 60);
+    setTiempoSeleccionado(en * 60);
   };
 
   // * Iniciar temporizador
@@ -220,6 +264,16 @@ const CartaXbox: React.FC<Props> = (props) => {
       data.append("final", horaFinal);
       data.append("duracion", String(tiempoTotalBandera));
       data.append("total", String(recaudadoBandera));
+
+      // ? Esta pagado
+      if (isPagado) {
+        data.append("isPagado", String(1));
+      }
+
+      // ? Mas de un control
+      if (noControles > 1) {
+        data.append("noControles", String(noControles));
+      }
 
       // ? Cliente valido
       if (cliente && regexCliente.test(cliente)) {
@@ -317,6 +371,8 @@ const CartaXbox: React.FC<Props> = (props) => {
     setTiempoCorriendo(false);
     setTiempoSeleccionado(-1);
     setTiempoRestante(0);
+    setNoControles(1);
+    setPagado(false);
     setKeyTemporizador((prevKey) => prevKey + 1);
     restanteBandera = 0;
     recaudadoBandera = 0;
@@ -472,7 +528,7 @@ const CartaXbox: React.FC<Props> = (props) => {
             <Col xs={8}>
               {/* -------- CUERPO */}
               <div className="d-flex flex-column">
-                {/* Tiempo total escogido */}
+                {/* -------- INFORMACIÓN */}
                 <h2>
                   {`Tiempo: ${
                     tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
@@ -497,30 +553,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                         isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
                       }
-                      onSelect={async (e) => {
-                        // Convertimos
-                        const en: number = Number(e);
-
-                        // ? Menor a 1
-                        if (Number(en) < 1) {
-                          // Alerta
-                          const n: number = await seleccionarTiempoManual(
-                            "seleccionado"
-                          );
-
-                          // ? Es negativo
-                          if (n < 1) {
-                            return;
-                          }
-
-                          setTiempoTotal(n * 60);
-                          setTiempoSeleccionado(n * 60);
-                          return;
-                        }
-
-                        setTiempoTotal(en * 60);
-                        setTiempoSeleccionado(en * 60);
-                      }}
+                      onSelect={(e) => seleccionarTiempoInicial(e)}
                       key={-1}
                     >
                       {selectsTiempo.map((select, i) => {
@@ -732,15 +765,16 @@ const CartaXbox: React.FC<Props> = (props) => {
                   </InputGroup.Text>
                   <Form.Select
                     aria-label="Pago la renta"
-                    value={"0"}
+                    value={isPagado ? 1 : 0}
                     disabled={
                       !isTiempoCorriendo ||
                       props.xbox.estado === "NO DISPONIBLE"
                     }
+                    onChange={(e) => setPagado(parseInt(e.target.value) === 1)}
                     className={"is-valid"}
                   >
-                    <option value="1">SI</option>
-                    <option value="0">NO</option>
+                    <option value={1}>SI</option>
+                    <option value={0}>NO</option>
                   </Form.Select>
 
                   {/* Numero de controles */}
@@ -749,15 +783,16 @@ const CartaXbox: React.FC<Props> = (props) => {
                   </InputGroup.Text>
                   <Form.Select
                     aria-label="Controles de renta"
-                    value={"1"}
+                    value={noControles}
                     disabled={
                       !isTiempoCorriendo ||
                       props.xbox.estado === "NO DISPONIBLE"
                     }
                     className={"is-valid"}
+                    onChange={(n) => setNoControles(parseInt(n.target.value))}
                   >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
                   </Form.Select>
                 </InputGroup>
 

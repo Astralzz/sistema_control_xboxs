@@ -64,10 +64,12 @@ const InfModalRenta: React.FC<Props> = (props) => {
     setInicio(props.renta?.inicio ?? null);
   };
 
+  console.log(props.renta);
+
   // * Cuerpo Información
   const CuerpoInf = () => {
     return (
-      <Row>
+      <Row style={{ fontSize: 20 }}>
         {/* Lista derecha */}
         <Col xs={6}>
           <ListGroup>
@@ -107,6 +109,24 @@ const InfModalRenta: React.FC<Props> = (props) => {
             {/* Minutos */}
             <ListGroup.Item style={styles}>{`Minutos: ${
               props.renta?.duracion ?? "00:00"
+            }`}</ListGroup.Item>
+
+            {/* Controles */}
+            <ListGroup.Item style={styles}>{`No. controles: ${
+              props.renta?.noControles ?? "desconocido"
+            }`}</ListGroup.Item>
+
+            {/* Pagado */}
+            <ListGroup.Item
+              style={{
+                ...styles,
+                color:
+                  props.renta?.isPagado === 1
+                    ? "var(--color-aceptado)"
+                    : "var(--color-no-aceptado)",
+              }}
+            >{`¿Pagado?: ${
+              props.renta?.isPagado === 1 ? "SI" : "NO"
             }`}</ListGroup.Item>
 
             {/* Total */}
@@ -153,54 +173,44 @@ const InfModalRenta: React.FC<Props> = (props) => {
             {/* Lista derecha */}
             <Col xs={6}>
               <ListGroup>
-                {/* Xbox */}
-                <ListGroup.Item style={styles}>{`Xbox: ${
-                  props.renta?.xbox.nombre ?? "desconocido"
-                }`}</ListGroup.Item>
-
                 {/* Cliente */}
-                <InputGroup className="mb-2" style={styles}>
-                  <InputGroup.Text style={styles}>Cliente</InputGroup.Text>
-                  <Form.Control
-                    style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
-                    onChange={(e) => setCliente(e.target.value)}
-                    value={cliente ?? ""}
-                    aria-label="Cliente de renta"
-                    maxLength={60}
-                    className={
-                      regexCliente.test(cliente ?? "")
-                        ? "is-valid"
-                        : "is-invalid"
-                    }
-                  />
-                </InputGroup>
+                <Form.Label style={styles}>{"Cliente:"}</Form.Label>
+                <Form.Control
+                  style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
+                  onChange={(e) => setCliente(e.target.value)}
+                  value={cliente ?? ""}
+                  aria-label="Cliente de renta"
+                  maxLength={60}
+                  className={
+                    regexCliente.test(cliente ?? "") ? "is-valid" : "is-invalid"
+                  }
+                  as={"textarea"}
+                  rows={2}
+                />
 
                 <br />
 
                 {/* Comentario */}
-                <InputGroup className="mb-2" style={styles}>
-                  <InputGroup.Text style={styles}>Comentario</InputGroup.Text>
-                  <Form.Control
-                    style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
-                    onChange={(e) => setComentario(e.target.value)}
-                    value={comentario ?? ""}
-                    aria-label="Comentario de renta"
-                    as="textarea"
-                    maxLength={699}
-                    rows={4}
-                    className={
-                      regexComentario.test(comentario ?? "")
-                        ? "is-valid"
-                        : "is-invalid"
-                    }
-                  />
-                </InputGroup>
+                <Form.Label style={styles}>{"Comentario:"}</Form.Label>
+                <Form.Control
+                  style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
+                  onChange={(e) => setComentario(e.target.value)}
+                  value={comentario ?? ""}
+                  aria-label="Comentario de renta"
+                  as="textarea"
+                  maxLength={699}
+                  rows={4}
+                  className={
+                    regexComentario.test(comentario ?? "")
+                      ? "is-valid"
+                      : "is-invalid"
+                  }
+                />
               </ListGroup>
             </Col>
             {/* Lista izquierda */}
             <Col xs={6}>
               <ListGroup>
-
                 {/* Inicio */}
                 <InputGroup className="mb-2" style={styles}>
                   <InputGroup.Text style={styles}>Inicio</InputGroup.Text>
@@ -208,7 +218,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
                     onChange={(t) => setInicio(t)}
                     value={inicio}
                     disableClock={true} // Reloj
-                    format="h:mm a" 
+                    format="h:mm a"
                     className={"picker-tiempo"}
                   />
                 </InputGroup>
@@ -221,6 +231,19 @@ const InfModalRenta: React.FC<Props> = (props) => {
                 {/* Minutos */}
                 <ListGroup.Item style={styles}>{`Minutos totales: ${
                   props.renta?.duracion ?? "00:00"
+                }`}</ListGroup.Item>
+
+                {/* Pagado */}
+                <ListGroup.Item
+                  style={{
+                    ...styles,
+                    color:
+                      props.renta?.isPagado === 1
+                        ? "var(--color-aceptado)"
+                        : "var(--color-no-aceptado)",
+                  }}
+                >{`¿Pagado?: ${
+                  props.renta?.isPagado === 1 ? "SI" : "NO"
                 }`}</ListGroup.Item>
 
                 {/* Total */}
