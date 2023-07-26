@@ -1,3 +1,5 @@
+import moment from "moment";
+import 'moment/locale/es';
 import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
 
 // * Variables de estilos
@@ -7,12 +9,15 @@ const colorAceptar: string = "var(--color-confirmar)";
 const colorCancelar: string = "var(--color-cancelar)";
 
 // * Calcular monto recaudado
-export function calcularMontoRecaudado(m: number): number {
+export function calcularMontoRecaudado(
+  m: number,
+  noControles: boolean
+): number {
   let minutos = m / 60;
-  const precioPorHora = 15;
-  const precioPorMediaHora = 9;
-  const precioPor3Minutos = 1;
-  const precioPor10Minutos = 3;
+  const precioPorHora = !noControles ? 15 : 21;
+  const precioPorMediaHora = !noControles ? 9 : 13;
+  const precioPor3Minutos = precioPorMediaHora / 9;
+  const precioPor10Minutos = precioPorMediaHora / 3;
 
   let precioTotal = 0;
 
@@ -42,29 +47,38 @@ export function calcularMontoRecaudado(m: number): number {
   return parseFloat(precioTotal.toFixed(2)); // Redondear a dos decimales
 }
 
-// for (let i = 0; i < 300; i++) {
-//   console.log(`${i + 1} son ${calcularMontoRecaudado((i + 1) * 60)}`);
-// }
+// * Redondear umero
+export function redondearNumero(numero: number): number {
+  // Obtenemos la parte decimal del número
+  const decimalPart = numero - Math.floor(numero);
+
+  // ? Menor que 0.25
+  if (decimalPart < 0.25) {
+    return Math.floor(numero);
+    // ? Mayor que 0.75
+  } else if (decimalPart >= 0.75) {
+    return Math.ceil(numero);
+    // ? A la mitad
+  } else {
+    return Math.floor(numero) + 0.5;
+  }
+}
 
 // * Formatear fecha
 export function formatearFecha(fecha: string): string | null {
   try {
-    // * Creamos fecha
-    const date = new Date(fecha);
+    // Creamos fecha con Moment.js
+    const date = moment(fecha);
 
-    // * Obtenemos
-    const dia = date.getDate();
-    const mes = date.getMonth() + 1;
-    const anio = date.getFullYear();
+    // Obtenemos
+    const dia = date.format("DD");
+    const mes = date.format("MM");
+    const anio = date.format("YYYY");
 
     // Formateamos
-    const fechaFormateada = `${dia.toString().padStart(2, "0")}/${mes
-      .toString()
-      .padStart(2, "0")}/${anio}`;
+    const fechaFormateada = `${dia}/${mes}/${anio}`;
 
     return fechaFormateada;
-
-    // ! Error
   } catch (error) {
     return null;
   }
@@ -72,16 +86,11 @@ export function formatearFecha(fecha: string): string | null {
 
 // * Formatear fecha con días
 export function formatearFechaConDias(fecha: string): string {
-  const date = new Date(fecha);
+  // Creamos fecha con Moment.js
+  const date = moment(fecha);
 
-  const opciones: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  };
-
-  return date.toLocaleDateString("es-ES", opciones);
+  // Formateamos con opciones de idioma
+  return date.locale("es").format("dddd, D [de] MMMM [de] YYYY");
 }
 
 // * Formatear hora sin segundos

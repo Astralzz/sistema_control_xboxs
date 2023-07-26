@@ -24,6 +24,7 @@ import {
   confirmacionSwal,
   fechaHoraActual,
   formatearTiempo,
+  redondearNumero,
   seleccionarTiempoManual,
 } from "../../functions/funcionesGlobales";
 import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
@@ -98,7 +99,7 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [idAlarma, setIdAlarma] = useState<string | null>(null);
   // * Datos de la BD
   const [isPagado, setPagado] = useState<boolean>(false);
-  const [noControles, setNoControles] = useState<number>(1);
+  const [controlesExtra, setControlesExtra] = useState<boolean>(false);
   const [tiempoTotal, setTiempoTotal] = useState<number>(0);
   const [cliente, setCliente] = useState<string | null>(null);
   const [comentario, setComentario] = useState<string | null>(null);
@@ -271,8 +272,8 @@ const CartaXbox: React.FC<Props> = (props) => {
       }
 
       // ? Mas de un control
-      if (noControles > 1) {
-        data.append("noControles", String(noControles));
+      if (controlesExtra) {
+        data.append("noControles", String(1));
       }
 
       // ? Cliente valido
@@ -364,14 +365,14 @@ const CartaXbox: React.FC<Props> = (props) => {
 
   // * Limpiar datos
   const limpiarDatos = (): void => {
-    setRecaudado(calcularMontoRecaudado(tiempoTotal));
+    setRecaudado(calcularMontoRecaudado(tiempoTotal, controlesExtra));
     setCliente(null);
     setComentario(null);
     setRentaActual(null);
     setTiempoCorriendo(false);
     setTiempoSeleccionado(-1);
     setTiempoRestante(0);
-    setNoControles(1);
+    setControlesExtra(false);
     setPagado(false);
     setKeyTemporizador((prevKey) => prevKey + 1);
     restanteBandera = 0;
@@ -436,9 +437,11 @@ const CartaXbox: React.FC<Props> = (props) => {
       // Accion en 2 s
       timeRecaudadoBandera = setTimeout(() => {
         // Recaudado
-        const r: number = calcularMontoRecaudado(tr);
+        const r: number = calcularMontoRecaudado(tr, controlesExtra);
+        // Redondeado
+        const rd: number = redondearNumero(r);
         // Ponemos valor
-        setRecaudado(r);
+        setRecaudado(rd);
         banderRecaudado = true;
       }, 2000);
     }
@@ -446,7 +449,9 @@ const CartaXbox: React.FC<Props> = (props) => {
     //  Restante bandera
     restanteBandera = remainingTime;
     // Recaudado
-    recaudadoBandera = calcularMontoRecaudado(tr);
+    recaudadoBandera = redondearNumero(
+      calcularMontoRecaudado(tr, controlesExtra)
+    );
     // Total
     tiempoTotalBandera = parseFloat((tr / 60).toFixed(2));
 
@@ -783,13 +788,15 @@ const CartaXbox: React.FC<Props> = (props) => {
                   </InputGroup.Text>
                   <Form.Select
                     aria-label="Controles de renta"
-                    value={noControles}
+                    value={!controlesExtra ? 1 : 2}
                     disabled={
                       !isTiempoCorriendo ||
                       props.xbox.estado === "NO DISPONIBLE"
                     }
                     className={"is-valid"}
-                    onChange={(n) => setNoControles(parseInt(n.target.value))}
+                    onChange={(n) =>
+                      setControlesExtra(parseInt(n.target.value) !== 1)
+                    }
                   >
                     <option value={1}>1</option>
                     <option value={2}>2</option>

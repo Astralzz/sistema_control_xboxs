@@ -3,6 +3,7 @@ import {
   Button,
   Col,
   Form,
+  FormGroup,
   InputGroup,
   ListGroup,
   Modal,
@@ -41,9 +42,7 @@ interface Props {
 const InfModalRenta: React.FC<Props> = (props) => {
   // * Variables
   const [isEditar, setEditar] = useState<boolean>(false);
-  const [inicio, setInicio] = useState<string | null>(
-    props.renta?.inicio ?? null
-  );
+  const [isPagado, setPagado] = useState<boolean>(props.renta?.isPagado === 1);
   const [cliente, setCliente] = useState<string>(props.renta?.cliente ?? "");
   const [comentario, setComentario] = useState<string>(
     props.renta?.comentario ?? ""
@@ -61,10 +60,8 @@ const InfModalRenta: React.FC<Props> = (props) => {
   const restablecerDatos = (): void => {
     setCliente(props.renta?.cliente ?? "");
     setComentario(props.renta?.comentario ?? "");
-    setInicio(props.renta?.inicio ?? null);
+    setPagado(props.renta?.isPagado === 1);
   };
-
-  console.log(props.renta);
 
   // * Cuerpo Información
   const CuerpoInf = () => {
@@ -159,7 +156,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
                 restablecerDatos();
                 setEditar(!isEditar);
               }}
-              nombre="PenFill"
+              nombre={isEditar ? "EyeFill" : "PenFill"}
             />
           </div>
         </Stack>
@@ -171,9 +168,24 @@ const InfModalRenta: React.FC<Props> = (props) => {
         ) : (
           <Row>
             {/* Lista derecha */}
-            <Col xs={6}>
-              <ListGroup>
-                {/* Cliente */}
+            <Col xs={12}>
+              <FormGroup>
+                <Form.Label style={styles}>{"¿Pagado?:"}</Form.Label>
+                <Form.Select
+                  aria-label="Pago la renta"
+                  value={isPagado ? 1 : 0}
+                  onChange={(e) => setPagado(parseInt(e.target.value) === 1)}
+                  className={"is-valid"}
+                >
+                  <option value={1}>SI</option>
+                  <option value={0}>NO</option>
+                </Form.Select>
+              </FormGroup>
+
+              <br />
+
+              {/* Cliente */}
+              <FormGroup>
                 <Form.Label style={styles}>{"Cliente:"}</Form.Label>
                 <Form.Control
                   style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
@@ -184,13 +196,13 @@ const InfModalRenta: React.FC<Props> = (props) => {
                   className={
                     regexCliente.test(cliente ?? "") ? "is-valid" : "is-invalid"
                   }
-                  as={"textarea"}
-                  rows={2}
                 />
+              </FormGroup>
 
-                <br />
+              <br />
 
-                {/* Comentario */}
+              {/* Comentario */}
+              <FormGroup>
                 <Form.Label style={styles}>{"Comentario:"}</Form.Label>
                 <Form.Control
                   style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
@@ -199,58 +211,14 @@ const InfModalRenta: React.FC<Props> = (props) => {
                   aria-label="Comentario de renta"
                   as="textarea"
                   maxLength={699}
-                  rows={4}
+                  rows={3}
                   className={
                     regexComentario.test(comentario ?? "")
                       ? "is-valid"
                       : "is-invalid"
                   }
                 />
-              </ListGroup>
-            </Col>
-            {/* Lista izquierda */}
-            <Col xs={6}>
-              <ListGroup>
-                {/* Inicio */}
-                <InputGroup className="mb-2" style={styles}>
-                  <InputGroup.Text style={styles}>Inicio</InputGroup.Text>
-                  <TimePicker
-                    onChange={(t) => setInicio(t)}
-                    value={inicio}
-                    disableClock={true} // Reloj
-                    format="h:mm a"
-                    className={"picker-tiempo"}
-                  />
-                </InputGroup>
-
-                {/* Final */}
-                <ListGroup.Item style={styles}>{`Hora final: ${
-                  props.renta?.final ?? "N/A"
-                }`}</ListGroup.Item>
-
-                {/* Minutos */}
-                <ListGroup.Item style={styles}>{`Minutos totales: ${
-                  props.renta?.duracion ?? "00:00"
-                }`}</ListGroup.Item>
-
-                {/* Pagado */}
-                <ListGroup.Item
-                  style={{
-                    ...styles,
-                    color:
-                      props.renta?.isPagado === 1
-                        ? "var(--color-aceptado)"
-                        : "var(--color-no-aceptado)",
-                  }}
-                >{`¿Pagado?: ${
-                  props.renta?.isPagado === 1 ? "SI" : "NO"
-                }`}</ListGroup.Item>
-
-                {/* Total */}
-                <ListGroup.Item style={styles}>{`Total: ${
-                  props.renta?.total ?? "0.00$"
-                }`}</ListGroup.Item>
-              </ListGroup>
+              </FormGroup>
             </Col>
           </Row>
         )}

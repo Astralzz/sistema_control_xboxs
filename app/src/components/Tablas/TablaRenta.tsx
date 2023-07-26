@@ -17,6 +17,8 @@ export interface ColumnasRenta {
   final?: boolean;
   duracion?: boolean;
   total?: boolean;
+  noControles?: boolean;
+  isPagado?: boolean;
   cliente?: boolean;
   comentario?: boolean;
   xbox?: boolean;
@@ -71,7 +73,9 @@ const TablaRentas: React.FC<Props> = (props) => {
             {props.columnas.inicio && <th>Inicio</th>}
             {props.columnas.final && <th>Final</th>}
             {props.columnas.duracion && <th>Min</th>}
+            {props.columnas.noControles && <th>Controles</th>}
             {props.columnas.total && <th>Total</th>}
+            {props.columnas.isPagado && <th>Pagado</th>}
             {props.columnas.cliente && <th>Cliente</th>}
             {props.columnas.comentario && <th>Comentario</th>}
             {props.columnas.masInf && <th>Ver</th>}
@@ -81,6 +85,7 @@ const TablaRentas: React.FC<Props> = (props) => {
         <tbody>
           {/* Recorremos */}
           {props.lista.map((renta, i) => {
+            
             return (
               <tr key={i}>
                 {/* Numero */}
@@ -103,8 +108,27 @@ const TablaRentas: React.FC<Props> = (props) => {
                 {props.columnas.duracion && (
                   <td>{renta.duracion ? parseInt(renta.duracion) : "N/A"}</td>
                 )}
+
+                {/* No de controles */}
+                {props.columnas.noControles && <td>{renta.noControles}</td>}
+
                 {/* Total */}
                 {props.columnas.total && <td>{"$ " + renta.total}</td>}
+
+                {/* Pagado */}
+                {props.columnas.isPagado && (
+                  <td
+                    style={{
+                      backgroundColor:
+                        renta.isPagado === 1
+                          ? undefined
+                          : "var(--color-no-aceptado)",
+                    }}
+                  >
+                    {renta.isPagado === 1 ? "SI" : "NO"}
+                  </td>
+                )}
+
                 {/* Cliente */}
                 {props.columnas.cliente && (
                   <td>{renta.cliente ? renta.cliente : ""}</td>

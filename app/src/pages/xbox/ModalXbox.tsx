@@ -30,6 +30,7 @@ const columnas: ColumnasRenta = {
   duracion: true,
   total: true,
   masInf: true,
+  isPagado: true,
 };
 
 // * Props
