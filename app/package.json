@@ -2,6 +2,7 @@
   "name": "control_xboxs",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -10,6 +11,8 @@
     "@types/react-howler": "^5.2.0",
     "axios": "^1.4.0",
     "bootstrap": "^5.3.0",
+    "concurrently": "^8.2.0",
+    "electron": "^25.3.2",
     "eslint-config-react-app": "^7.0.1",
     "howler": "^2.2.3",
     "moment": "^2.29.4",
@@ -26,13 +29,15 @@
     "sweetalert2": "^11.7.18",
     "typescript": "^4.9.5",
     "variables": "^1.0.1",
+    "wait-on": "^7.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron": "concurrently \"npm start\" \"wait-on http://127.0.0.1:3000 && electron .\""
   },
   "eslintConfig": {
     "extends": [

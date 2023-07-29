@@ -33,11 +33,6 @@ const reproducirAlarma = (): string => {
   // Iniciamos
   sonido.play();
 
-  console.log("====================================");
-  console.log("PLAY, \n");
-  console.log(sonido);
-  console.log("====================================");
-
   // Guardamos
   alarmas[id] = { sound: sonido };
 
@@ -54,11 +49,6 @@ const detenerAlarma = (alarmId: string): boolean => {
   if (alarma) {
     // Detenemos
     alarma.sound.stop();
-
-    console.log("====================================");
-    console.log("STOP, \n");
-    console.log(alarmas);
-    console.log("====================================");
 
     // Destruimos
     alarma.sound.unload();
