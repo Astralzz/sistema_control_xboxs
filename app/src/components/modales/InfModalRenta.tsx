@@ -4,7 +4,6 @@ import {
   Col,
   Form,
   FormGroup,
-  InputGroup,
   ListGroup,
   Modal,
   Row,
@@ -12,11 +11,14 @@ import {
 } from "react-bootstrap";
 import Renta from "../../models/Renta";
 import {
+  alertaSwal,
+  confirmacionSwal,
   formatearFechaConDias,
   formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
 import IconoBootstrap from "../global/IconoBootstrap";
-import TimePicker from "react-time-picker";
+import { RespuestaApi } from "../../apis/apiVariables";
+import { apiActualizarRenta, apiEliminarRenta } from "../../apis/apiRentas";
 
 // * Estilos
 const styles: React.CSSProperties = {
@@ -26,6 +28,7 @@ const styles: React.CSSProperties = {
 };
 
 // * ERS
+const regexTotal: RegExp = /^(?:\d{1,5}(?:\.\d{1,2})?|\.\d{1,2})$/;
 const regexCliente: RegExp =
   /^(?!\s)([a-zA-ZñÑáéíóúÁÉÍÓÚ_-\s\d]{0,60})(?<!\s)$/;
 const regexComentario: RegExp =
@@ -36,6 +39,9 @@ interface Props {
   renta: Renta | null;
   cerrarModal: Dispatch<void>;
   estadoModal: boolean;
+  setCargando: Dispatch<boolean>;
+  actualizarRentaLocal: (id: number, rentaActualizada: Renta) => void;
+  eliminarRentaLocal: (id: number) => void;
 }
 
 // Todo, Modal de renta
@@ -44,9 +50,146 @@ const InfModalRenta: React.FC<Props> = (props) => {
   const [isEditar, setEditar] = useState<boolean>(false);
   const [isPagado, setPagado] = useState<boolean>(props.renta?.isPagado === 1);
   const [cliente, setCliente] = useState<string>(props.renta?.cliente ?? "");
+  const [total, setTotal] = useState<string>(props.renta?.total ?? "0");
   const [comentario, setComentario] = useState<string>(
     props.renta?.comentario ?? ""
   );
+
+  // * Actualizar
+  const actualizarRenta = async (): Promise<void> => {
+    try {
+      // Cargando
+      props.setCargando(true);
+
+      const preTotal = props.renta?.total ?? "0";
+      const preCliente = props.renta?.cliente ?? "";
+      const preComentario = props.renta?.comentario ?? "";
+      const preIsPagado = props.renta?.isPagado === 1;
+
+      // ? No se cambio nada
+      if (
+        total === preTotal &&
+        cliente === preCliente &&
+        comentario === preComentario &&
+        isPagado === preIsPagado
+      ) {
+        throw new Error("Debes de cambiar al menos un dato");
+      }
+
+      // Creamos data
+      const data: FormData = new FormData();
+
+      // Agregamos los datos a la data
+      data.append("id_xbox", String(props.renta?.id_xbox ?? -1));
+      data.append("fecha", props.renta?.fecha ?? "N/A");
+      data.append("inicio", props.renta?.inicio ?? "N/A");
+      data.append("final", props.renta?.final ?? "N/A");
+      data.append("duracion", String(props.renta?.duracion));
+      data.append("total", String(total ?? "0"));
+
+      // ? Esta pagado
+      data.append("isPagado", String(isPagado ? 1 : 0));
+
+      // ? Cliente valido
+      data.append(
+        "cliente",
+        cliente && regexCliente.test(cliente) ? cliente : ""
+      );
+
+      // ? Comentario
+      data.append(
+        "comentario",
+        comentario && regexComentario.test(comentario) ? comentario : ""
+      );
+
+      console.log("Datos a enviar:");
+      data.forEach((value, key) => {
+        console.log(key + ": " + value);
+      });
+
+      // Enviamos
+      const res: RespuestaApi = await apiActualizarRenta(
+        data,
+        props.renta?.id ?? -1
+      );
+
+      // ? salio mal
+      if (!res.estado) {
+        // ! Error
+        throw new Error(
+          res.detalles_error
+            ? String(res.detalles_error)
+            : "Ocurrió un error al actualizar la renta, intenta mas tarde"
+        );
+      }
+
+      // ? No se puede aumentar
+      if (!props.actualizarRentaLocal || !res.renta) {
+        alertaSwal(
+          "Casi éxito!",
+          "La renta se actualizo correctamente pero no se vera reflejado el cambio asta que recargué la tabla",
+          "warning"
+        );
+        return;
+      }
+
+      // * Terminamos
+      props.actualizarRentaLocal(props.renta?.id ?? -1, res.renta);
+      alertaSwal("Éxito!", "Renta actualizada correctamente", "success");
+
+      // ! Error
+    } catch (error: unknown) {
+      alertaSwal("Error!", String(error), "error");
+    } finally {
+      props.setCargando(false);
+    }
+  };
+
+  // * Eliminar
+  const eliminarRenta = async (): Promise<void> => {
+    try {
+      // Confirmacion
+      const isEliminar = await confirmacionSwal(
+        "Estas seguro?",
+        "Si eliminas este registro ya no podrás restaurar sus datos!",
+        "Si, eliminar renta"
+      );
+
+      // ? Si
+      if (isEliminar) {
+        // Cargando
+        props.setCargando(true);
+
+        // Obtenemos id
+        const idRenta: number = props.renta?.id ?? -1;
+
+        // Enviamos
+        const res: RespuestaApi = await apiEliminarRenta(idRenta);
+
+        // ? salio mal
+        if (!res.estado) {
+          throw new Error(
+            res.detalles_error
+              ? String(res.detalles_error)
+              : "Ocurrió un error al eliminar la renta, intenta mas tarde"
+          );
+        }
+
+        // * Éxito
+        alertaSwal(
+          "Éxito!",
+          res.mensaje ?? "renta eliminada correctamente",
+          "success"
+        );
+        props.eliminarRentaLocal(idRenta);
+        accionAlCerrar();
+      }
+    } catch (error) {
+      alertaSwal("Error!", String(error), "error");
+    } finally {
+      props.setCargando(false);
+    }
+  };
 
   // * Al cerrar
   const accionAlCerrar = (): void => {
@@ -61,9 +204,30 @@ const InfModalRenta: React.FC<Props> = (props) => {
     setCliente(props.renta?.cliente ?? "");
     setComentario(props.renta?.comentario ?? "");
     setPagado(props.renta?.isPagado === 1);
+    setTotal(props.renta?.total ?? "0");
   };
 
-  // * Cuerpo Información
+  // * Bloquear boton
+  const bloquearBoton = (): boolean => {
+    // * lista de validaciones
+    const listaValidaciones: boolean[] = [
+      regexCliente.test(cliente ?? ""),
+      regexComentario.test(comentario ?? ""),
+      regexTotal.test(total ?? ""),
+    ];
+
+    // Recorremos
+    for (let i = 0; i < listaValidaciones.length; i++) {
+      // ? Es falso
+      if (!listaValidaciones[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Todo, Cuerpo Información
   const CuerpoInf = () => {
     return (
       <Row style={{ fontSize: 20 }}>
@@ -139,7 +303,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
   return (
     <Modal show={props.estadoModal} onHide={accionAlCerrar}>
       {/* ENCABEZADO */}
-      <Modal.Header closeButton style={styles} closeVariant="white">
+      <Modal.Header style={styles} closeVariant="white">
         <Stack direction="horizontal" gap={5}>
           {/* Titulo */}
           <div className="p-2">
@@ -149,17 +313,25 @@ const InfModalRenta: React.FC<Props> = (props) => {
                 : "???"
             }`}</Modal.Title>
           </div>
-          {/* Editar */}
-          <div className="p-2 ms-auto">
-            <IconoBootstrap
-              onClick={() => {
-                restablecerDatos();
-                setEditar(!isEditar);
-              }}
-              nombre={isEditar ? "EyeFill" : "PenFill"}
-            />
-          </div>
         </Stack>
+        {/* Editar */}
+        <div className="p-2 ms-auto">
+          <IconoBootstrap
+            onClick={() => {
+              restablecerDatos();
+              setEditar(!isEditar);
+            }}
+            nombre={isEditar ? "EyeFill" : "PenFill"}
+          />
+        </div>
+        {/* Eliminar */}
+        <div className="p-2">
+          <IconoBootstrap onClick={eliminarRenta} nombre={"Trash2Fill"} />
+        </div>
+        {/* Salir */}
+        <div className="p-2">
+          <IconoBootstrap onClick={accionAlCerrar} nombre={"XCircleFill"} />
+        </div>
       </Modal.Header>
       {/* CUERPO */}
       <Modal.Body style={styles}>
@@ -167,19 +339,44 @@ const InfModalRenta: React.FC<Props> = (props) => {
           <CuerpoInf />
         ) : (
           <Row>
-            {/* Lista derecha */}
+            {/* Columna */}
             <Col xs={12}>
               <FormGroup>
-                <Form.Label style={styles}>{"¿Pagado?:"}</Form.Label>
-                <Form.Select
-                  aria-label="Pago la renta"
-                  value={isPagado ? 1 : 0}
-                  onChange={(e) => setPagado(parseInt(e.target.value) === 1)}
-                  className={"is-valid"}
-                >
-                  <option value={1}>SI</option>
-                  <option value={0}>NO</option>
-                </Form.Select>
+                <Row>
+                  {/* Pagado */}
+                  <Col xs={6}>
+                    <Form.Label style={styles}>{"¿Pagado?:"}</Form.Label>
+                    <Form.Select
+                      aria-label="Pago la renta"
+                      value={isPagado ? 1 : 0}
+                      onChange={(e) =>
+                        setPagado(parseInt(e.target.value) === 1)
+                      }
+                      className={"is-valid"}
+                    >
+                      <option value={1}>SI</option>
+                      <option value={0}>NO</option>
+                    </Form.Select>
+                  </Col>
+                  {/* Total */}
+                  <Col xs={6}>
+                    <Form.Label style={styles}>{"Total:"}</Form.Label>
+                    <Form.Control
+                      style={{
+                        ...styles,
+                        borderBottom: "0.5px solid #ffffff",
+                      }}
+                      onChange={(e) => setTotal(e.target.value)}
+                      value={total ?? "0"}
+                      type="number"
+                      aria-label="total de renta"
+                      maxLength={6}
+                      className={
+                        regexTotal.test(total ?? "") ? "is-valid" : "is-invalid"
+                      }
+                    />
+                  </Col>
+                </Row>
               </FormGroup>
 
               <br />
@@ -229,12 +426,18 @@ const InfModalRenta: React.FC<Props> = (props) => {
         <Button variant="danger" onClick={() => accionAlCerrar()}>
           Cerrar
         </Button>
+        {/* Aceptar */}
         {!isEditar ? (
           <Button variant="success" onClick={accionAlCerrar}>
             Aceptar
           </Button>
         ) : (
-          <Button variant="success" disabled onClick={accionAlCerrar}>
+          // Editar
+          <Button
+            variant="success"
+            disabled={bloquearBoton()}
+            onClick={() => actualizarRenta()}
+          >
             Guardar
           </Button>
         )}

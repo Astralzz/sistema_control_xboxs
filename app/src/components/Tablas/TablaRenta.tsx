@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Dispatch, useState } from "react";
 import { Table } from "react-bootstrap";
 import Renta from "../../models/Renta";
 import {
@@ -28,6 +28,9 @@ export interface ColumnasRenta {
 interface Props {
   lista: Renta[];
   columnas: ColumnasRenta;
+  setCargando: Dispatch<boolean>;
+  actualizarRentaLocal: (id: number, rentaActualizada: Renta) => void;
+  eliminarRentaLocal: (id: number) => void;
 }
 
 // Todo, Tabla Rentas
@@ -85,7 +88,6 @@ const TablaRentas: React.FC<Props> = (props) => {
         <tbody>
           {/* Recorremos */}
           {props.lista.map((renta, i) => {
-            
             return (
               <tr key={i}>
                 {/* Numero */}
@@ -104,9 +106,12 @@ const TablaRentas: React.FC<Props> = (props) => {
                 {props.columnas.final && (
                   <td>{renta.final ? renta.final : "N/A"}</td>
                 )}
+
                 {/* Duracion */}
                 {props.columnas.duracion && (
-                  <td>{renta.duracion ? parseInt(renta.duracion) : "N/A"}</td>
+                  <td>
+                    {renta.duracion ? parseInt(renta.duracion) : "Activo"}
+                  </td>
                 )}
 
                 {/* No de controles */}
@@ -156,6 +161,15 @@ const TablaRentas: React.FC<Props> = (props) => {
         cerrarModal={cerrarModal}
         estadoModal={isEstadoModal}
         renta={rentaSeleccionada}
+        setCargando={props.setCargando}
+        actualizarRentaLocal={(id: number, rentaActualizada: Renta) => {
+          setRentaSeleccionada(rentaActualizada);
+          props.actualizarRentaLocal(id, rentaActualizada);
+        }}
+        eliminarRentaLocal={(id: number) => {
+          setRentaSeleccionada(null);
+          props.eliminarRentaLocal(id);
+        }}
       />
     </>
   );

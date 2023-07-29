@@ -57,6 +57,16 @@ const ModalXbox: React.FC<Props> = (props) => {
   const cerrarModal = () => setEstadoModal(false);
   const abrirModal = () => setEstadoModal(true);
 
+  // * Actualizar renta local
+  const actualizarRentaLocal = (id: number, rentaActualizada: Renta) =>
+    setListaRentas((prevLista) =>
+      prevLista.map((renta) => (renta.id === id ? rentaActualizada : renta))
+    );
+
+  // * Eliminar renta local
+  const eliminarRentaLocal = (id: number) =>
+    setListaRentas((prevLista) => prevLista.filter((renta) => renta.id !== id));
+
   // * Obtener xbox
   const obtenerUltimasVentas = useCallback(async () => {
     try {
@@ -214,7 +224,12 @@ const ModalXbox: React.FC<Props> = (props) => {
 
               <br />
 
-              <h6>{"Últimas 10 rentas:"}</h6>
+              {/* Mensaje */}
+              {!isCargandoTabla &&
+                Array.isArray(listaRentas) &&
+                listaRentas.length > 0 && (
+                  <h6>{"Últimas " + listaRentas.length + " rentas:"}</h6>
+                )}
 
               {/* Esta cargando*/}
               {isCargandoTabla ? (
@@ -231,7 +246,13 @@ const ModalXbox: React.FC<Props> = (props) => {
                 })
               ) : // ? Lista vacía
               Array.isArray(listaRentas) && listaRentas.length > 0 ? (
-                <TablaRentas lista={listaRentas} columnas={columnas} />
+                <TablaRentas
+                  lista={listaRentas}
+                  columnas={columnas}
+                  actualizarRentaLocal={actualizarRentaLocal}
+                  setCargando={setCargando}
+                  eliminarRentaLocal={eliminarRentaLocal}
+                />
               ) : (
                 <h6>La lista esta vacía</h6>
               )}

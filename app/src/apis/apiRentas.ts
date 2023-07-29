@@ -75,3 +75,24 @@ export async function apiActualizarRenta(
     return await catchAxiosError(er);
   }
 }
+
+// * Eliminar renta
+export async function apiEliminarRenta(id: number): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
+
+    // Enviamos
+    const res = await axios.delete(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
