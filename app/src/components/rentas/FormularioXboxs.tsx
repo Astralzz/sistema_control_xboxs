@@ -3,7 +3,7 @@ import Xbox from "../../models/Xbox";
 import { Button, Form, Modal } from "react-bootstrap";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiActualizarXbox, apiCrearNuevoXbox } from "../../apis/apiXboxs";
-import ComponenteCargando from "../../components/global/ComponenteCargando";
+import ComponenteCargando from "../global/ComponenteCargando";
 import { alertaSwal } from "../../functions/funcionesGlobales";
 
 // * Estilos

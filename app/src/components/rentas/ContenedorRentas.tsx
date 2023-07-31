@@ -4,13 +4,11 @@ import CartaXbox from "./CartaXbox";
 import Xbox from "../../models/Xbox";
 import { apiObtenerListaXboxs } from "../../apis/apiXboxs";
 import { RespuestaApi } from "../../apis/apiVariables";
-import ComponentError, {
-  DataError,
-} from "../../components/global/ComponentError";
+import ComponentError, { DataError } from "../global/ComponentError";
 import FormularioXboxs from "./FormularioXboxs";
 
-// TODO, Pagina de los xbox
-const PaginaXboxs: React.FC = () => {
+// TODO, Contenedor rentas
+const ContenedorRentas: React.FC = () => {
   // * Variables
   const [keyTab, setKeyTab] = useState<string | null>(null);
   const [listaXboxs, setListaXboxs] = useState<Xbox[]>([]);
@@ -91,13 +89,11 @@ const PaginaXboxs: React.FC = () => {
     );
   }
 
+  // TODO, Pagina
   return (
     <>
       {/* PAGINA COMPLETA */}
-      <Container>
-        <br />
-        <h3>Rentas de xbox</h3>
-        <br />
+      <div>
         {/* Es un arreglo y no esta vació */}
         {Array.isArray(listaXboxs) && listaXboxs.length > 0 ? (
           <Tabs
@@ -138,7 +134,7 @@ const PaginaXboxs: React.FC = () => {
             icono={"PlusSquare"}
           />
         )}
-      </Container>
+      </div>
       {/* MODAL */}
       <FormularioXboxs
         estadoModal={isEstadoModal}
@@ -149,4 +145,4 @@ const PaginaXboxs: React.FC = () => {
   );
 };
 
-export default PaginaXboxs;
+export default ContenedorRentas;

@@ -2,49 +2,6 @@
 
 @import "variables";
 
-// * BARRA SUPERIOR
-.barra-superior {
-    min-height: 10vh;
-    background: $color-barra;
-
-    .container {
-        background: $color-barra;
-        background-color: $color-barra;
-    }
-
-    .icono-principal {
-        margin-right: 10px;
-    }
-
-    .navbar-brand {
-        color: $color-letra;
-        font-size: 1.6rem;
-        font-weight: bold;
-        .icono-bootstrap {
-            margin-right: 10px;
-        }
-        &:hover,
-        &:focus {
-            color: $color-letra;
-            text-shadow: $sombra-item-seleccionado;
-        }
-    }
-
-    .nav-link {
-        font-size: 1.3rem;
-        color: $color-letra;
-        font-weight: bold;
-        &:hover,
-        &:focus {
-            color: $color-letra-seleccionada;
-            text-shadow: $sombra-item-seleccionado;
-        }
-        &.active {
-            color: $color-letra;
-        }
-    }
-}
-
 // * PAGINA DEL INICIO
 
 .contenedor-inicio {
@@ -101,26 +58,6 @@
     }
 }
 
-// * PIE DE PAGINA
-.pie-de-pagina {
-    background-color: $color-fondo;
-    color: $color-letra;
-    position: relative;
-
-    .linea-blanca {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background-color: #fff;
-    }
-
-    .link {
-        color: $color-letra;
-    }
-}
-
 .img-alarma {
     // background-color: $color-cancelar;
     transition: transform 0.2s ease;
@@ -128,7 +65,7 @@
 }
 
 .img-alarma:hover {
-    cursor: pointer; 
+    cursor: pointer;
 }
 
 /* Definición de la animación "palpitar" */

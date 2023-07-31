@@ -4,42 +4,23 @@ import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import IconoBootstrap from "./global/IconoBootstrap";
 import { Link } from "react-router-dom";
+import { Button } from "react-bootstrap";
 
-interface Ruta {
-  url: string;
-  nombre: string;
+// * Props
+interface Props {
+  titulo: string;
 }
 
-const rutas: Ruta[] = [
-  { nombre: "Xboxs", url: "xboxs" },
-  { nombre: "Ventas", url: "ventas" },
-];
-
 // Barra superior
-const BarraSuperior: React.FC = () => {
+const BarraSuperior: React.FC<Props> = (props) => {
   return (
     <Navbar expand="lg" className="barra-superior">
       <Container>
-        <Navbar.Brand as={Link} to="/">
-          <IconoBootstrap
-            className="icono-principal"
-            nombre="Xbox"
-            color="white"
-            size={30}
-          />
-          Inovatech
-        </Navbar.Brand>
+        {/* <Button>A</Button> */}
+
+        {/* Titulo */}
         <Navbar.Collapse className="justify-content-end">
-          <Nav>
-            {/* Links de las rutas */}
-            {rutas.map((ruta, i) => {
-              return (
-                <Nav.Link as={Link} to={ruta.url} key={i}>
-                  {ruta.nombre}
-                </Nav.Link>
-              );
-            })}
-          </Nav>
+          <h4>{props.titulo}</h4>
         </Navbar.Collapse>
       </Container>
     </Navbar>

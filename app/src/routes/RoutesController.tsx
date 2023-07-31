@@ -1,53 +1,51 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
-import PaginaXboxs from "../pages/xbox/PaginaXboxs";
-import { Col, Container, Row } from "react-bootstrap";
-import ComponentError from "../components/global/ComponentError";
-import PaginaProductos from "../pages/productos/PaginaProductos";
+import BarraSuperior from "../components/BarraSuperior";
+import { useLocation } from "react-router";
+import ContenedorRentas from "../components/rentas/ContenedorRentas";
+import PaginaEscogida from "../components/global/PaginaEscogida";
+import PaginaInicio from "../pages/PaginaInicio";
 
-const ContenedorPrueba = ({ titulo }: { titulo: string }) => {
-  return (
-    <Container>
-      <br />
-      <h3>{titulo}</h3>
-      <br />
-    </Container>
-  );
+// * Obtener el titulo
+const obtenerTitulo = (ruta: string): string => {
+  // Verificamos
+  switch (ruta) {
+    // Inicio
+    case "/inicio":
+    case "/":
+      return "Inicio";
+
+    // Inicio
+    case "/xboxs":
+      return "Xbox";
+
+    // Inicio
+    case "/productos":
+      return "Productos";
+
+    default:
+      return "Error 404";
+  }
 };
 
 // TODO, Control de las rutas
 const RoutesController: React.FC = () => {
-  return (
-    <Container className="contenedor-inicio">
-      <Row>
-        {/* Parte izquierda */}
-        <Col lg={9} md={12} className="mb-4 derecha">
-          {/* Pagina xboxs */}
-          <PaginaXboxs />
-        </Col>
+  // * Variables
+  const rutaActual = useLocation().pathname;
+  const titulo = obtenerTitulo(rutaActual);
 
-        {/* Parte derecha */}
-        <Col lg={3} md={12} className="mb-4 izquierda">
-          {/* Rutas */}
-          <Routes>
-            <Route
-              path="/xboxs"
-              element={<ContenedorPrueba titulo={"xboxs"} />}
-            />
-            <Route path="/ventas" element={<PaginaProductos />} />
-            <Route
-              path="/*"
-              element={
-                <ComponentError
-                  titulo="ERROR 404"
-                  detalles="Pagina no encontrada"
-                />
-              }
-            />
-          </Routes>
-        </Col>
-      </Row>
-    </Container>
+  return (
+    <div className="pagina-principal">
+      {/* BARRA DE LA PAGINA */}
+      <BarraSuperior titulo={titulo} />
+
+      {/* Inicio */}
+      <div hidden={rutaActual !== "/" && rutaActual !== "/inicio"}>
+        <PaginaInicio />
+      </div>
+
+      {/* Pagina Escogida */}
+      <PaginaEscogida ruta={rutaActual} />
+    </div>
   );
 };
 

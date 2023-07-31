@@ -17,7 +17,7 @@ import {
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
 import ModalXbox from "./ModalXbox";
-import IconoBootstrap from "../../components/global/IconoBootstrap";
+import IconoBootstrap from "../global/IconoBootstrap";
 import {
   alertaSwal,
   calcularMontoRecaudado,
@@ -30,7 +30,7 @@ import {
 import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
 import { RespuestaApi } from "../../apis/apiVariables";
 import Renta from "../../models/Renta";
-import ComponenteCargando from "../../components/global/ComponenteCargando";
+import ComponenteCargando from "../global/ComponenteCargando";
 import { OverlayChildren } from "react-bootstrap/esm/Overlay";
 import { detenerAlarma, reproducirAlarma } from "../../functions/alarma";
 import iconoAlarma from "../../assets/imgs/iconoAlarma.png";

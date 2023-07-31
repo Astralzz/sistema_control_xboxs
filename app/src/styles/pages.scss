@@ -1,0 +1,44 @@
+@import "variables";
+
+// TODO --> INICIO
+.pagina-inicio {
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+
+    .tab-xbox {
+        background-color: $color-tarjeta-xbox;
+        color: $color-letra;
+        border-radius: 0%;
+
+        &:hover,
+        &:focus,
+        &:active {
+            background-color: $color-tab-seleccionado-xbox;
+            color: $color-letra;
+            border-radius: 10%;
+        }
+    }
+
+    .tab-xbox-invalido {
+        background-color: $color-tab-error-xbox;
+        color: $color-letra;
+        border-radius: 0%;
+
+        &:hover,
+        &:focus,
+        &:active {
+            background-color: $color-tab-error-seleccionado-xbox;
+            color: $color-letra;
+            border-radius: 10%;
+        }
+    }
+
+    .card {
+        text-decoration: none;
+        border: none;
+        border-radius: 0%;
+        background-color: $color-tarjeta-xbox;
+        color: $color-letra;
+    }
+}
