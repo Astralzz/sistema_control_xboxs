@@ -2,61 +2,86 @@
 
 @import "variables";
 
-// * PAGINA DEL INICIO
+// Todo ---> BOTONES
 
-.contenedor-inicio {
-    display: flex;
-    color: $color-letra;
-    align-items: start;
+// * B. Temporizador
+.botones-temporizador {
+    .b-tp {
+        background-color: #000000;
+        border: 2px solid #161515;
+        appearance: none;
+        border-radius: 15px;
+        box-sizing: border-box;
+        color: #ffffff;
+        cursor: pointer;
+        display: inline-block;
+        font-family:
+            Roobert,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Helvetica,
+            Arial,
+            sans-serif,
+            "Apple Color Emoji",
+            "Segoe UI Emoji",
+            "Segoe UI Symbol";
+        font-size: 16px;
+        font-weight: 600;
+        line-height: normal;
+        margin: 0;
+        min-height: 60px;
+        min-width: 0;
+        outline: none;
+        padding: 16px 24px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        width: 100%;
+        will-change: transform;
 
-    .derecha,
-    .izquierda {
-        align-self: start;
+        #bt-inicio {
+            background-color: $color-aceptado;
+        }
 
-        .container {
-            display: inline;
-            align-items: start;
-            width: 100%;
-            min-width: 100%;
+        &:disabled {
+            pointer-events: none;
+            background-color: #000000;
+            border: 2px solid #161515;
+            color: #ffffff;
+        }
+
+        &:hover {
+            box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            box-shadow: none;
+            transform: translateY(0);
         }
     }
 
-    .derecha {
-        .tab-xbox {
-            background-color: $color-tarjeta-xbox;
-            color: $color-letra;
-            border-radius: 0%;
+    .b-tp-iniciar,
+    .b-tp-iniciar:disabled {
+        background-color: #62ba42;
+    }
 
-            &:hover,
-            &:focus,
-            &:active {
-                background-color: $color-tab-seleccionado-xbox;
-                color: $color-letra;
-                border-radius: 10%;
-            }
-        }
+    .b-tp-pausar,
+    .b-tp-pausar:disabled {
+        background-color: #d9c73b;
+    }
 
-        .tab-xbox-invalido {
-            background-color: $color-tab-error-xbox;
-            color: $color-letra;
-            border-radius: 0%;
-
-            &:hover,
-            &:focus,
-            &:active {
-                background-color: $color-tab-error-seleccionado-xbox;
-                color: $color-letra;
-                border-radius: 10%;
-            }
-        }
-
-        .card {
-            border-radius: 0%;
-            background-color: $color-tarjeta-xbox;
-            color: $color-letra;
-        }
+    .b-tp-parar,
+    .b-tp-parar:disabled {
+        background-color: #c13b29;
     }
 }
+
+// Todo ---> ALARMA
 
 .img-alarma {
     // background-color: $color-cancelar;

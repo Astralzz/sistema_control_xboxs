@@ -116,11 +116,18 @@ const ContenedorRentas: React.FC = () => {
                   eventKey={"xbox-" + i}
                   title={i + 1}
                 >
-                  <CartaXbox
-                    xbox={xbox}
-                    actualizarXbox={actualizarXbox}
-                    eliminarXbox={eliminarXbox}
-                  />
+                  {xbox.estado === "DISPONIBLE" ? (
+                    <CartaXbox
+                      xbox={xbox}
+                      actualizarXbox={actualizarXbox}
+                      eliminarXbox={eliminarXbox}
+                    />
+                  ) : (
+                    <Container>
+                      <br />
+                      <h3>Xbox no disponible</h3>
+                    </Container>
+                  )}
                 </Tab>
               );
             })}

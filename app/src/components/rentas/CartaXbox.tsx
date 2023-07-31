@@ -35,6 +35,21 @@ import { OverlayChildren } from "react-bootstrap/esm/Overlay";
 import { detenerAlarma, reproducirAlarma } from "../../functions/alarma";
 import iconoAlarma from "../../assets/imgs/iconoAlarma.png";
 
+// * Estilos
+const styles: React.CSSProperties[] = [
+  {
+    backgroundColor: "var(--color-fondo)",
+    color: "var(--color-letra)",
+    border: "none",
+    borderBottom: "1px solid white",
+  },
+  {
+    backgroundColor: "var(--color-fondo-opaco)",
+    color: "var(--color-letra)",
+    border: "none",
+  },
+];
+
 // * Seleccionar tiempos
 interface SelectTiempo {
   leyenda: string;
@@ -44,28 +59,36 @@ interface SelectTiempo {
 // * Tiempos establecidos
 const selectsTiempo: SelectTiempo[] = [
   {
-    leyenda: "Ninguno",
+    leyenda: "N/A",
     tiempo: 0,
   },
   {
-    leyenda: "15 minutos",
+    leyenda: "15 m",
     tiempo: 15,
   },
   {
-    leyenda: "media hora",
+    leyenda: "30 m",
     tiempo: 30,
   },
   {
-    leyenda: "una hora",
+    leyenda: "1 h",
     tiempo: 60,
   },
   {
-    leyenda: "una hora y media",
+    leyenda: "1/30 h",
     tiempo: 90,
   },
   {
-    leyenda: "2 horas",
+    leyenda: "2 h",
     tiempo: 120,
+  },
+  {
+    leyenda: "2/30 h",
+    tiempo: 150,
+  },
+  {
+    leyenda: "3 h",
+    tiempo: 180,
   },
   {
     leyenda: "Otra cantidad",
@@ -173,6 +196,16 @@ const CartaXbox: React.FC<Props> = (props) => {
 
     // Convertimos
     const en: number = Number(e);
+
+    // ? Es NaN
+    if (isNaN(en)) {
+      alertaSwal(
+        "ERROR",
+        "Ocurrió un error extraño, comuníquelo al desarrollador",
+        "error"
+      );
+      return;
+    }
 
     // ? es 0
     if (en === 0) {
@@ -310,9 +343,42 @@ const CartaXbox: React.FC<Props> = (props) => {
   const pausarTemporizador = (): void => setTiempoCorriendo(false);
 
   // * Aumentar tiempo
-  const aumentarTiempo = (valor: number): void => {
-    setTiempoTotal((prevTiempo) => prevTiempo + valor * 60);
-    setTiempoRestante((prevTiempo) => prevTiempo + valor * 60);
+  const aumentarTiempo = async (e: string | null): Promise<void> => {
+    // ? Menor a 1
+    if (tiempoRestante < 1) {
+      return;
+    }
+
+    // Convertimos
+    const en: number = Number(e);
+
+    // ? Es NaN
+    if (isNaN(en)) {
+      alertaSwal(
+        "ERROR",
+        "Ocurrió un error extraño, comuníquelo al desarrollador",
+        "error"
+      );
+      return;
+    }
+
+    // ? Menor a 1
+    if (en < 1) {
+      // Alerta
+      const n: number = await seleccionarTiempoManual("aumentado");
+
+      // ? Es negativo
+      if (n < 1) {
+        return;
+      }
+
+      setTiempoTotal((prevTiempo) => prevTiempo + n * 60);
+      setTiempoRestante((prevTiempo) => prevTiempo + n * 60);
+      return;
+    }
+
+    setTiempoTotal((prevTiempo) => prevTiempo + en * 60);
+    setTiempoRestante((prevTiempo) => prevTiempo + en * 60);
   };
 
   // * Disminuir tiempo
@@ -334,34 +400,6 @@ const CartaXbox: React.FC<Props> = (props) => {
     setTiempoTotal((prevTiempo) => prevTiempo + valorNegativo);
     setTiempoRestante((prevTiempo) => prevTiempo + valorNegativo);
   };
-
-  // * Comentario
-  const ComentarioPop: OverlayChildren = (
-    <Popover id="popover-comentario">
-      <Popover.Header as="h3">Comentario</Popover.Header>
-      <Popover.Body>
-        <InputGroup>
-          <Form.Control
-            onChange={(e) => setComentario(e.target.value)}
-            value={comentario ?? ""}
-            maxLength={360}
-            autoComplete="off"
-            disabled={
-              !isTiempoCorriendo || props.xbox.estado === "NO DISPONIBLE"
-            }
-            as="textarea"
-            rows={3}
-            aria-label="area-comentario"
-            className={
-              comentario && regexComentario.test(comentario)
-                ? "is-valid"
-                : "is-invalid"
-            }
-          />
-        </InputGroup>
-      </Popover.Body>
-    </Popover>
-  );
 
   // * Limpiar datos
   const limpiarDatos = (): void => {
@@ -475,16 +513,16 @@ const CartaXbox: React.FC<Props> = (props) => {
           {/* INFORMACIÓN */}
           <IconoBootstrap
             onClick={abrirModal}
-            nombre="InfoCircle"
+            nombre="EyeFill"
             color="white"
-            size={20}
+            size={25}
           />
         </Card.Header>
 
         {/* CUERPO DE LA CARTA */}
         <Card.Body>
           <Row>
-            {/* IZQUIERDA */}
+            {/* TEMPORIZADOR */}
             <Col xs={4}>
               <Toast
                 animation
@@ -496,9 +534,15 @@ const CartaXbox: React.FC<Props> = (props) => {
               >
                 {/* CUERPO */}
                 <Toast.Body>
-                  {props.xbox.estado !== "NO DISPONIBLE" ? (
-                    <div className="d-flex flex-column justify-content-center">
-                      <br className="mb-2" />
+                  <div className="d-flex flex-column justify-content-center">
+                    <br className="mb-2" />
+                    {/* Temporizador */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
                       <CountdownCircleTimer
                         rotation="clockwise"
                         key={keyTemporizador}
@@ -514,258 +558,195 @@ const CartaXbox: React.FC<Props> = (props) => {
                         {renderizarTiempo}
                       </CountdownCircleTimer>
                     </div>
-                  ) : (
-                    // No disponible
-                    <div className="d-flex flex-column justify-content-center h-100">
-                      <br />
-                      <br />
-                      <br />
-                      <h4>XBOX NO DISPONIBLE</h4>
-                      <br />
-                      <br />
-                      <br />
-                    </div>
-                  )}
+                    <br className="mb-2" />
+                    {/* Botones del temporizador */}
+                    <ButtonGroup className="botones-temporizador">
+                      {/* Iniciar */}
+                      <Button
+                        className="b-tp b-tp-iniciar"
+                        onClick={() => {
+                          // ? Es menor a 1
+                          if (tiempoRestante > 1) {
+                            continuarTemporizador();
+                            return;
+                          }
+                          iniciarTemporizador();
+                        }}
+                        disabled={
+                          isTiempoCorriendo ||
+                          tiempoSeleccionado < 0 ||
+                          idAlarma !== null
+                        }
+                      >
+                        <IconoBootstrap nombre="PlayFill" size={25} />
+                      </Button>
+                      {/* Pausar */}
+                      <Button
+                        className="b-tp b-tp-pausar"
+                        disabled={!isTiempoCorriendo || tiempoSeleccionado < 0}
+                        onClick={pausarTemporizador}
+                      >
+                        <IconoBootstrap nombre="PauseFill" size={25} />
+                      </Button>
+                      {/* Terminar */}
+                      <Button
+                        className="b-tp b-tp-parar"
+                        disabled={!isTiempoCorriendo}
+                        onClick={async () => {
+                          // Confirmacion
+                          const res = await confirmacionSwal(
+                            "Estas seguro?",
+                            "Quieres terminar este temporizador!",
+                            "Si, terminar"
+                          );
+
+                          // ? Si
+                          if (res) {
+                            terminarTemporizador(false);
+                          }
+                        }}
+                      >
+                        <IconoBootstrap nombre="X" size={25} />
+                      </Button>
+                    </ButtonGroup>
+                  </div>
                 </Toast.Body>
               </Toast>
             </Col>
-            {/* DERECHA */}
+            {/* CONTROLES */}
             <Col xs={8}>
               {/* -------- CUERPO */}
               <div className="d-flex flex-column">
+                <br className="mb-3" />
                 {/* -------- INFORMACIÓN */}
-                <h2>
+                <h3>
                   {`Tiempo: ${
                     tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
-                  } | recaudado: ${recaudado} $`}
-                </h2>
+                  } | Recaudado: ${recaudado} $ | Estimado: 15 $
+                  `}
+                </h3>
                 <br />
-
                 {/* -------- CONTROL DE TIEMPOS */}
                 <InputGroup className="mb-2">
                   {/* Tiempo inicial */}
-                  <div className="mb-2">
-                    <DropdownButton
-                      align="start"
-                      title="Seleccionar tiempo "
-                      variant={
-                        isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                          ? "danger"
-                          : "success"
-                      }
-                      disabled={
-                        isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                      }
-                      onSelect={(e) => seleccionarTiempoInicial(e)}
-                      key={-1}
-                    >
-                      {selectsTiempo.map((select, i) => {
-                        return (
-                          <Dropdown.Item key={i} eventKey={select.tiempo}>
-                            {select.leyenda}
-                          </Dropdown.Item>
-                        );
-                      })}
-                    </DropdownButton>
-                  </div>
+                  <InputGroup.Text style={styles[1]}>
+                    Seleccionar
+                  </InputGroup.Text>
+                  <Form.Select
+                    disabled={
+                      isTiempoCorriendo || props.xbox.estado === "NO DISPONIBLE"
+                    }
+                    onChange={(e) => seleccionarTiempoInicial(e.target.value)}
+                    value={tiempoSeleccionado / 60 ?? 0}
+                    className={
+                      isTiempoCorriendo || props.xbox.estado === "NO DISPONIBLE"
+                        ? "is-invalid"
+                        : "is-valid"
+                    }
+                    style={styles[0]}
+                  >
+                    {selectsTiempo.map((select, i) => {
+                      return (
+                        <option key={i} value={select.tiempo}>
+                          {select.leyenda}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
 
                   {/* Aumentar tiempo */}
-                  <div className="mb-2">
-                    <DropdownButton
-                      align="end"
-                      title="Aumentar minutos "
-                      variant={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                          ? "danger"
-                          : "success"
-                      }
-                      disabled={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                      }
-                      onSelect={async (e) => {
-                        // ? Menor a 1
-                        if (tiempoRestante < 1) {
-                          return;
-                        }
-
-                        // Convertimos
-                        const en: number = Number(e);
-
-                        // ? Menor a 1
-                        if (en < 1) {
-                          // Alerta
-                          const n: number = await seleccionarTiempoManual(
-                            "aumentado"
-                          );
-
-                          // ? Es negativo
-                          if (n < 1) {
-                            return;
-                          }
-
-                          aumentarTiempo(n);
-                          return;
-                        }
-
-                        aumentarTiempo(en);
-                      }}
-                      id="-1"
-                    >
-                      {selectsTiempo.map((select, i) => {
-                        return (
-                          <Dropdown.Item key={i} eventKey={select.tiempo}>
-                            {select.leyenda}
-                          </Dropdown.Item>
-                        );
-                      })}
-                    </DropdownButton>
-                  </div>
+                  <InputGroup.Text style={styles[1]}>Aumentar</InputGroup.Text>
+                  <Form.Select
+                    disabled={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                    }
+                    onChange={async (e) => aumentarTiempo(e.target.value)}
+                    value={0}
+                    className={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                        ? "is-invalid"
+                        : "is-valid"
+                    }
+                    style={styles[0]}
+                  >
+                    {selectsTiempo.map((select, i) => {
+                      return (
+                        <option key={i} value={select.tiempo}>
+                          {select.leyenda}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
 
                   {/* Disminuir tiempo */}
-                  <div className="mb-2">
-                    <DropdownButton
-                      align="end"
-                      title="Disminuir minutos "
-                      variant={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                          ? "danger"
-                          : "success"
-                      }
-                      disabled={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                      }
-                      onSelect={async (e) => {
-                        // ? Menor a 1
-                        if (tiempoRestante < 1) {
-                          return;
-                        }
-
-                        // Convertimos
-                        const en: number = Number(e);
-
-                        // ? Menor a 1
-                        if (en < 1) {
-                          // Alerta
-                          const n: number = await seleccionarTiempoManual(
-                            "disminuido"
-                          );
-
-                          // ? Es negativo
-                          if (n < 1) {
-                            return;
-                          }
-
-                          // Disminuimos
-                          disminuirTiempo(n);
-                          return;
-                        }
-
-                        disminuirTiempo(en);
-                      }}
-                      id="-1"
-                    >
-                      {selectsTiempo.map((select, i) => {
-                        return (
-                          <Dropdown.Item key={i} eventKey={select.tiempo}>
-                            {select.leyenda}
-                          </Dropdown.Item>
-                        );
-                      })}
-                    </DropdownButton>
-                  </div>
-                </InputGroup>
-
-                {/* -------- BOTONES DE ESTADOS */}
-                <ButtonGroup aria-label="grupo-botones" className="mb-4">
-                  {/* -------- Iniciar */}
-                  <Button
+                  <InputGroup.Text style={styles[1]}>Disminuir</InputGroup.Text>
+                  <Form.Select
                     disabled={
-                      isTiempoCorriendo ||
-                      tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE" ||
-                      idAlarma !== null
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
                     }
-                    onClick={() => {
-                      // ? Es menor a 1
-                      if (tiempoRestante > 1) {
-                        continuarTemporizador();
+                    onChange={async (e) => {
+                      // ? Menor a 1
+                      if (tiempoRestante < 1) {
                         return;
                       }
 
-                      iniciarTemporizador();
-                    }}
-                    variant={
-                      isTiempoCorriendo ||
-                      tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE" ||
-                      idAlarma !== null
-                        ? "danger"
-                        : "success"
-                    }
-                  >
-                    {props.xbox.estado !== "NO DISPONIBLE"
-                      ? "Iniciar"
-                      : "No disponible"}
-                  </Button>
-                  {/* -------- Pausar */}
-                  <Button
-                    variant={
-                      !isTiempoCorriendo ||
-                      tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                        ? "danger"
-                        : "success"
-                    }
-                    disabled={
-                      !isTiempoCorriendo ||
-                      tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                    onClick={pausarTemporizador}
-                  >
-                    Pausar
-                  </Button>
-                  {/* -------- Terminar */}
-                  <Button
-                    disabled={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                    variant={
-                      !isTiempoCorriendo ||
-                      tiempoSeleccionado < 0 ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                        ? "danger"
-                        : "success"
-                    }
-                    onClick={async () => {
-                      // Confirmacion
-                      const res = await confirmacionSwal(
-                        "Estas seguro?",
-                        "Quieres terminar este temporizador!",
-                        "Si, terminar"
-                      );
+                      // Convertimos
+                      const en: number = Number(e.target.value);
 
-                      // ? Si
-                      if (res) {
-                        terminarTemporizador(false);
+                      // ? Es NaN
+                      if (isNaN(en)) {
+                        alertaSwal(
+                          "ERROR",
+                          "Ocurrió un error extraño, comuníquelo al desarrollador",
+                          "error"
+                        );
+                        return;
                       }
-                    }}
-                  >
-                    Terminar
-                  </Button>
-                </ButtonGroup>
 
+                      // ? Menor a 1
+                      if (en < 1) {
+                        // Alerta
+                        const n: number = await seleccionarTiempoManual(
+                          "disminuido"
+                        );
+
+                        // ? Es negativo
+                        if (n < 1) {
+                          return;
+                        }
+
+                        // Disminuimos
+                        disminuirTiempo(n);
+                        return;
+                      }
+
+                      disminuirTiempo(en);
+                    }}
+                    value={0}
+                    className={
+                      !isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE"
+                        ? "is-invalid"
+                        : "is-valid"
+                    }
+                    style={styles[0]}
+                  >
+                    {selectsTiempo.map((select, i) => {
+                      return (
+                        <option key={i} value={select.tiempo}>
+                          {select.leyenda}
+                        </option>
+                      );
+                    })}
+                  </Form.Select>
+                </InputGroup>
                 {/* -------- PAGO Y CONTROLES */}
                 <InputGroup className="mb-3">
                   {/* Renta pagada */}
-                  <InputGroup.Text className="bg-secondary text-white">
+                  <InputGroup.Text style={styles[1]}>
                     ¿Renta pagada?
                   </InputGroup.Text>
                   <Form.Select
@@ -777,13 +758,14 @@ const CartaXbox: React.FC<Props> = (props) => {
                     }
                     onChange={(e) => setPagado(parseInt(e.target.value) === 1)}
                     className={"is-valid"}
+                    style={styles[0]}
                   >
                     <option value={1}>SI</option>
                     <option value={0}>NO</option>
                   </Form.Select>
 
                   {/* Numero de controles */}
-                  <InputGroup.Text className="bg-secondary text-white">
+                  <InputGroup.Text style={styles[1]}>
                     ¿Cuantos controles?
                   </InputGroup.Text>
                   <Form.Select
@@ -793,66 +775,72 @@ const CartaXbox: React.FC<Props> = (props) => {
                       !isTiempoCorriendo ||
                       props.xbox.estado === "NO DISPONIBLE"
                     }
-                    className={"is-valid"}
                     onChange={(n) =>
                       setControlesExtra(parseInt(n.target.value) !== 1)
                     }
+                    className={"is-valid"}
+                    style={styles[0]}
                   >
                     <option value={1}>1</option>
                     <option value={2}>2</option>
                   </Form.Select>
                 </InputGroup>
-
                 {/* -------- CLIENTE Y COMENTARIO */}
-                <InputGroup className="mb-3">
+                <div>
                   {/* Cliente */}
-                  <InputGroup.Text className="bg-secondary text-white">
-                    Cliente
-                  </InputGroup.Text>
-                  <Form.Control
-                    className={
-                      cliente === "" || !cliente
-                        ? ""
-                        : cliente && regexCliente.test(cliente)
-                        ? "is-valid"
-                        : "is-invalid"
-                    }
-                    onChange={(e) => setCliente(e.target.value)}
-                    value={cliente ?? ""}
-                    type="text"
-                    autoFocus
-                    placeholder="Nombre del cliente"
-                    aria-label="Nombre del cliente"
-                    aria-describedby="Cliente que esta rentando actualmente"
-                    maxLength={60}
-                    autoComplete="off"
-                    disabled={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                  />
-
-                  {/* Comentario */}
-                  <InputGroup.Text className="bg-secondary text-white">
-                    Comentario
-                  </InputGroup.Text>
-                  <OverlayTrigger
-                    rootClose
-                    placement="right"
-                    trigger="click"
-                    overlay={ComentarioPop}
-                  >
-                    <Button
-                      variant="success"
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text style={styles[1]}>Cliente</InputGroup.Text>
+                    <Form.Control
+                      onChange={(e) => setCliente(e.target.value)}
+                      value={cliente ?? ""}
+                      type="text"
+                      autoFocus
+                      aria-label="Nombre del cliente"
+                      aria-describedby="Cliente que esta rentando actualmente"
+                      maxLength={60}
+                      autoComplete="off"
                       disabled={
                         !isTiempoCorriendo ||
                         props.xbox.estado === "NO DISPONIBLE"
                       }
-                    >
-                      <IconoBootstrap nombre={"PenFill"} />
-                    </Button>
-                  </OverlayTrigger>
-                </InputGroup>
+                      className={
+                        cliente === "" || !cliente
+                          ? ""
+                          : cliente && regexCliente.test(cliente)
+                          ? "is-valid"
+                          : "is-invalid"
+                      }
+                      style={styles[0]}
+                    />
+                  </InputGroup>
+                  {/* Comentario */}
+                  <InputGroup>
+                    <InputGroup.Text style={styles[1]}>
+                      Comentario
+                    </InputGroup.Text>
+                    <Form.Control
+                      onChange={(e) => setComentario(e.target.value)}
+                      value={comentario ?? ""}
+                      maxLength={360}
+                      autoComplete="off"
+                      disabled={
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                      }
+                      as="textarea"
+                      rows={3}
+                      aria-label="area-comentario"
+                      className={
+                        comentario === "" || !comentario
+                          ? ""
+                          : comentario && regexComentario.test(comentario)
+                          ? "is-valid"
+                          : "is-invalid"
+                      }
+                      style={styles[0]}
+                    />
+                  </InputGroup>
+                </div>
               </div>
             </Col>
           </Row>
