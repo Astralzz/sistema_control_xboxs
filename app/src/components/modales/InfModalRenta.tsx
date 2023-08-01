@@ -353,6 +353,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
                         setPagado(parseInt(e.target.value) === 1)
                       }
                       className={"is-valid"}
+                      style={{ ...styles, borderBottom: "0.5px solid #ffffff" }}
                     >
                       <option value={1}>SI</option>
                       <option value={0}>NO</option>

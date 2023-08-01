@@ -6,7 +6,7 @@ import { detenerAlarma, reproducirAlarma } from "../../functions/alarma";
 let id: string = "";
 
 // TODO, Pagina de lso productos
-const PaginaProductos: React.FC = () => {
+const ContenedorVenta: React.FC = () => {
   // * Variables
   const [producto, setProducto] = useState<Producto | null>(null);
   const [listaProductos, setListaProductos] = useState<Producto[]>([]);
@@ -31,4 +31,4 @@ const PaginaProductos: React.FC = () => {
   );
 };
 
-export default PaginaProductos;
+export default ContenedorVenta;

@@ -2,12 +2,19 @@
 
 @import "variables";
 
+// Todo ---> CONTENEDORES
+.contenedor-completo {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
 // Todo ---> BOTONES
 
 // * B. Temporizador
 .botones-temporizador {
     .b-tp {
-        background-color: #000000;
+        background-color: $color-fondo-opaco;
         border: 2px solid #161515;
         appearance: none;
         border-radius: 15px;
@@ -49,7 +56,7 @@
 
         &:disabled {
             pointer-events: none;
-            background-color: #000000;
+            background-color: $color-cancelar;
             border: 2px solid #161515;
             color: #ffffff;
         }
@@ -63,21 +70,6 @@
             box-shadow: none;
             transform: translateY(0);
         }
-    }
-
-    .b-tp-iniciar,
-    .b-tp-iniciar:disabled {
-        background-color: #62ba42;
-    }
-
-    .b-tp-pausar,
-    .b-tp-pausar:disabled {
-        background-color: #d9c73b;
-    }
-
-    .b-tp-parar,
-    .b-tp-parar:disabled {
-        background-color: #c13b29;
     }
 }
 

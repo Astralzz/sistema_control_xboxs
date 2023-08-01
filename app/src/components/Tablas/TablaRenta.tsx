@@ -109,7 +109,13 @@ const TablaRentas: React.FC<Props> = (props) => {
 
                 {/* Duracion */}
                 {props.columnas.duracion && (
-                  <td>
+                  <td
+                    style={{
+                      backgroundColor: renta.duracion
+                        ? undefined
+                        : "var(--color-aceptado)",
+                    }}
+                  >
                     {renta.duracion ? parseInt(renta.duracion) : "Activo"}
                   </td>
                 )}

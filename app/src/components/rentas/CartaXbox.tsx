@@ -120,9 +120,11 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [rentaActual, setRentaActual] = useState<null | Renta>(null);
   const [isCargando, setCargando] = useState<boolean>(false);
   const [idAlarma, setIdAlarma] = useState<string | null>(null);
+  const [precioEstimado, setPrecioEstimado] = useState<number>(0);
+  const [isPausa, setPausa] = useState<boolean>(false);
   // * Datos de la BD
   const [isPagado, setPagado] = useState<boolean>(false);
-  const [controlesExtra, setControlesExtra] = useState<boolean>(false);
+  const [isControlExtra, setControlExtra] = useState<boolean>(false);
   const [tiempoTotal, setTiempoTotal] = useState<number>(0);
   const [cliente, setCliente] = useState<string | null>(null);
   const [comentario, setComentario] = useState<string | null>(null);
@@ -211,6 +213,7 @@ const CartaXbox: React.FC<Props> = (props) => {
     if (en === 0) {
       setTiempoTotal(0);
       setTiempoSeleccionado(-1);
+      setPrecioEstimado(0);
       return;
     }
 
@@ -224,13 +227,21 @@ const CartaXbox: React.FC<Props> = (props) => {
         return;
       }
 
-      setTiempoTotal(n * 60);
-      setTiempoSeleccionado(n * 60);
+      // Minutos
+      const m: number = n * 60;
+
+      setTiempoTotal(m);
+      setTiempoSeleccionado(m);
+      setPrecioEstimado(calcularMontoRecaudado(m, isControlExtra));
       return;
     }
 
-    setTiempoTotal(en * 60);
-    setTiempoSeleccionado(en * 60);
+    // Minutos
+    const m: number = en * 60;
+
+    setTiempoTotal(m);
+    setTiempoSeleccionado(m);
+    setPrecioEstimado(calcularMontoRecaudado(m, isControlExtra));
   };
 
   // * Iniciar temporizador
@@ -297,7 +308,7 @@ const CartaXbox: React.FC<Props> = (props) => {
       data.append("inicio", rentaActual?.inicio ?? horaInicio);
       data.append("final", horaFinal);
       data.append("duracion", String(tiempoTotalBandera));
-      data.append("total", String(recaudadoBandera));
+      data.append("total", String(precioEstimado));
 
       // ? Esta pagado
       if (isPagado) {
@@ -305,7 +316,7 @@ const CartaXbox: React.FC<Props> = (props) => {
       }
 
       // ? Mas de un control
-      if (controlesExtra) {
+      if (isControlExtra) {
         data.append("noControles", String(1));
       }
 
@@ -337,10 +348,16 @@ const CartaXbox: React.FC<Props> = (props) => {
   };
 
   // * Continuar temporizador
-  const continuarTemporizador = (): void => setTiempoCorriendo(true);
+  const continuarTemporizador = (): void => {
+    setPausa(false);
+    setTiempoCorriendo(true);
+  };
 
   // * Pausar temporizador
-  const pausarTemporizador = (): void => setTiempoCorriendo(false);
+  const pausarTemporizador = (): void => {
+    setPausa(true);
+    setTiempoCorriendo(false);
+  };
 
   // * Aumentar tiempo
   const aumentarTiempo = async (e: string | null): Promise<void> => {
@@ -403,15 +420,16 @@ const CartaXbox: React.FC<Props> = (props) => {
 
   // * Limpiar datos
   const limpiarDatos = (): void => {
-    setRecaudado(calcularMontoRecaudado(tiempoTotal, controlesExtra));
+    setRecaudado(calcularMontoRecaudado(tiempoTotal, isControlExtra));
     setCliente(null);
     setComentario(null);
     setRentaActual(null);
     setTiempoCorriendo(false);
     setTiempoSeleccionado(-1);
     setTiempoRestante(0);
-    setControlesExtra(false);
+    setControlExtra(false);
     setPagado(false);
+    setPausa(false);
     setKeyTemporizador((prevKey) => prevKey + 1);
     restanteBandera = 0;
     recaudadoBandera = 0;
@@ -475,7 +493,7 @@ const CartaXbox: React.FC<Props> = (props) => {
       // Accion en 2 s
       timeRecaudadoBandera = setTimeout(() => {
         // Recaudado
-        const r: number = calcularMontoRecaudado(tr, controlesExtra);
+        const r: number = calcularMontoRecaudado(tr, isControlExtra);
         // Redondeado
         const rd: number = redondearNumero(r);
         // Ponemos valor
@@ -488,7 +506,7 @@ const CartaXbox: React.FC<Props> = (props) => {
     restanteBandera = remainingTime;
     // Recaudado
     recaudadoBandera = redondearNumero(
-      calcularMontoRecaudado(tr, controlesExtra)
+      calcularMontoRecaudado(tr, isControlExtra)
     );
     // Total
     tiempoTotalBandera = parseFloat((tr / 60).toFixed(2));
@@ -501,6 +519,7 @@ const CartaXbox: React.FC<Props> = (props) => {
     );
   };
 
+  // Todo, Componente principal
   return (
     <>
       {/* TARJETA DE XBOX */}
@@ -563,7 +582,8 @@ const CartaXbox: React.FC<Props> = (props) => {
                     <ButtonGroup className="botones-temporizador">
                       {/* Iniciar */}
                       <Button
-                        className="b-tp b-tp-iniciar"
+                        className="b-tp"
+                        variant="dark"
                         onClick={() => {
                           // ? Es menor a 1
                           if (tiempoRestante > 1) {
@@ -582,7 +602,8 @@ const CartaXbox: React.FC<Props> = (props) => {
                       </Button>
                       {/* Pausar */}
                       <Button
-                        className="b-tp b-tp-pausar"
+                        className="b-tp"
+                        variant="dark"
                         disabled={!isTiempoCorriendo || tiempoSeleccionado < 0}
                         onClick={pausarTemporizador}
                       >
@@ -590,7 +611,8 @@ const CartaXbox: React.FC<Props> = (props) => {
                       </Button>
                       {/* Terminar */}
                       <Button
-                        className="b-tp b-tp-parar"
+                        className="b-tp"
+                        variant="dark"
                         disabled={!isTiempoCorriendo}
                         onClick={async () => {
                           // Confirmacion
@@ -622,7 +644,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                 <h3>
                   {`Tiempo: ${
                     tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
-                  } | Recaudado: ${recaudado} $ | Estimado: 15 $
+                  } | Recaudado: ${recaudado} $ | Estimado: ${precioEstimado} $
                   `}
                 </h3>
                 <br />
@@ -634,12 +656,16 @@ const CartaXbox: React.FC<Props> = (props) => {
                   </InputGroup.Text>
                   <Form.Select
                     disabled={
-                      isTiempoCorriendo || props.xbox.estado === "NO DISPONIBLE"
+                      isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE" ||
+                      isPausa
                     }
                     onChange={(e) => seleccionarTiempoInicial(e.target.value)}
                     value={tiempoSeleccionado / 60 ?? 0}
                     className={
-                      isTiempoCorriendo || props.xbox.estado === "NO DISPONIBLE"
+                      isTiempoCorriendo ||
+                      props.xbox.estado === "NO DISPONIBLE" ||
+                      isPausa
                         ? "is-invalid"
                         : "is-valid"
                     }
@@ -770,13 +796,13 @@ const CartaXbox: React.FC<Props> = (props) => {
                   </InputGroup.Text>
                   <Form.Select
                     aria-label="Controles de renta"
-                    value={!controlesExtra ? 1 : 2}
+                    value={!isControlExtra ? 1 : 2}
                     disabled={
                       !isTiempoCorriendo ||
                       props.xbox.estado === "NO DISPONIBLE"
                     }
                     onChange={(n) =>
-                      setControlesExtra(parseInt(n.target.value) !== 1)
+                      setControlExtra(parseInt(n.target.value) !== 1)
                     }
                     className={"is-valid"}
                     style={styles[0]}
@@ -804,7 +830,10 @@ const CartaXbox: React.FC<Props> = (props) => {
                         props.xbox.estado === "NO DISPONIBLE"
                       }
                       className={
-                        cliente === "" || !cliente
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                          ? "is-invalid"
+                          : cliente === "" || !cliente
                           ? ""
                           : cliente && regexCliente.test(cliente)
                           ? "is-valid"
@@ -831,7 +860,10 @@ const CartaXbox: React.FC<Props> = (props) => {
                       rows={3}
                       aria-label="area-comentario"
                       className={
-                        comentario === "" || !comentario
+                        !isTiempoCorriendo ||
+                        props.xbox.estado === "NO DISPONIBLE"
+                          ? "is-invalid"
+                          : comentario === "" || !comentario
                           ? ""
                           : comentario && regexComentario.test(comentario)
                           ? "is-valid"
