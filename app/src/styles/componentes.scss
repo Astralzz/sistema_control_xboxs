@@ -73,6 +73,37 @@
     }
 }
 
+// Todo ---> PAGINATION
+.pagination-tabla {
+    // * Pagina
+    .page-link {
+        background-color: $color-variant;
+        color: $color-letra;
+        border-color: $color-variant;
+
+        &:hover {
+            cursor: pointer;
+            background-color: $color-variant-hover;
+            color: $color-letra;
+            border-color: $color-variant-hover;
+        }
+    }
+
+    // * Activo
+    .page-item.active .page-link {
+        background-color: $color-variant-active;
+        color: $color-letra;
+        border-color: $color-variant-active;
+
+        &:hover {
+            cursor: pointer;
+            background-color: $color-variant-hover;
+            color: $color-letra;
+            border-color: $color-variant-hover;
+        }
+    }
+}
+
 // Todo ---> ALARMA
 
 .img-alarma {

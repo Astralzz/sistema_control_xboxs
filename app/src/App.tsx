@@ -4,7 +4,6 @@ import { Container } from "react-bootstrap";
 
 // * Paginas
 import { BrowserRouter } from "react-router-dom";
-import BarraSuperior from "./components/BarraSuperior";
 import PieDePagina from "./components/PieDePagina";
 
 // * Estilos

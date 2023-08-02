@@ -1,5 +1,5 @@
 import moment from "moment";
-import 'moment/locale/es';
+import "moment/locale/es";
 import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
 
 // * Variables de estilos
@@ -282,3 +282,27 @@ export const seleccionarTiempoManual = (
         resolve(-1);
       });
   });
+
+// * Calcular no de paginas
+export function calcularPaginaciones(
+  numeroDatos: number,
+  datosPorPagina: number = 10
+): number {
+  // ? Es menor a 1
+  if (numeroDatos < 1) {
+    return 0;
+  }
+
+  return Math.ceil(numeroDatos / datosPorPagina);
+}
+
+
+// * Cortar texto
+export function truncarTexto(texto: string, longitudMaxima: number): string {
+  // ? Es mayor
+  if (texto.length > longitudMaxima) {
+    return texto.substring(0, longitudMaxima) + '...';
+  } else {
+    return texto;
+  }
+}

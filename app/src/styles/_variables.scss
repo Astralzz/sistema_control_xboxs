@@ -7,6 +7,12 @@ $color-cancelar: #dc3545;
 $color-aceptado: #198754;
 $color-no-aceptado: #dc3545;
 
+// * Variant
+$color-variant: #212529;
+$color-variant-hover: #30373d;
+$color-variant-active: #13171b;
+
+
 // * Barra
 $color-barra: rgb(22, 26, 41);
 $color-letra-seleccionada: rgb(240, 229, 194);
@@ -27,7 +33,7 @@ $color-tab-error-seleccionado-xbox: rgba(167, 33, 33, 0.5);
 
 :root {
     --color-fondo: #282c34;
-    --color-fondo-opaco:rgba(21, 23, 25, 0.5);
+    --color-fondo-opaco: rgba(21, 23, 25, 0.5);
     --color-letra: white;
     --color-confirmar: #198754;
     --color-cancelar: #dc3545;

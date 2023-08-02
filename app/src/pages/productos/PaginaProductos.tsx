@@ -9,14 +9,11 @@ import ComponentError, {
 } from "../../components/global/ComponentError";
 import ReactLoading from "react-loading";
 import { RespuestaApi } from "../../apis/apiVariables";
-import { apiObtenerListaProductos } from "../../apis/apiProductos";
-
-// * Pagina
-interface Pagina {
-  leyenda?: string;
-  desde: number;
-  asta: number;
-}
+import {
+  apiObtenerListaProductos,
+  apiObtenerNoDeProductosTotales,
+} from "../../apis/apiProductos";
+import { alertaSwal } from "../../functions/funcionesGlobales";
 
 // * Columnas de tabla
 const columnas: ColumnasProducto = {
@@ -35,29 +32,30 @@ const PaginaProductos: React.FC = () => {
   const [productoSeleccionado, setProductoSeleccionado] =
     useState<Producto | null>(null);
   const [listaProductos, setListaProductos] = useState<Producto[]>([]);
+  const [noTotalProductos, setNoTotalProductos] = useState<number>(0);
   const [isErrorTabla, setErrorTabla] = useState<DataError>({
     estado: true,
   });
 
-  //* Paginas
-  const paginas: Pagina[] = [
-    {
-      desde: 0,
-      asta: 10,
-    },
-    {
-      desde: 10,
-      asta: 20,
-    },
-    {
-      desde: 20,
-      asta: 30,
-    },
-    {
-      desde: 30,
-      asta: 40,
-    },
-  ];
+  // * Obtener numero total e datos
+  const obtenerNoTotalProductos = async (): Promise<void> => {
+    // * Buscamos
+    const res: RespuestaApi = await apiObtenerNoDeProductosTotales();
+
+    // ? Salio bien y llego data
+    if (res.estado && res.dato) {
+      setNoTotalProductos(res.dato);
+      return;
+    }
+
+    // ! Error
+    alertaSwal(
+      "Error",
+      "No se pudo obtener el numero total de productos",
+      "error"
+    );
+    setNoTotalProductos(0);
+  };
 
   // * Obtener xbox
   const obtenerProductos = useCallback(async () => {
@@ -82,6 +80,9 @@ const PaginaProductos: React.FC = () => {
 
       // Ponemos lista
       setListaProductos(res.listaProductos ?? []);
+
+      // * Obtenemos el total
+      await obtenerNoTotalProductos();
     } catch (error) {
       console.error(String(error));
     } finally {
@@ -124,24 +125,13 @@ const PaginaProductos: React.FC = () => {
               />
             ) : (
               // * Tabla de productos
-              <>
-                <TablaProductos
-                  lista={listaProductos}
-                  columnas={columnas}
-                  setCargandoTabla={setCargandoTabla}
-                  setProductoSeleccionado={setProductoSeleccionado}
-                />
-                {/* Pagination */}
-                <Pagination size="sm">
-                  {paginas.map((pagina, i) => {
-                    return (
-                      <Pagination.Item key={i} active={i === 2}>
-                        {pagina.leyenda ?? i + 1}
-                      </Pagination.Item>
-                    );
-                  })}
-                </Pagination>
-              </>
+              <TablaProductos
+                lista={listaProductos}
+                totalProductos={noTotalProductos}
+                columnas={columnas}
+                setCargandoTabla={setCargandoTabla}
+                setProductoSeleccionado={setProductoSeleccionado}
+              />
             )}
           </Container>
         </Col>

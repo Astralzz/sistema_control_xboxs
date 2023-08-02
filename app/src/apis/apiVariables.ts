@@ -22,7 +22,7 @@ export interface RespuestaApi {
   renta?: Renta;
   producto?: Producto;
   // Data
-  dato?: number | string;
+  dato?: number;
 }
 
 // * Respuesta axios
