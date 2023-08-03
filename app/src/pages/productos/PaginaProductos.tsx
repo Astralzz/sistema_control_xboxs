@@ -31,13 +31,15 @@ const PaginaProductos: React.FC = () => {
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
   const [productoSeleccionado, setProductoSeleccionado] =
     useState<Producto | null>(null);
-  const [listaProductos, setListaProductos] = useState<Producto[]>([]);
   const [noTotalProductos, setNoTotalProductos] = useState<number>(0);
   const [isErrorTabla, setErrorTabla] = useState<DataError>({
     estado: true,
   });
 
-  // * Obtener numero total e datos
+  // * Listas
+  const [listaProductos, setListaProductos] = useState<Producto[]>([]);
+
+  // * Obtener numero total de datos
   const obtenerNoTotalProductos = async (): Promise<void> => {
     // * Buscamos
     const res: RespuestaApi = await apiObtenerNoDeProductosTotales();
@@ -57,38 +59,44 @@ const PaginaProductos: React.FC = () => {
     setNoTotalProductos(0);
   };
 
-  // * Obtener xbox
-  const obtenerProductos = useCallback(async () => {
-    try {
-      setCargandoTabla(true);
+  // * Obtener productos
+  const obtenerProductos = useCallback(
+    async (desde: number = 0, asta: number = 10) => {
+      try {
+        setCargandoTabla(true);
 
-      // * Buscamos
-      const res: RespuestaApi = await apiObtenerListaProductos();
+        // * Buscamos
+        const res: RespuestaApi = await apiObtenerListaProductos(desde, asta);
 
-      // ? salio mal
-      if (!res.estado) {
-        setErrorTabla({
-          estado: true,
-          titulo: res.noEstado ? String(res.noEstado) : undefined,
-          detalles: res.detalles_error ? String(res.detalles_error) : undefined,
-        });
-        return;
+        // ? salio mal
+        if (!res.estado) {
+          setErrorTabla({
+            estado: true,
+            titulo: res.noEstado ? String(res.noEstado) : undefined,
+            detalles: res.detalles_error
+              ? String(res.detalles_error)
+              : undefined,
+          });
+          setListaProductos([]);
+          return;
+        }
+
+        // * Sin errores
+        setErrorTabla({ estado: false });
+
+        // Ponemos lista
+        setListaProductos(res.listaProductos ?? []);
+
+        // * Obtenemos el total
+        await obtenerNoTotalProductos();
+      } catch (error) {
+        console.error(String(error));
+      } finally {
+        setCargandoTabla(false);
       }
-
-      // * Sin errores
-      setErrorTabla({ estado: false });
-
-      // Ponemos lista
-      setListaProductos(res.listaProductos ?? []);
-
-      // * Obtenemos el total
-      await obtenerNoTotalProductos();
-    } catch (error) {
-      console.error(String(error));
-    } finally {
-      setCargandoTabla(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   // * Al iniciar
   useEffect(() => {
@@ -98,7 +106,7 @@ const PaginaProductos: React.FC = () => {
   // Todo, componente principal
   return (
     <Container className="contenedor-completo">
-      <br className="mb-2" />
+      {/* <br className="mb-2" /> */}
       <Row>
         {/* Administrador */}
         <Col sm={4}>
@@ -109,20 +117,25 @@ const PaginaProductos: React.FC = () => {
         {/* Tabla */}
         <Col sm={8}>
           <Container>
-            {/* Cargando tabla */}
-            {isCargandoTabla ? (
+            {/* Si esta cargando y esta vacía */}
+            {isCargandoTabla && listaProductos.length < 1 ? (
               <div className="contenedor-centrado">
                 <ReactLoading type={"bubbles"} color="#FFF" />
               </div>
-            ) : // ! Error de tabla
+            ) : // ! Error
             isErrorTabla.estado ? (
               <ComponentError
                 titulo={isErrorTabla.titulo ?? "Error 404"}
+                accionVoid={() => obtenerProductos()}
                 detalles={
                   isErrorTabla.detalles ?? "No se pudieron cargar los productos"
                 }
-                accionVoid={obtenerProductos}
               />
+            ) : // ? Tabla vacía
+            listaProductos.length < 1 ? (
+              <div className="contenedor-centrado">
+                <h3>Tabla vacía</h3>
+              </div>
             ) : (
               // * Tabla de productos
               <TablaProductos
@@ -131,6 +144,10 @@ const PaginaProductos: React.FC = () => {
                 columnas={columnas}
                 setCargandoTabla={setCargandoTabla}
                 setProductoSeleccionado={setProductoSeleccionado}
+                obtenerMasDatos={(desde: number, asta: number) =>
+                  obtenerProductos(desde, asta)
+                }
+                isCargandoTabla={isCargandoTabla}
               />
             )}
           </Container>

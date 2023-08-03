@@ -1,11 +1,31 @@
 import React, { Dispatch, useEffect, useState } from "react";
-import { Pagination, Table } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Form,
+  InputGroup,
+  Navbar,
+  Pagination,
+  Row,
+  Table,
+} from "react-bootstrap";
 import IconoBootstrap from "../global/IconoBootstrap";
 import Producto from "../../models/Producto";
-import { calcularPaginaciones } from "../../functions/funcionesGlobales";
+import {
+  Paginacion,
+  calcularPaginaciones,
+} from "../../functions/funcionesGlobales";
 import { TextoLargoElement } from "../global/Otros";
+import ReactLoading from "react-loading";
+import { regexBuscar } from "../../functions/variables";
 
-const noDatosPorPagina: number = 10;
+// * Estilos
+const styles: React.CSSProperties = {
+  backgroundColor: "transparent",
+  color: "var(--color-letra)",
+  border: "none",
+  borderBottom: "1px solid white",
+};
 
 // * Columnas
 export interface ColumnasProducto {
@@ -17,13 +37,6 @@ export interface ColumnasProducto {
   masInf?: boolean;
 }
 
-// * Pagina
-interface Pagina {
-  leyenda?: string;
-  desde: number;
-  asta: number;
-}
-
 // * Props
 interface Props {
   lista: Producto[];
@@ -31,34 +44,75 @@ interface Props {
   columnas: ColumnasProducto;
   setCargandoTabla: Dispatch<boolean>;
   setProductoSeleccionado: Dispatch<Producto | null>;
+  obtenerMasDatos: (desde: number, asta: number) => void;
+  isCargandoTabla: boolean;
 }
 
 // Todo, Tabla Rentas
 const TablaProductos: React.FC<Props> = (props) => {
   // * Variables
-  const [totalPaginaciones, setTotalPaginaciones] = useState<Pagina[]>([]);
+  const [totalPaginaciones, setTotalPaginaciones] = useState<Paginacion[]>([]);
+  const [textBuscar, setTextBuscar] = useState<string>("");
 
   // * Al cambiar
   useEffect(() => {
     // Total
-    const t: number = calcularPaginaciones(props.totalProductos);
-
-    // * Recorremos
-    const paginas: Pagina[] = [];
-    for (let i = 0; i < t; i++) {
-      i = i + 1;
-
-      paginas.push({
-        desde: i * noDatosPorPagina,
-        asta: i * (noDatosPorPagina * 2),
-      });
-    }
-
-    setTotalPaginaciones(paginas);
+    const pag: Paginacion[] = calcularPaginaciones(props.totalProductos);
+    setTotalPaginaciones(pag);
   }, [props.totalProductos]);
 
   return (
     <div>
+      {/* Narval */}
+      <Navbar className="bg-body-transparent justify-content-end">
+        {/* Precio */}
+        <InputGroup>
+          <Form.Control
+            placeholder="buscar"
+            type="text"
+            style={styles}
+            className={
+              textBuscar === ""
+                ? ""
+                : regexBuscar.test(textBuscar)
+                ? "is-valid"
+                : "is-invalid"
+            }
+            value={textBuscar}
+            onChange={(t) => setTextBuscar(t.target.value)}
+          />
+          <div className="boton-buscar">
+            <Button disabled={!regexBuscar.test(textBuscar)} className="bt-b">
+              Buscar
+            </Button>
+          </div>
+        </InputGroup>
+
+        {/* Nombre */}
+        <InputGroup>
+          <Form.Control
+            placeholder="buscar"
+            type="text"
+            style={styles}
+            className={
+              textBuscar === ""
+                ? ""
+                : regexBuscar.test(textBuscar)
+                ? "is-valid"
+                : "is-invalid"
+            }
+            value={textBuscar}
+            onChange={(t) => setTextBuscar(t.target.value)}
+          />
+          <div className="boton-buscar">
+            <Button disabled={!regexBuscar.test(textBuscar)} className="bt-b">
+              Buscar
+            </Button>
+          </div>
+        </InputGroup>
+      </Navbar>
+
+      {/* Tabla */}
       <Table responsive bordered variant="dark">
         {/* TÍTULOS */}
         <thead>
@@ -112,18 +166,19 @@ const TablaProductos: React.FC<Props> = (props) => {
           })}
         </tbody>
       </Table>
-      {/* Pagination */}
-      <div className="d-flex justify-content-start">
-        <Pagination size="sm" className="pagination-tabla">
-          {totalPaginaciones.map((pagina, i) => {
-            return (
-              <Pagination.Item key={i}>
-                {pagina.leyenda ?? i + 1}
-              </Pagination.Item>
-            );
-          })}
-        </Pagination>
-      </div>
+
+      <Pagination size="sm" className="pagination-tabla">
+        {totalPaginaciones.map((pagina, i) => {
+          return (
+            <Pagination.Item
+              key={i}
+              onClick={() => props.obtenerMasDatos(pagina.desde, pagina.asta)}
+            >
+              {i + 1}
+            </Pagination.Item>
+          );
+        })}
+      </Pagination>
     </div>
   );
 };

@@ -8,6 +8,12 @@ const colorLetra: string = "var(--color-letra)";
 const colorAceptar: string = "var(--color-confirmar)";
 const colorCancelar: string = "var(--color-cancelar)";
 
+// * Paginacion
+export interface Paginacion {
+  desde: number;
+  asta: number;
+}
+
 // * Calcular monto recaudado
 export function calcularMontoRecaudado(
   m: number,
@@ -287,21 +293,29 @@ export const seleccionarTiempoManual = (
 export function calcularPaginaciones(
   numeroDatos: number,
   datosPorPagina: number = 10
-): number {
-  // ? Es menor a 1
-  if (numeroDatos < 1) {
-    return 0;
+): Paginacion[] {
+  // t paginas
+  const totalPaginas =
+    numeroDatos < 1 ? 0 : Math.ceil(numeroDatos / datosPorPagina);
+
+  //  Recorremos y agregamos
+  const paginas: Paginacion[] = [];
+  for (let i = 0; i < totalPaginas; i++) {
+    paginas.push({
+      desde: i * datosPorPagina,
+      //asta: i === totalPaginas - 1 ? numeroDatos - 1 : (i + 1) * datosPorPagina - 1;
+      asta: datosPorPagina
+    });
   }
 
-  return Math.ceil(numeroDatos / datosPorPagina);
+  return paginas;
 }
-
 
 // * Cortar texto
 export function truncarTexto(texto: string, longitudMaxima: number): string {
   // ? Es mayor
   if (texto.length > longitudMaxima) {
-    return texto.substring(0, longitudMaxima) + '...';
+    return texto.substring(0, longitudMaxima) + "...";
   } else {
     return texto;
   }
