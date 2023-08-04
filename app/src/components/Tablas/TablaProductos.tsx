@@ -1,12 +1,12 @@
 import React, { Dispatch, useEffect, useState } from "react";
 import {
   Button,
-  Col,
+  Container,
   Form,
   InputGroup,
   Navbar,
   Pagination,
-  Row,
+  Spinner,
   Table,
 } from "react-bootstrap";
 import IconoBootstrap from "../global/IconoBootstrap";
@@ -16,8 +16,10 @@ import {
   calcularPaginaciones,
 } from "../../functions/funcionesGlobales";
 import { TextoLargoElement } from "../global/Otros";
-import ReactLoading from "react-loading";
-import { regexBuscar } from "../../functions/variables";
+import {
+  regexBuscarTitulo,
+  regexNumerosEnteros,
+} from "../../functions/variables";
 
 // * Estilos
 const styles: React.CSSProperties = {
@@ -44,76 +46,111 @@ interface Props {
   columnas: ColumnasProducto;
   setCargandoTabla: Dispatch<boolean>;
   setProductoSeleccionado: Dispatch<Producto | null>;
-  obtenerMasDatos: (desde: number, asta: number) => void;
+  obtenerMasDatos: (
+    desde: number,
+    asta: number,
+    nombre?: string,
+    stock?: number
+  ) => void;
   isCargandoTabla: boolean;
 }
 
 // Todo, Tabla Rentas
 const TablaProductos: React.FC<Props> = (props) => {
   // * Variables
-  const [totalPaginaciones, setTotalPaginaciones] = useState<Paginacion[]>([]);
-  const [textBuscar, setTextBuscar] = useState<string>("");
+  const [listaPaginaciones, setListaPaginaciones] = useState<Paginacion[]>([]);
+  const [pagSeleccionada, setPaginaSeleccionada] = useState<number>(0);
+  const [textBuscarTitulo, setTextBuscarTitulo] = useState<string>("");
+  const [textBuscarCantidad, setTextBuscarCantidad] = useState<string>("");
 
   // * Al cambiar
   useEffect(() => {
     // Total
     const pag: Paginacion[] = calcularPaginaciones(props.totalProductos);
-    setTotalPaginaciones(pag);
+    setListaPaginaciones(pag);
   }, [props.totalProductos]);
 
   return (
     <div>
-      {/* Narval */}
+      {/* BARRA SUPERIOR */}
       <Navbar className="bg-body-transparent justify-content-end">
-        {/* Precio */}
-        <InputGroup>
-          <Form.Control
-            placeholder="buscar"
-            type="text"
-            style={styles}
-            className={
-              textBuscar === ""
-                ? ""
-                : regexBuscar.test(textBuscar)
-                ? "is-valid"
-                : "is-invalid"
-            }
-            value={textBuscar}
-            onChange={(t) => setTextBuscar(t.target.value)}
-          />
+        <Container>
+          {/* Todos los productos */}
           <div className="boton-buscar">
-            <Button disabled={!regexBuscar.test(textBuscar)} className="bt-b">
-              Buscar
+            <Button
+              className="bt-b"
+              onClick={() => props.obtenerMasDatos(0, 10)}
+            >
+              Todos
             </Button>
           </div>
-        </InputGroup>
+          <Navbar.Toggle />
+          <Navbar.Collapse className="justify-content-end">
+            {/* Stock */}
+            <InputGroup className="placeholder-blanco">
+              <Form.Control
+                placeholder="buscar cantidad"
+                type="text"
+                style={styles}
+                className={
+                  textBuscarCantidad === ""
+                    ? ""
+                    : regexNumerosEnteros.test(textBuscarCantidad)
+                    ? "is-valid"
+                    : "is-invalid"
+                }
+                value={String(textBuscarCantidad)}
+                onChange={(t) => setTextBuscarCantidad(t.target.value)}
+              />
+              <div className="boton-buscar">
+                <Button
+                  disabled={!regexNumerosEnteros.test(textBuscarCantidad)}
+                  className="bt-b"
+                  onClick={() =>
+                    props.obtenerMasDatos(
+                      0,
+                      10,
+                      undefined,
+                      Number(textBuscarCantidad)
+                    )
+                  }
+                >
+                  Buscar
+                </Button>
+              </div>
+            </InputGroup>
+          </Navbar.Collapse>
+        </Container>
 
         {/* Nombre */}
-        <InputGroup>
+        <InputGroup className="placeholder-blanco">
           <Form.Control
-            placeholder="buscar"
+            placeholder="buscar por nombre"
             type="text"
             style={styles}
             className={
-              textBuscar === ""
+              textBuscarTitulo === ""
                 ? ""
-                : regexBuscar.test(textBuscar)
+                : regexBuscarTitulo.test(textBuscarTitulo)
                 ? "is-valid"
                 : "is-invalid"
             }
-            value={textBuscar}
-            onChange={(t) => setTextBuscar(t.target.value)}
+            value={textBuscarTitulo}
+            onChange={(t) => setTextBuscarTitulo(t.target.value)}
           />
           <div className="boton-buscar">
-            <Button disabled={!regexBuscar.test(textBuscar)} className="bt-b">
+            <Button
+              disabled={!regexBuscarTitulo.test(textBuscarTitulo)}
+              onClick={() => props.obtenerMasDatos(0, 10, textBuscarTitulo)}
+              className="bt-b"
+            >
               Buscar
             </Button>
           </div>
         </InputGroup>
       </Navbar>
-
-      {/* Tabla */}
-      <Table responsive bordered variant="dark">
+      {/* TABLA */}
+      <Table responsive bordered variant="dark" style={{ marginBottom: 0 }}>
         {/* TÍTULOS */}
         <thead>
           <tr>
@@ -129,10 +166,41 @@ const TablaProductos: React.FC<Props> = (props) => {
         <tbody>
           {/* Recorremos */}
           {props.lista.map((producto, i) => {
+            // ? Esta cargando
+            if (props.isCargandoTabla) {
+              return (
+                <tr key={i}>
+                  {/* Numero */}
+                  {props.columnas.no && (
+                    <td>
+                      {listaPaginaciones[pagSeleccionada]
+                        ? listaPaginaciones[pagSeleccionada].desde + (i + 1)
+                        : i + 1}
+                    </td>
+                  )}
+                  {/* Cargando */}
+                  {[1, 2, 3, 4, 5].map((j) => {
+                    return (
+                      <td key={j + i}>
+                        <Spinner animation="grow" size="sm" />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            }
+
+            // Todo, Datos tabla
             return (
               <tr key={i} className="text-left">
                 {/* Numero */}
-                {props.columnas.no && <td>{i + 1}</td>}
+                {props.columnas.no && (
+                  <td>
+                    {listaPaginaciones[pagSeleccionada]
+                      ? listaPaginaciones[pagSeleccionada].desde + (i + 1)
+                      : i + 1}
+                  </td>
+                )}
                 {/* Nombre */}
                 {props.columnas.nombre && (
                   <TextoLargoElement
@@ -166,13 +234,17 @@ const TablaProductos: React.FC<Props> = (props) => {
           })}
         </tbody>
       </Table>
-
+      {/* PAGINACION */}
       <Pagination size="sm" className="pagination-tabla">
-        {totalPaginaciones.map((pagina, i) => {
+        {listaPaginaciones.map((pagina, i) => {
           return (
             <Pagination.Item
+              active={pagSeleccionada === i}
               key={i}
-              onClick={() => props.obtenerMasDatos(pagina.desde, pagina.asta)}
+              onClick={() => {
+                setPaginaSeleccionada(i);
+                props.obtenerMasDatos(pagina.desde, pagina.asta);
+              }}
             >
               {i + 1}
             </Pagination.Item>

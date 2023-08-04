@@ -540,342 +540,320 @@ const CartaXbox: React.FC<Props> = (props) => {
 
         {/* CUERPO DE LA CARTA */}
         <Card.Body>
-          <Row>
-            {/* TEMPORIZADOR */}
-            <Col xs={4}>
-              <Toast
-                animation
-                style={{
-                  backgroundColor: "transparent",
-                  border: "none",
-                  boxShadow: "none",
-                }}
-              >
-                {/* CUERPO */}
-                <Toast.Body>
-                  <div className="d-flex flex-column justify-content-center">
-                    <br className="mb-2" />
-                    {/* Temporizador */}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <CountdownCircleTimer
-                        rotation="clockwise"
-                        key={keyTemporizador}
-                        isPlaying={isTiempoCorriendo}
-                        duration={tiempoRestante}
-                        colors={["#3C9B2C", "#FAB200", "#F2961C", "#A30000"]}
-                        size={230}
-                        colorsTime={[tiempoSeleccionado, 5, 2, 0]}
-                        onComplete={(): void => {
-                          terminarTemporizador();
+          {props.xbox.estado === "NO DISPONIBLE" ? (
+            <div className="contenedor-centrado">
+              <h4>Xbox no disponible</h4>
+            </div>
+          ) : (
+            <Row>
+              {/* TEMPORIZADOR */}
+              <Col xs={4}>
+                <Toast
+                  animation
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    boxShadow: "none",
+                  }}
+                >
+                  {/* CUERPO */}
+                  <Toast.Body>
+                    <div className="d-flex flex-column justify-content-center">
+                      <br className="mb-2" />
+                      {/* Temporizador */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
                         }}
                       >
-                        {renderizarTiempo}
-                      </CountdownCircleTimer>
+                        <CountdownCircleTimer
+                          rotation="clockwise"
+                          key={keyTemporizador}
+                          isPlaying={isTiempoCorriendo}
+                          duration={tiempoRestante}
+                          colors={["#3C9B2C", "#FAB200", "#F2961C", "#A30000"]}
+                          size={230}
+                          colorsTime={[tiempoSeleccionado, 5, 2, 0]}
+                          onComplete={(): void => {
+                            terminarTemporizador();
+                          }}
+                        >
+                          {renderizarTiempo}
+                        </CountdownCircleTimer>
+                      </div>
+                      <br className="mb-2" />
+                      {/* Botones del temporizador */}
+                      <ButtonGroup className="botones-temporizador">
+                        {/* Iniciar */}
+                        <Button
+                          className="b-tp"
+                          variant="dark"
+                          onClick={() => {
+                            // ? Es menor a 1
+                            if (tiempoRestante > 1) {
+                              continuarTemporizador();
+                              return;
+                            }
+                            iniciarTemporizador();
+                          }}
+                          disabled={
+                            isTiempoCorriendo ||
+                            tiempoSeleccionado < 0 ||
+                            idAlarma !== null
+                          }
+                        >
+                          <IconoBootstrap nombre="PlayFill" size={25} />
+                        </Button>
+                        {/* Pausar */}
+                        <Button
+                          className="b-tp"
+                          variant="dark"
+                          disabled={
+                            !isTiempoCorriendo || tiempoSeleccionado < 0
+                          }
+                          onClick={pausarTemporizador}
+                        >
+                          <IconoBootstrap nombre="PauseFill" size={25} />
+                        </Button>
+                        {/* Terminar */}
+                        <Button
+                          className="b-tp"
+                          variant="dark"
+                          disabled={!isTiempoCorriendo}
+                          onClick={async () => {
+                            // Confirmacion
+                            const res = await confirmacionSwal(
+                              "Estas seguro?",
+                              "Quieres terminar este temporizador!",
+                              "Si, terminar"
+                            );
+
+                            // ? Si
+                            if (res) {
+                              terminarTemporizador(false);
+                            }
+                          }}
+                        >
+                          <IconoBootstrap nombre="X" size={25} />
+                        </Button>
+                      </ButtonGroup>
                     </div>
-                    <br className="mb-2" />
-                    {/* Botones del temporizador */}
-                    <ButtonGroup className="botones-temporizador">
-                      {/* Iniciar */}
-                      <Button
-                        className="b-tp"
-                        variant="dark"
-                        onClick={() => {
-                          // ? Es menor a 1
-                          if (tiempoRestante > 1) {
-                            continuarTemporizador();
-                            return;
-                          }
-                          iniciarTemporizador();
-                        }}
-                        disabled={
-                          isTiempoCorriendo ||
-                          tiempoSeleccionado < 0 ||
-                          idAlarma !== null
-                        }
-                      >
-                        <IconoBootstrap nombre="PlayFill" size={25} />
-                      </Button>
-                      {/* Pausar */}
-                      <Button
-                        className="b-tp"
-                        variant="dark"
-                        disabled={!isTiempoCorriendo || tiempoSeleccionado < 0}
-                        onClick={pausarTemporizador}
-                      >
-                        <IconoBootstrap nombre="PauseFill" size={25} />
-                      </Button>
-                      {/* Terminar */}
-                      <Button
-                        className="b-tp"
-                        variant="dark"
-                        disabled={!isTiempoCorriendo}
-                        onClick={async () => {
-                          // Confirmacion
-                          const res = await confirmacionSwal(
-                            "Estas seguro?",
-                            "Quieres terminar este temporizador!",
-                            "Si, terminar"
-                          );
-
-                          // ? Si
-                          if (res) {
-                            terminarTemporizador(false);
-                          }
-                        }}
-                      >
-                        <IconoBootstrap nombre="X" size={25} />
-                      </Button>
-                    </ButtonGroup>
-                  </div>
-                </Toast.Body>
-              </Toast>
-            </Col>
-            {/* CONTROLES */}
-            <Col xs={8}>
-              {/* -------- CUERPO */}
-              <div className="d-flex flex-column">
-                <br className="mb-3" />
-                {/* -------- INFORMACIÓN */}
-                <h3>
-                  {`Tiempo: ${
-                    tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
-                  } | Recaudado: ${recaudado} $ | Estimado: ${precioEstimado} $
-                  `}
-                </h3>
-                <br />
-                {/* -------- CONTROL DE TIEMPOS */}
-                <InputGroup className="mb-2">
-                  {/* Tiempo inicial */}
-                  <InputGroup.Text style={styles[1]}>
-                    Seleccionar
-                  </InputGroup.Text>
-                  <Form.Select
-                    disabled={
-                      isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE" ||
-                      isPausa
-                    }
-                    onChange={(e) => seleccionarTiempoInicial(e.target.value)}
-                    value={tiempoSeleccionado / 60 ?? 0}
-                    className={
-                      isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE" ||
-                      isPausa
-                        ? "is-invalid"
-                        : "is-valid"
-                    }
-                    style={styles[0]}
-                  >
-                    {selectsTiempo.map((select, i) => {
-                      return (
-                        <option key={i} value={select.tiempo}>
-                          {select.leyenda}
-                        </option>
-                      );
-                    })}
-                  </Form.Select>
-
-                  {/* Aumentar tiempo */}
-                  <InputGroup.Text style={styles[1]}>Aumentar</InputGroup.Text>
-                  <Form.Select
-                    disabled={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                    onChange={async (e) => aumentarTiempo(e.target.value)}
-                    value={0}
-                    className={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                        ? "is-invalid"
-                        : "is-valid"
-                    }
-                    style={styles[0]}
-                  >
-                    {selectsTiempo.map((select, i) => {
-                      return (
-                        <option key={i} value={select.tiempo}>
-                          {select.leyenda}
-                        </option>
-                      );
-                    })}
-                  </Form.Select>
-
-                  {/* Disminuir tiempo */}
-                  <InputGroup.Text style={styles[1]}>Disminuir</InputGroup.Text>
-                  <Form.Select
-                    disabled={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                    onChange={async (e) => {
-                      // ? Menor a 1
-                      if (tiempoRestante < 1) {
-                        return;
+                  </Toast.Body>
+                </Toast>
+              </Col>
+              {/* CONTROLES */}
+              <Col xs={8}>
+                {/* -------- CUERPO */}
+                <div className="d-flex flex-column">
+                  <br className="mb-3" />
+                  {/* -------- INFORMACIÓN */}
+                  <h3>
+                    {`Tiempo: ${
+                      tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
+                    } | Recaudado: ${recaudado} $ | Estimado: ${precioEstimado} $
+              `}
+                  </h3>
+                  <br />
+                  {/* -------- CONTROL DE TIEMPOS */}
+                  <InputGroup className="mb-2">
+                    {/* Tiempo inicial */}
+                    <InputGroup.Text style={styles[1]}>
+                      Seleccionar
+                    </InputGroup.Text>
+                    <Form.Select
+                      disabled={isTiempoCorriendo || isPausa}
+                      onChange={(e) => seleccionarTiempoInicial(e.target.value)}
+                      value={tiempoSeleccionado / 60 ?? 0}
+                      className={
+                        isTiempoCorriendo || isPausa ? "is-invalid" : "is-valid"
                       }
-
-                      // Convertimos
-                      const en: number = Number(e.target.value);
-
-                      // ? Es NaN
-                      if (isNaN(en)) {
-                        alertaSwal(
-                          "ERROR",
-                          "Ocurrió un error extraño, comuníquelo al desarrollador",
-                          "error"
+                      style={styles[0]}
+                    >
+                      {selectsTiempo.map((select, i) => {
+                        return (
+                          <option key={i} value={select.tiempo}>
+                            {select.leyenda}
+                          </option>
                         );
-                        return;
-                      }
+                      })}
+                    </Form.Select>
 
-                      // ? Menor a 1
-                      if (en < 1) {
-                        // Alerta
-                        const n: number = await seleccionarTiempoManual(
-                          "disminuido"
+                    {/* Aumentar tiempo */}
+                    <InputGroup.Text style={styles[1]}>
+                      Aumentar
+                    </InputGroup.Text>
+                    <Form.Select
+                      disabled={!isTiempoCorriendo}
+                      onChange={async (e) => aumentarTiempo(e.target.value)}
+                      value={0}
+                      className={!isTiempoCorriendo ? "is-invalid" : "is-valid"}
+                      style={styles[0]}
+                    >
+                      {selectsTiempo.map((select, i) => {
+                        return (
+                          <option key={i} value={select.tiempo}>
+                            {select.leyenda}
+                          </option>
                         );
+                      })}
+                    </Form.Select>
 
-                        // ? Es negativo
-                        if (n < 1) {
+                    {/* Disminuir tiempo */}
+                    <InputGroup.Text style={styles[1]}>
+                      Disminuir
+                    </InputGroup.Text>
+                    <Form.Select
+                      disabled={!isTiempoCorriendo}
+                      onChange={async (e) => {
+                        // ? Menor a 1
+                        if (tiempoRestante < 1) {
                           return;
                         }
 
-                        // Disminuimos
-                        disminuirTiempo(n);
-                        return;
-                      }
+                        // Convertimos
+                        const en: number = Number(e.target.value);
 
-                      disminuirTiempo(en);
-                    }}
-                    value={0}
-                    className={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                        ? "is-invalid"
-                        : "is-valid"
-                    }
-                    style={styles[0]}
-                  >
-                    {selectsTiempo.map((select, i) => {
-                      return (
-                        <option key={i} value={select.tiempo}>
-                          {select.leyenda}
-                        </option>
-                      );
-                    })}
-                  </Form.Select>
-                </InputGroup>
-                {/* -------- PAGO Y CONTROLES */}
-                <InputGroup className="mb-3">
-                  {/* Renta pagada */}
-                  <InputGroup.Text style={styles[1]}>
-                    ¿Renta pagada?
-                  </InputGroup.Text>
-                  <Form.Select
-                    aria-label="Pago la renta"
-                    value={isPagado ? 1 : 0}
-                    disabled={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                    onChange={(e) => setPagado(parseInt(e.target.value) === 1)}
-                    className={"is-valid"}
-                    style={styles[0]}
-                  >
-                    <option value={1}>SI</option>
-                    <option value={0}>NO</option>
-                  </Form.Select>
+                        // ? Es NaN
+                        if (isNaN(en)) {
+                          alertaSwal(
+                            "ERROR",
+                            "Ocurrió un error extraño, comuníquelo al desarrollador",
+                            "error"
+                          );
+                          return;
+                        }
 
-                  {/* Numero de controles */}
-                  <InputGroup.Text style={styles[1]}>
-                    ¿Cuantos controles?
-                  </InputGroup.Text>
-                  <Form.Select
-                    aria-label="Controles de renta"
-                    value={!isControlExtra ? 1 : 2}
-                    disabled={
-                      !isTiempoCorriendo ||
-                      props.xbox.estado === "NO DISPONIBLE"
-                    }
-                    onChange={(n) =>
-                      setControlExtra(parseInt(n.target.value) !== 1)
-                    }
-                    className={"is-valid"}
-                    style={styles[0]}
-                  >
-                    <option value={1}>1</option>
-                    <option value={2}>2</option>
-                  </Form.Select>
-                </InputGroup>
-                {/* -------- CLIENTE Y COMENTARIO */}
-                <div>
-                  {/* Cliente */}
+                        // ? Menor a 1
+                        if (en < 1) {
+                          // Alerta
+                          const n: number = await seleccionarTiempoManual(
+                            "disminuido"
+                          );
+
+                          // ? Es negativo
+                          if (n < 1) {
+                            return;
+                          }
+
+                          // Disminuimos
+                          disminuirTiempo(n);
+                          return;
+                        }
+
+                        disminuirTiempo(en);
+                      }}
+                      value={0}
+                      className={!isTiempoCorriendo ? "is-invalid" : "is-valid"}
+                      style={styles[0]}
+                    >
+                      {selectsTiempo.map((select, i) => {
+                        return (
+                          <option key={i} value={select.tiempo}>
+                            {select.leyenda}
+                          </option>
+                        );
+                      })}
+                    </Form.Select>
+                  </InputGroup>
+                  {/* -------- PAGO Y CONTROLES */}
                   <InputGroup className="mb-3">
-                    <InputGroup.Text style={styles[1]}>Cliente</InputGroup.Text>
-                    <Form.Control
-                      onChange={(e) => setCliente(e.target.value)}
-                      value={cliente ?? ""}
-                      type="text"
-                      autoFocus
-                      aria-label="Nombre del cliente"
-                      aria-describedby="Cliente que esta rentando actualmente"
-                      maxLength={60}
-                      autoComplete="off"
-                      disabled={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                      }
-                      className={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                          ? "is-invalid"
-                          : cliente === "" || !cliente
-                          ? ""
-                          : cliente && regexCliente.test(cliente)
-                          ? "is-valid"
-                          : "is-invalid"
-                      }
-                      style={styles[0]}
-                    />
-                  </InputGroup>
-                  {/* Comentario */}
-                  <InputGroup>
+                    {/* Renta pagada */}
                     <InputGroup.Text style={styles[1]}>
-                      Comentario
+                      ¿Renta pagada?
                     </InputGroup.Text>
-                    <Form.Control
-                      onChange={(e) => setComentario(e.target.value)}
-                      value={comentario ?? ""}
-                      maxLength={360}
-                      autoComplete="off"
-                      disabled={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
+                    <Form.Select
+                      aria-label="Pago la renta"
+                      value={isPagado ? 1 : 0}
+                      disabled={!isTiempoCorriendo}
+                      onChange={(e) =>
+                        setPagado(parseInt(e.target.value) === 1)
                       }
-                      as="textarea"
-                      rows={3}
-                      aria-label="area-comentario"
-                      className={
-                        !isTiempoCorriendo ||
-                        props.xbox.estado === "NO DISPONIBLE"
-                          ? "is-invalid"
-                          : comentario === "" || !comentario
-                          ? ""
-                          : comentario && regexComentario.test(comentario)
-                          ? "is-valid"
-                          : "is-invalid"
-                      }
+                      className={"is-valid"}
                       style={styles[0]}
-                    />
+                    >
+                      <option value={1}>SI</option>
+                      <option value={0}>NO</option>
+                    </Form.Select>
+
+                    {/* Numero de controles */}
+                    <InputGroup.Text style={styles[1]}>
+                      ¿Cuantos controles?
+                    </InputGroup.Text>
+                    <Form.Select
+                      aria-label="Controles de renta"
+                      value={!isControlExtra ? 1 : 2}
+                      disabled={!isTiempoCorriendo}
+                      onChange={(n) =>
+                        setControlExtra(parseInt(n.target.value) !== 1)
+                      }
+                      className={"is-valid"}
+                      style={styles[0]}
+                    >
+                      <option value={1}>1</option>
+                      <option value={2}>2</option>
+                    </Form.Select>
                   </InputGroup>
+                  {/* -------- CLIENTE Y COMENTARIO */}
+                  <div>
+                    {/* Cliente */}
+                    <InputGroup className="mb-3">
+                      <InputGroup.Text style={styles[1]}>
+                        Cliente
+                      </InputGroup.Text>
+                      <Form.Control
+                        onChange={(e) => setCliente(e.target.value)}
+                        value={cliente ?? ""}
+                        type="text"
+                        autoFocus
+                        aria-label="Nombre del cliente"
+                        aria-describedby="Cliente que esta rentando actualmente"
+                        maxLength={60}
+                        autoComplete="off"
+                        disabled={!isTiempoCorriendo}
+                        className={
+                          !isTiempoCorriendo
+                            ? "is-invalid"
+                            : cliente === "" || !cliente
+                            ? ""
+                            : cliente && regexCliente.test(cliente)
+                            ? "is-valid"
+                            : "is-invalid"
+                        }
+                        style={styles[0]}
+                      />
+                    </InputGroup>
+                    {/* Comentario */}
+                    <InputGroup>
+                      <InputGroup.Text style={styles[1]}>
+                        Comentario
+                      </InputGroup.Text>
+                      <Form.Control
+                        onChange={(e) => setComentario(e.target.value)}
+                        value={comentario ?? ""}
+                        maxLength={360}
+                        autoComplete="off"
+                        disabled={!isTiempoCorriendo}
+                        as="textarea"
+                        rows={3}
+                        aria-label="area-comentario"
+                        className={
+                          !isTiempoCorriendo
+                            ? "is-invalid"
+                            : comentario === "" || !comentario
+                            ? ""
+                            : comentario && regexComentario.test(comentario)
+                            ? "is-valid"
+                            : "is-invalid"
+                        }
+                        style={styles[0]}
+                      />
+                    </InputGroup>
+                  </div>
                 </div>
-              </div>
-            </Col>
-          </Row>
+              </Col>
+            </Row>
+          )}
         </Card.Body>
       </Card>
       {/* CANVAS DE INFORMACIÓN */}

@@ -11,6 +11,8 @@ import ReactLoading from "react-loading";
 import { RespuestaApi } from "../../apis/apiVariables";
 import {
   apiObtenerListaProductos,
+  apiObtenerListaProductosPorNombre,
+  apiObtenerListaProductosPorStock,
   apiObtenerNoDeProductosTotales,
 } from "../../apis/apiProductos";
 import { alertaSwal } from "../../functions/funcionesGlobales";
@@ -61,12 +63,28 @@ const PaginaProductos: React.FC = () => {
 
   // * Obtener productos
   const obtenerProductos = useCallback(
-    async (desde: number = 0, asta: number = 10) => {
+    async (
+      desde: number = 0,
+      asta: number = 10,
+      nombre?: string,
+      stock?: number
+    ) => {
       try {
         setCargandoTabla(true);
 
-        // * Buscamos
-        const res: RespuestaApi = await apiObtenerListaProductos(desde, asta);
+        // Respuesta
+        let res: RespuestaApi;
+
+        // ? Llego nombre
+        if (nombre) {
+          res = await apiObtenerListaProductosPorNombre(nombre, desde, asta);
+          // ? Llego stock
+        } else if (stock) {
+          res = await apiObtenerListaProductosPorStock(stock, desde, asta);
+          // ? Ninguno
+        } else {
+          res = await apiObtenerListaProductos(desde, asta);
+        }
 
         // ? salio mal
         if (!res.estado) {
@@ -106,7 +124,7 @@ const PaginaProductos: React.FC = () => {
   // Todo, componente principal
   return (
     <Container className="contenedor-completo">
-      {/* <br className="mb-2" /> */}
+      <br className="mb-2" />
       <Row>
         {/* Administrador */}
         <Col sm={4}>
@@ -144,9 +162,12 @@ const PaginaProductos: React.FC = () => {
                 columnas={columnas}
                 setCargandoTabla={setCargandoTabla}
                 setProductoSeleccionado={setProductoSeleccionado}
-                obtenerMasDatos={(desde: number, asta: number) =>
-                  obtenerProductos(desde, asta)
-                }
+                obtenerMasDatos={(
+                  desde: number,
+                  asta: number,
+                  nombre?: string,
+                  stock?: number
+                ) => obtenerProductos(desde, asta, nombre, stock)}
                 isCargandoTabla={isCargandoTabla}
               />
             )}
