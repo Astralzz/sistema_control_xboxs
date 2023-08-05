@@ -13,9 +13,9 @@ import {
   apiObtenerListaProductos,
   apiObtenerListaProductosPorNombre,
   apiObtenerListaProductosPorStock,
-  apiObtenerNoDeProductosTotales,
 } from "../../apis/apiProductos";
 import { alertaSwal } from "../../functions/funcionesGlobales";
+import TarjetaProducto from "./TarjetaProducto";
 
 // * Columnas de tabla
 const columnas: ColumnasProducto = {
@@ -31,6 +31,7 @@ const columnas: ColumnasProducto = {
 const PaginaProductos: React.FC = () => {
   // * Variables
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
+  const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
   const [productoSeleccionado, setProductoSeleccionado] =
     useState<Producto | null>(null);
   const [noTotalProductos, setNoTotalProductos] = useState<number>(0);
@@ -40,26 +41,6 @@ const PaginaProductos: React.FC = () => {
 
   // * Listas
   const [listaProductos, setListaProductos] = useState<Producto[]>([]);
-
-  // * Obtener numero total de datos
-  const obtenerNoTotalProductos = async (): Promise<void> => {
-    // * Buscamos
-    const res: RespuestaApi = await apiObtenerNoDeProductosTotales();
-
-    // ? Salio bien y llego data
-    if (res.estado && res.dato) {
-      setNoTotalProductos(res.dato);
-      return;
-    }
-
-    // ! Error
-    alertaSwal(
-      "Error",
-      "No se pudo obtener el numero total de productos",
-      "error"
-    );
-    setNoTotalProductos(0);
-  };
 
   // * Obtener productos
   const obtenerProductos = useCallback(
@@ -76,10 +57,10 @@ const PaginaProductos: React.FC = () => {
         let res: RespuestaApi;
 
         // ? Llego nombre
-        if (nombre) {
+        if (typeof nombre !== "undefined" && nombre !== null) {
           res = await apiObtenerListaProductosPorNombre(nombre, desde, asta);
           // ? Llego stock
-        } else if (stock) {
+        } else if (typeof stock !== "undefined" && stock !== null) {
           res = await apiObtenerListaProductosPorStock(stock, desde, asta);
           // ? Ninguno
         } else {
@@ -105,11 +86,12 @@ const PaginaProductos: React.FC = () => {
         // Ponemos lista
         setListaProductos(res.listaProductos ?? []);
 
-        // * Obtenemos el total
-        await obtenerNoTotalProductos();
+        // * Ponemos el total
+        setNoTotalProductos(res.totalDatos ?? 0);
       } catch (error) {
         console.error(String(error));
       } finally {
+        setCargandoPagina(false);
         setCargandoTabla(false);
       }
     },
@@ -118,6 +100,7 @@ const PaginaProductos: React.FC = () => {
 
   // * Al iniciar
   useEffect(() => {
+    setCargandoPagina(true);
     obtenerProductos();
   }, [obtenerProductos]);
 
@@ -126,17 +109,15 @@ const PaginaProductos: React.FC = () => {
     <Container className="contenedor-completo">
       <br className="mb-2" />
       <Row>
-        {/* Administrador */}
+        {/* Tarjeta */}
         <Col sm={4}>
-          <Container>
-            <h4>Administrador</h4>
-          </Container>
+          <TarjetaProducto producto={productoSeleccionado} />
         </Col>
         {/* Tabla */}
         <Col sm={8}>
           <Container>
             {/* Si esta cargando y esta vacía */}
-            {isCargandoTabla && listaProductos.length < 1 ? (
+            {isCargandoPagina ? (
               <div className="contenedor-centrado">
                 <ReactLoading type={"bubbles"} color="#FFF" />
               </div>
@@ -149,11 +130,6 @@ const PaginaProductos: React.FC = () => {
                   isErrorTabla.detalles ?? "No se pudieron cargar los productos"
                 }
               />
-            ) : // ? Tabla vacía
-            listaProductos.length < 1 ? (
-              <div className="contenedor-centrado">
-                <h3>Tabla vacía</h3>
-              </div>
             ) : (
               // * Tabla de productos
               <TablaProductos

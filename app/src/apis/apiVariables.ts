@@ -21,8 +21,8 @@ export interface RespuestaApi {
   xbox?: Xbox;
   renta?: Renta;
   producto?: Producto;
-  // Data
-  dato?: number;
+  // Total datos
+  totalDatos?: number;
 }
 
 // * Respuesta axios

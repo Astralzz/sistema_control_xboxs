@@ -19,7 +19,8 @@ export async function apiObtenerListaProductos(
     // * Éxito
     return {
       estado: true,
-      listaProductos: res.data ?? undefined,
+      listaProductos: res.data.lista ?? undefined,
+      totalDatos: res.data.totalDatos ?? undefined,
     };
 
     // ! Error
@@ -28,7 +29,7 @@ export async function apiObtenerListaProductos(
   }
 }
 
-// * Obtener lista de productos
+// * Obtener lista de productos por nombre
 export async function apiObtenerListaProductosPorNombre(
   nombre: string,
   desde: number = 0,
@@ -46,7 +47,8 @@ export async function apiObtenerListaProductosPorNombre(
     // * Éxito
     return {
       estado: true,
-      listaProductos: res.data ?? undefined,
+      listaProductos: res.data.lista ?? undefined,
+      totalDatos: res.data.totalDatos ?? undefined,
     };
 
     // ! Error
@@ -55,7 +57,7 @@ export async function apiObtenerListaProductosPorNombre(
   }
 }
 
-// * Obtener lista de productos
+// * Obtener lista de productos por stock
 export async function apiObtenerListaProductosPorStock(
   stock: number,
   desde: number = 0,
@@ -72,28 +74,8 @@ export async function apiObtenerListaProductosPorStock(
     // * Éxito
     return {
       estado: true,
-      listaProductos: res.data ?? undefined,
-    };
-
-    // ! Error
-  } catch (er: unknown) {
-    return await catchAxiosError(er);
-  }
-}
-
-// * Obtener total de datos
-export async function apiObtenerNoDeProductosTotales(): Promise<RespuestaApi> {
-  try {
-    // Ruta
-    let url = API_URL + `${intermedio}/opciones/no/datos`;
-
-    // Enviamos
-    const res = await axios.get(url);
-
-    // * Éxito
-    return {
-      estado: true,
-      dato: res.data ?? undefined,
+      listaProductos: res.data.lista ?? undefined,
+      totalDatos: res.data.totalDatos ?? undefined,
     };
 
     // ! Error

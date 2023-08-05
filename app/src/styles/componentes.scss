@@ -26,6 +26,23 @@
     height: 76.5vh;
 }
 
+// Todo --> TARJETAS
+
+.tarjeta-inf {
+    .card {
+        background-color: $color-variant;
+        color: $color-letra;
+
+        .image {
+            border: 3px solid #ffffff;
+        }
+
+        .cuerpo-tarjeta {
+            align-items: center;
+        }
+    }
+}
+
 // Todo ---> BOTONES
 
 // * B. Temporizador
