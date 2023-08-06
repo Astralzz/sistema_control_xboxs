@@ -14,8 +14,9 @@ import {
   apiObtenerListaProductosPorNombre,
   apiObtenerListaProductosPorStock,
 } from "../../apis/apiProductos";
-import { alertaSwal } from "../../functions/funcionesGlobales";
 import TarjetaProducto from "./TarjetaProducto";
+import ComponenteCargando from "../../components/global/ComponenteCargando";
+import ModalProducto from "./ModalProducto";
 
 // * Columnas de tabla
 const columnas: ColumnasProducto = {
@@ -30,8 +31,11 @@ const columnas: ColumnasProducto = {
 // TODO, Pagina de los productos
 const PaginaProductos: React.FC = () => {
   // * Variables
+  const [tituloModal, setTituloModal] = useState<string>("????");
+  const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
   const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
+  const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
   const [productoSeleccionado, setProductoSeleccionado] =
     useState<Producto | null>(null);
   const [noTotalProductos, setNoTotalProductos] = useState<number>(0);
@@ -41,6 +45,11 @@ const PaginaProductos: React.FC = () => {
 
   // * Listas
   const [listaProductos, setListaProductos] = useState<Producto[]>([]);
+
+  // * Acciones modal
+  const cambiarTituloModal = (newTitulo: string) => setTituloModal(newTitulo);
+  const cerrarModal = () => setEstadoModal(false);
+  const abrirModal = () => setEstadoModal(true);
 
   // * Obtener productos
   const obtenerProductos = useCallback(
@@ -80,13 +89,13 @@ const PaginaProductos: React.FC = () => {
           return;
         }
 
-        // * Sin errores
+        //  Sin errores
         setErrorTabla({ estado: false });
 
         // Ponemos lista
         setListaProductos(res.listaProductos ?? []);
 
-        // * Ponemos el total
+        //  Ponemos el total
         setNoTotalProductos(res.totalDatos ?? 0);
       } catch (error) {
         console.error(String(error));
@@ -106,51 +115,74 @@ const PaginaProductos: React.FC = () => {
 
   // Todo, componente principal
   return (
-    <Container className="contenedor-completo">
-      <br className="mb-2" />
-      <Row>
-        {/* Tarjeta */}
-        <Col sm={4}>
-          <TarjetaProducto producto={productoSeleccionado} />
-        </Col>
-        {/* Tabla */}
-        <Col sm={8}>
-          <Container>
-            {/* Si esta cargando y esta vacía */}
-            {isCargandoPagina ? (
-              <div className="contenedor-centrado">
-                <ReactLoading type={"bubbles"} color="#FFF" />
-              </div>
-            ) : // ! Error
-            isErrorTabla.estado ? (
-              <ComponentError
-                titulo={isErrorTabla.titulo ?? "Error 404"}
-                accionVoid={() => obtenerProductos()}
-                detalles={
-                  isErrorTabla.detalles ?? "No se pudieron cargar los productos"
-                }
-              />
-            ) : (
-              // * Tabla de productos
-              <TablaProductos
-                lista={listaProductos}
-                totalProductos={noTotalProductos}
-                columnas={columnas}
-                setCargandoTabla={setCargandoTabla}
-                setProductoSeleccionado={setProductoSeleccionado}
-                obtenerMasDatos={(
-                  desde: number,
-                  asta: number,
-                  nombre?: string,
-                  stock?: number
-                ) => obtenerProductos(desde, asta, nombre, stock)}
-                isCargandoTabla={isCargandoTabla}
-              />
-            )}
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+    <>
+      {/* PAGINA */}
+      <Container className="contenedor-completo">
+        <br className="mb-2" />
+        <Row>
+          {/* Tarjeta */}
+          <Col sm={4}>
+            <TarjetaProducto
+              producto={productoSeleccionado}
+              setCargandoAccion={setCargandoAccion}
+              setProductoSeleccionado={setProductoSeleccionado}
+              setAbrirModal={abrirModal}
+              cambiarTituloModal={cambiarTituloModal}
+              recargarTabla={obtenerProductos}
+            />
+          </Col>
+          {/* Tabla */}
+          <Col sm={8}>
+            <Container>
+              {/* Si esta cargando y esta vacía */}
+              {isCargandoPagina ? (
+                <div className="contenedor-centrado">
+                  <ReactLoading type={"bubbles"} color="#FFF" />
+                </div>
+              ) : // ! Error
+              isErrorTabla.estado ? (
+                <ComponentError
+                  titulo={isErrorTabla.titulo ?? "Error 404"}
+                  accionVoid={() => obtenerProductos()}
+                  detalles={
+                    isErrorTabla.detalles ??
+                    "No se pudieron cargar los productos"
+                  }
+                />
+              ) : (
+                // * Tabla de productos
+                <TablaProductos
+                  lista={listaProductos}
+                  totalProductos={noTotalProductos}
+                  columnas={columnas}
+                  setCargandoTabla={setCargandoTabla}
+                  setProductoSeleccionado={setProductoSeleccionado}
+                  productoSeleccionado={productoSeleccionado}
+                  obtenerMasDatos={(
+                    desde: number,
+                    asta: number,
+                    nombre?: string,
+                    stock?: number
+                  ) => obtenerProductos(desde, asta, nombre, stock)}
+                  isCargandoTabla={isCargandoTabla}
+                />
+              )}
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* MODAL */}
+      <ModalProducto
+        estadoModal={isEstadoModal}
+        cerrarModal={cerrarModal}
+        producto={productoSeleccionado ?? undefined}
+        titulo={tituloModal}
+      />
+
+      {/* CARGANDO */}
+      <ComponenteCargando tipo={"spin"} estadoModal={isCargandoAccion} />
+    </>
   );
 };
 

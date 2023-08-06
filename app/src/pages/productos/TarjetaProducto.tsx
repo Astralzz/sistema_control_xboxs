@@ -1,7 +1,6 @@
-import React from "react";
+import React, { Dispatch } from "react";
 import Producto from "../../models/Producto";
 import {
-  Badge,
   Button,
   ButtonGroup,
   Card,
@@ -11,15 +10,75 @@ import {
 } from "react-bootstrap";
 import iconProducto from "../../assets/imgs/iconProducto.png";
 import IconoBootstrap from "../../components/global/IconoBootstrap";
+import {
+  alertaSwal,
+  confirmacionSwal,
+} from "../../functions/funcionesGlobales";
+import { RespuestaApi } from "../../apis/apiVariables";
+import { apiEliminarProducto } from "../../apis/apiProductos";
 
 // * Props
 interface Props {
   producto: Producto | null;
+  setCargandoAccion: Dispatch<boolean>;
+  setProductoSeleccionado: Dispatch<Producto | null>;
+  setAbrirModal: Dispatch<void>;
+  cambiarTituloModal: (newTitulo: string) => void;
+  recargarTabla: () => void;
 }
 
 // Todo, Pagina tarjeta producto
 const TarjetaProducto: React.FC<Props> = (props) => {
-  console.log(props.producto);
+  // * Eliminar producto
+  const eliminarProducto = async (): Promise<void> => {
+    try {
+      // Confirmacion
+      const conf = await confirmacionSwal(
+        "Estas seguro?",
+        "Si eliminas este producto ya no podrás restaurar sus datos!",
+        "Si, eliminar producto"
+      );
+
+      // ? Se confirmo
+      if (conf) {
+        //  Cargando
+        props.setCargandoAccion(true);
+
+        // Obtenemos id
+        const idProducto: number = props?.producto?.id ?? -1;
+
+        // Enviamos
+        const res: RespuestaApi = await apiEliminarProducto(idProducto);
+
+        // ? salio mal
+        if (!res.estado) {
+          throw new Error(
+            res.detalles_error
+              ? String(res.detalles_error)
+              : "Ocurrió un error al eliminar el xbox, intenta mas tarde"
+          );
+        }
+
+        // Eliminamos y recargamos
+        props.setProductoSeleccionado(null);
+        props.recargarTabla();
+
+        // * Éxito
+        alertaSwal(
+          "Éxito!",
+          // res.mensaje ?? "Xbox eliminado correctamente",
+          "Xbox eliminado correctamente",
+          "success"
+        );
+      }
+
+      // ! Error
+    } catch (error: unknown) {
+      alertaSwal("Error!", String(error), "error");
+    } finally {
+      props.setCargandoAccion(false);
+    }
+  };
 
   return (
     <Container className="tarjeta-inf">
@@ -85,26 +144,50 @@ const TarjetaProducto: React.FC<Props> = (props) => {
 
             <hr className="hr" />
 
+            {/* Botones */}
             <ListGroup.Item
               style={{
                 backgroundColor: "transparent",
                 border: "none",
                 color: "white",
               }}
-              className="list-group-item d-flex justify-content-between align-items-center p-1"
+              className="list-group-item d-flex justify-content-between align-items-center p-1 botones-tarjeta"
             >
+              {/* Ultimas ventas */}
               <p className="mb-0">
-                <Button variant="secondary">
+                <Button
+                  disabled={props.producto === null}
+                  variant="secondary"
+                  className="bt-tr"
+                  onClick={() => {
+                    props.setAbrirModal();
+                    props.cambiarTituloModal(
+                      "Ultimas ventas de " + props.producto?.nombre ?? "???"
+                    );
+                  }}
+                >
                   <IconoBootstrap nombre="EyeFill" />
                 </Button>
               </p>
 
-              {/* BOTONES */}
               <ButtonGroup>
-                <Button variant="success">
+                {/* Editar producto */}
+                <Button
+                  disabled={props.producto === null}
+                  className="bt-tr"
+                  onClick={() => {
+                    props.setAbrirModal();
+                    props.cambiarTituloModal("Editar producto");
+                  }}
+                >
                   <IconoBootstrap nombre="PencilFill" />
                 </Button>
-                <Button variant="danger">
+                {/* Eliminar producto */}
+                <Button
+                  disabled={props.producto === null}
+                  onClick={eliminarProducto}
+                  className="bt-tr"
+                >
                   <IconoBootstrap nombre="TrashFill" />
                 </Button>
               </ButtonGroup>

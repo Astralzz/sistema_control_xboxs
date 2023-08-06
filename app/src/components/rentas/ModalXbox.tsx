@@ -123,7 +123,7 @@ const ModalXbox: React.FC<Props> = (props) => {
       alCerrar();
 
       // * Terminamos
-      props.eliminarXbox(props.xbox.id);
+      props.eliminarXbox(idXbox);
 
       alertaSwal(
         "Éxito!",

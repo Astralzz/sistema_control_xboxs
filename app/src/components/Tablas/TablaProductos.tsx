@@ -15,7 +15,7 @@ import {
   Paginacion,
   calcularPaginaciones,
 } from "../../functions/funcionesGlobales";
-import { TextoLargoElement } from "../global/Otros";
+import { ComponenteCargandoTabla, TextoLargoElement } from "../global/Otros";
 import {
   regexBuscarTitulo,
   regexNumerosEnteros,
@@ -46,6 +46,7 @@ interface Props {
   columnas: ColumnasProducto;
   setCargandoTabla: Dispatch<boolean>;
   setProductoSeleccionado: Dispatch<Producto | null>;
+  productoSeleccionado: Producto | null;
   obtenerMasDatos: (
     desde: number,
     asta: number,
@@ -85,6 +86,14 @@ const TablaProductos: React.FC<Props> = (props) => {
     const pag: Paginacion[] = calcularPaginaciones(props.totalProductos);
     setListaPaginaciones(pag);
   }, [props.totalProductos]);
+
+  // * Al cambiar
+  useEffect(() => {
+    // ? No existe
+    if (!props.productoSeleccionado) {
+      LimpiarFiltros();
+    }
+  }, [props.productoSeleccionado]);
 
   return (
     <div>
@@ -175,32 +184,42 @@ const TablaProductos: React.FC<Props> = (props) => {
         </InputGroup>
       </Navbar>
       {/* TABLA */}
-      <Table responsive bordered variant="dark" style={{ marginBottom: 0 }}>
-        {/* TÍTULOS */}
-        <thead>
-          <tr>
-            {props.columnas.no && <th>No</th>}
-            {props.columnas.nombre && <th>Nombre</th>}
-            {props.columnas.precio && <th>Precio</th>}
-            {props.columnas.stock && <th>Stock</th>}
-            {props.columnas.descripcion && <th>Descripcion</th>}
-            {props.columnas.masInf && <th>Ver</th>}
-          </tr>
-        </thead>
-        {/* FILAS */}
-        {props.lista.length < 1 ? (
-          // ? Tabla vacía
-          <div className="contenedor-centrado">
-            <h3>Tabla vacía</h3>
-          </div>
-        ) : (
-          <tbody>
-            {/* Recorremos */}
-            {props.lista.map((producto, i) => {
-              // ? Esta cargando
-              if (props.isCargandoTabla) {
+      {props.lista.length < 1 && !props.isCargandoTabla ? (
+        // ? Esta vacía y no esta cargando
+        <div className="contenedor-centrado">
+          <h4>No se encontraron datos</h4>
+        </div>
+      ) : (
+        <Table responsive bordered variant="dark" style={{ marginBottom: 0 }}>
+          {/* TÍTULOS */}
+          <thead>
+            <tr>
+              {props.columnas.no && <th>No</th>}
+              {props.columnas.nombre && <th>Nombre</th>}
+              {props.columnas.precio && <th>Precio</th>}
+              {props.columnas.stock && <th>Stock</th>}
+              {props.columnas.descripcion && <th>Descripcion</th>}
+              {props.columnas.masInf && <th>Ver</th>}
+            </tr>
+          </thead>
+          {/* Esta cargando */}
+          {props.isCargandoTabla ? (
+            // Componente cargando
+            <ComponenteCargandoTabla
+              filas={props.lista.length < 1 ? 10 : props.lista.length}
+              columnas={5}
+              pagSeleccionada={pagSeleccionada}
+              paginaciones={listaPaginaciones}
+              no
+            />
+          ) : (
+            // ? Productos
+            <tbody>
+              {/* Recorremos */}
+              {props.lista.map((producto, i) => {
+                // Todo, Datos tabla
                 return (
-                  <tr key={i}>
+                  <tr key={i} className="text-left">
                     {/* Numero */}
                     {props.columnas.no && (
                       <td>
@@ -209,63 +228,44 @@ const TablaProductos: React.FC<Props> = (props) => {
                           : i + 1}
                       </td>
                     )}
-                    {/* Cargando */}
-                    {[1, 2, 3, 4, 5].map((j) => {
-                      return (
-                        <td key={j + i}>
-                          <Spinner animation="grow" size="sm" />
-                        </td>
-                      );
-                    })}
+                    {/* Nombre */}
+                    {props.columnas.nombre && (
+                      <TextoLargoElement
+                        lg={20}
+                        texto={producto.nombre}
+                        i={producto.id}
+                      />
+                    )}
+                    {/* Precio */}
+                    {props.columnas.precio && <td>{producto.precio}</td>}
+                    {/* Stock */}
+                    {props.columnas.stock && <td>{producto.stock}</td>}
+                    {/* Descripcion */}
+                    {props.columnas.descripcion && (
+                      <TextoLargoElement
+                        texto={producto.descripcion}
+                        i={producto.id}
+                      />
+                    )}
+                    {/* Mas información */}
+                    {props.columnas.masInf && (
+                      <td>
+                        <IconoBootstrap
+                          onClick={() =>
+                            props.setProductoSeleccionado(producto)
+                          }
+                          nombre={"EyeFill"}
+                        />
+                      </td>
+                    )}
                   </tr>
                 );
-              }
+              })}
+            </tbody>
+          )}
+        </Table>
+      )}
 
-              // Todo, Datos tabla
-              return (
-                <tr key={i} className="text-left">
-                  {/* Numero */}
-                  {props.columnas.no && (
-                    <td>
-                      {listaPaginaciones[pagSeleccionada]
-                        ? listaPaginaciones[pagSeleccionada].desde + (i + 1)
-                        : i + 1}
-                    </td>
-                  )}
-                  {/* Nombre */}
-                  {props.columnas.nombre && (
-                    <TextoLargoElement
-                      lg={20}
-                      texto={producto.nombre}
-                      i={producto.id}
-                    />
-                  )}
-                  {/* Precio */}
-                  {props.columnas.precio && <td>{producto.precio}</td>}
-                  {/* Stock */}
-                  {props.columnas.stock && <td>{producto.stock}</td>}
-                  {/* Descripcion */}
-                  {props.columnas.descripcion && (
-                    <TextoLargoElement
-                      texto={producto.descripcion}
-                      i={producto.id}
-                    />
-                  )}
-                  {/* Mas información */}
-                  {props.columnas.masInf && (
-                    <td>
-                      <IconoBootstrap
-                        onClick={() => props.setProductoSeleccionado(producto)}
-                        nombre={"EyeFill"}
-                      />
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        )}
-      </Table>
       {/* PAGINACION */}
       <Pagination size="sm" className="pagination-tabla">
         {/* Recorremos */}
@@ -284,9 +284,15 @@ const TablaProductos: React.FC<Props> = (props) => {
 
           return (
             <Pagination.Item
+              // disabled={props.isCargandoTabla}
               active={pagSeleccionada === i}
               key={i}
               onClick={() => {
+                // ? Cargando
+                if (props.isCargandoTabla) {
+                  return;
+                }
+
                 setPaginaSeleccionada(i);
                 preObtenerProductos(pagina.desde, pagina.asta, nombre, stock);
               }}
