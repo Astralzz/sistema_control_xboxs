@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Col, Container, Pagination, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import Producto from "../../models/Producto";
-import TablaProductos, {
-  ColumnasProducto,
-} from "../../components/tablas/TablaProductos";
+import TablaProductos, { ColumnasProducto } from "./TablaProductos";
 import ComponentError, {
   DataError,
 } from "../../components/global/ComponentError";
@@ -28,10 +26,21 @@ const columnas: ColumnasProducto = {
   masInf: true,
 };
 
+// * Accion producto
+export interface OpcionesModalProducto {
+  titulo: string;
+  opcion: "CREAR" | "EDITAR" | "VENTAS" | undefined;
+  producto?: Producto;
+}
+
 // TODO, Pagina de los productos
 const PaginaProductos: React.FC = () => {
   // * Variables
-  const [tituloModal, setTituloModal] = useState<string>("????");
+  const [opcionesModalProducto, setOpcionesModalProducto] =
+    useState<OpcionesModalProducto>({
+      titulo: "???",
+      opcion: undefined,
+    });
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
   const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
@@ -47,9 +56,13 @@ const PaginaProductos: React.FC = () => {
   const [listaProductos, setListaProductos] = useState<Producto[]>([]);
 
   // * Acciones modal
-  const cambiarTituloModal = (newTitulo: string) => setTituloModal(newTitulo);
   const cerrarModal = () => setEstadoModal(false);
-  const abrirModal = () => setEstadoModal(true);
+
+  // * Accion Modal
+  const accionModal = (opcionesModalProducto: OpcionesModalProducto) => {
+    setEstadoModal(true);
+    setOpcionesModalProducto(opcionesModalProducto);
+  };
 
   // * Obtener productos
   const obtenerProductos = useCallback(
@@ -126,8 +139,7 @@ const PaginaProductos: React.FC = () => {
               producto={productoSeleccionado}
               setCargandoAccion={setCargandoAccion}
               setProductoSeleccionado={setProductoSeleccionado}
-              setAbrirModal={abrirModal}
-              cambiarTituloModal={cambiarTituloModal}
+              accionModal={accionModal}
               recargarTabla={obtenerProductos}
             />
           </Col>
@@ -176,8 +188,9 @@ const PaginaProductos: React.FC = () => {
       <ModalProducto
         estadoModal={isEstadoModal}
         cerrarModal={cerrarModal}
-        producto={productoSeleccionado ?? undefined}
-        titulo={tituloModal}
+        opcionesModalProducto={opcionesModalProducto}
+        setCargando={setCargandoAccion}
+        setProductoSeleccionado={setProductoSeleccionado}
       />
 
       {/* CARGANDO */}

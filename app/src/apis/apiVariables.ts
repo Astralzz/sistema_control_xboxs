@@ -2,9 +2,11 @@ import axios from "axios";
 import Renta from "../models/Renta";
 import Xbox from "../models/Xbox";
 import Producto from "../models/Producto";
+import Venta from "../models/Venta";
 
 // Url oficial
-const API_URL: string = "http://controlxbox/api/";
+export const URL_SERVER = "http://controlxbox";
+export const API_URL: string = `${URL_SERVER}/api/`;
 
 // Respuesta
 export interface RespuestaApi {
@@ -16,11 +18,13 @@ export interface RespuestaApi {
   listaXboxs?: Xbox[];
   listaProductos?: Producto[];
   listaRentas?: Renta[];
+  listaVentas?: Venta[];
   // Datos
   mensaje?: string;
   xbox?: Xbox;
   renta?: Renta;
   producto?: Producto;
+  venta?: Venta;
   // Total datos
   totalDatos?: number;
 }

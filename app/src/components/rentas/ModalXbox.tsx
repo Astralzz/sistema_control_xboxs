@@ -4,7 +4,7 @@ import Xbox from "../../models/Xbox";
 import Renta from "../../models/Renta";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiObtenerListaRentasPorXbox } from "../../apis/apiRentas";
-import TablaRentas, { ColumnasRenta } from "../tablas/TablaRenta";
+import ComponenteTablaRenta, { ColumnasRenta } from "../tablas/ComponenteTablaRenta";
 import ComponentError, {
   DataError,
 } from "../global/ComponentError";
@@ -246,7 +246,7 @@ const ModalXbox: React.FC<Props> = (props) => {
                 })
               ) : // ? Lista vacía
               Array.isArray(listaRentas) && listaRentas.length > 0 ? (
-                <TablaRentas
+                <ComponenteTablaRenta
                   lista={listaRentas}
                   columnas={columnas}
                   actualizarRentaLocal={actualizarRentaLocal}

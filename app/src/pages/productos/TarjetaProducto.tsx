@@ -14,16 +14,16 @@ import {
   alertaSwal,
   confirmacionSwal,
 } from "../../functions/funcionesGlobales";
-import { RespuestaApi } from "../../apis/apiVariables";
+import API_URL, { RespuestaApi, URL_SERVER } from "../../apis/apiVariables";
 import { apiEliminarProducto } from "../../apis/apiProductos";
+import { OpcionesModalProducto } from "./PaginaProductos";
 
 // * Props
 interface Props {
   producto: Producto | null;
   setCargandoAccion: Dispatch<boolean>;
   setProductoSeleccionado: Dispatch<Producto | null>;
-  setAbrirModal: Dispatch<void>;
-  cambiarTituloModal: (newTitulo: string) => void;
+  accionModal: (opcionesModalProducto: OpcionesModalProducto) => void;
   recargarTabla: () => void;
 }
 
@@ -90,17 +90,19 @@ const TarjetaProducto: React.FC<Props> = (props) => {
         {/* Imagen */}
         <div className="align-items-center">
           <Image
-            src={props.producto?.enlace_img ?? iconProducto}
+            src={
+              props.producto?.enlace_img
+                ? `${URL_SERVER}/${props.producto?.enlace_img}`
+                : iconProducto
+            }
             roundedCircle
             height={140}
             width={140}
           />
         </div>
 
-        <br className="mb-1" />
-
-        {/* Encabezado */}
-        <Card.Header>
+        {/* Cuerpo */}
+        <Card.Body className="align-items-center cuerpo-tarjeta">
           {/* Nombre */}
           <Card.Title>
             {props.producto?.nombre ?? "Ningún producto seleccionado"}
@@ -109,10 +111,7 @@ const TarjetaProducto: React.FC<Props> = (props) => {
           <Card.Text>
             {props.producto?.descripcion ?? "Sin descripcion"}
           </Card.Text>
-        </Card.Header>
 
-        {/* Cuerpo */}
-        <Card.Body className="align-items-center cuerpo-tarjeta">
           <ListGroup>
             {/* Precio */}
             <ListGroup.Item
@@ -142,8 +141,6 @@ const TarjetaProducto: React.FC<Props> = (props) => {
               <p className="mb-0">{props.producto?.stock ?? "N/A"}</p>
             </ListGroup.Item>
 
-            <hr className="hr" />
-
             {/* Botones */}
             <ListGroup.Item
               style={{
@@ -159,26 +156,30 @@ const TarjetaProducto: React.FC<Props> = (props) => {
                   disabled={props.producto === null}
                   variant="secondary"
                   className="bt-tr"
-                  onClick={() => {
-                    props.setAbrirModal();
-                    props.cambiarTituloModal(
-                      "Ultimas ventas de " + props.producto?.nombre ?? "???"
-                    );
-                  }}
+                  onClick={() =>
+                    props.accionModal({
+                      titulo:
+                        "Ultimas ventas de " + props.producto?.nombre ?? "???",
+                      opcion: "VENTAS",
+                      producto: props.producto ?? undefined,
+                    })
+                  }
                 >
                   <IconoBootstrap nombre="EyeFill" />
                 </Button>
               </p>
-
               <ButtonGroup>
                 {/* Editar producto */}
                 <Button
                   disabled={props.producto === null}
                   className="bt-tr"
-                  onClick={() => {
-                    props.setAbrirModal();
-                    props.cambiarTituloModal("Editar producto");
-                  }}
+                  onClick={() =>
+                    props.accionModal({
+                      titulo: "Editar " + props.producto?.nombre ?? "???",
+                      opcion: "EDITAR",
+                      producto: props.producto ?? undefined,
+                    })
+                  }
                 >
                   <IconoBootstrap nombre="PencilFill" />
                 </Button>
@@ -193,6 +194,21 @@ const TarjetaProducto: React.FC<Props> = (props) => {
               </ButtonGroup>
             </ListGroup.Item>
           </ListGroup>
+
+          <hr className="hr" />
+          <div className="d-flex botones-tarjeta">
+            <Button
+              onClick={() =>
+                props.accionModal({
+                  titulo: "Nuevo producto",
+                  opcion: "CREAR",
+                })
+              }
+              className="bt-tr bt-bcr"
+            >
+              NUEVO PRODUCTO
+            </Button>
+          </div>
         </Card.Body>
       </Card>
     </Container>

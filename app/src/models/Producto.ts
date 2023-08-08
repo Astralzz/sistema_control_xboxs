@@ -4,8 +4,8 @@ interface Producto {
   nombre: string;
   precio: number;
   stock: number;
-  descripcion: string | null;
-  enlace_img: string | null;
+  descripcion?: string;
+  enlace_img?: string;
 }
 
 export default Producto;

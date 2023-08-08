@@ -1,13 +1,19 @@
-import React, { Dispatch, useState } from "react";
+import React, { Dispatch } from "react";
+import { Offcanvas } from "react-bootstrap";
+import { OpcionesModalProducto } from "./PaginaProductos";
+import ComponenteTablaVentas, {
+  ColumnasVentas,
+} from "../../components/tablas/ComponenteTablaVentas";
+import FormularioProducto from "./FormularioProducto";
 import Producto from "../../models/Producto";
-import { Container, Offcanvas } from "react-bootstrap";
 
 // * Props
 interface Props {
-  producto?: Producto;
-  cerrarModal: Dispatch<void>;
   estadoModal: boolean;
-  titulo: string;
+  cerrarModal: Dispatch<void>;
+  opcionesModalProducto: OpcionesModalProducto;
+  setCargando: Dispatch<boolean>;
+  setProductoSeleccionado: Dispatch<Producto | null>;
   // aumentarXbox?: (x: Xbox) => void;
   // actualizarXbox?: (id: number, xboxActualizado: Xbox) => void;
 }
@@ -20,6 +26,80 @@ const ModalProducto: React.FC<Props> = (props) => {
     props.cerrarModal();
   };
 
+  // * Componente escogido
+  const SeccionEscogida = () => {
+    // opciones
+    const opc = props.opcionesModalProducto;
+
+    // ? Tabla ventas
+    if (opc.opcion === "VENTAS") {
+      // ? Tiene producto
+      if (opc.producto) {
+        // columnas
+        const columnas: ColumnasVentas = {
+          fecha: true,
+          hora: true,
+          noProductos: true,
+          total: true,
+        };
+
+        return (
+          <ComponenteTablaVentas
+            producto={opc.producto}
+            isEstadoModal={props.estadoModal}
+            columnas={columnas}
+            asta={20}
+          />
+        );
+      }
+
+      // ! Error
+      return (
+        <div className="contenedor-centrado">
+          <h4>No se pudo obtener el producto</h4>
+        </div>
+      );
+    }
+
+    // ? Crear producto
+    if (opc.opcion === "CREAR") {
+      return (
+        <FormularioProducto
+          setCargando={props.setCargando}
+          setProductoSeleccionado={props.setProductoSeleccionado}
+        />
+      );
+    }
+
+    // ? Editar producto
+    if (opc.opcion === "EDITAR") {
+      // ? Tiene producto
+      if (opc.producto) {
+        return (
+          <FormularioProducto
+            producto={opc.producto}
+            setCargando={props.setCargando}
+            setProductoSeleccionado={props.setProductoSeleccionado}
+          />
+        );
+      }
+
+      // ! Error
+      return (
+        <div className="contenedor-centrado">
+          <h4>No se pudo obtener el producto</h4>
+        </div>
+      );
+    }
+
+    // ! Error
+    return (
+      <div className="contenedor-centrado">
+        <h4>No se pudo obtener la opcion escogida</h4>
+      </div>
+    );
+  };
+
   return (
     <Offcanvas show={props.estadoModal} onHide={alCerrar} placement="end">
       {/* ENCABEZADO */}
@@ -29,13 +109,12 @@ const ModalProducto: React.FC<Props> = (props) => {
         closeVariant="white"
       >
         {/* Titulo */}
-        <Offcanvas.Title>{props.titulo}</Offcanvas.Title>
+        <Offcanvas.Title>{props.opcionesModalProducto.titulo}</Offcanvas.Title>
       </Offcanvas.Header>
 
       {/* CUERPO */}
       <Offcanvas.Body className="modal-derecho">
-        Some text as placeholder. In real life you can have the elements you
-        have chosen. Like, text, images, lists, etc.
+        <SeccionEscogida />
       </Offcanvas.Body>
     </Offcanvas>
   );

@@ -4,6 +4,53 @@ import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
 // * Variables
 const intermedio: string = "productos";
 
+// * Crear nuevo producto
+export async function apiCrearProducto(data: FormData): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/crear`;
+
+    // Enviamos
+    const res = await axios.post(url, data);
+
+    // * Éxito
+    return {
+      estado: true,
+      producto: res.data.producto ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
+// * Actualizar producto
+export async function apiActualizarProducto(
+  data: FormData,
+  id: number
+): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/actualizar/${id}`;
+
+    // Enviamos
+    const res = await axios.post(url, data);
+
+    // * Éxito
+    return {
+      estado: true,
+      producto: res.data.producto ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
 // * Obtener lista de productos
 export async function apiObtenerListaProductos(
   desde: number = 0,

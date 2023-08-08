@@ -1,7 +1,6 @@
 import Xbox from "./Xbox";
 
 // Todo, Modelo de la renta
-// Todo, Modelo de renta
 interface Renta {
   id: number;
   id_xbox: number;

@@ -1,5 +1,5 @@
 import React from "react";
-import { OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
+import { OverlayTrigger, Placeholder, Spinner, Tooltip } from "react-bootstrap";
 import { Paginacion } from "../../functions/funcionesGlobales";
 
 // * Para textos largos
@@ -82,5 +82,35 @@ export const ComponenteCargandoTabla = ({
         );
       })}
     </tbody>
+  );
+};
+
+// * Cargando tabla 2
+export const ComponenteCargandoTablaLineas = ({
+  filas,
+  rDesde = 10,
+  rAsta = 2,
+}: {
+  filas: number;
+  rDesde?: number;
+  rAsta?: number;
+}) => {
+  // Arreglo
+  let arrayFilas: number[] = Array.from({ length: filas }, (_, i) => i + 1);
+
+  return (
+    <>
+      {/* Cargando */}
+      {arrayFilas.map((n) => {
+        // n aleatorio desde asta
+        const nr: number = Math.floor(Math.random() * (rDesde + 1)) + rAsta;
+
+        return (
+          <Placeholder key={n} animation="glow">
+            <Placeholder xs={nr} />
+          </Placeholder>
+        );
+      })}
+    </>
   );
 };

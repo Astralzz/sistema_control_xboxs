@@ -14,6 +14,64 @@ export interface Paginacion {
   asta: number;
 }
 
+// * Validar input file img
+export function validarInputFile(
+  archivo: File | null,
+  tamMaximo: number = 2048,
+  extensionesValidas: Set<string> = new Set([
+    "jpeg",
+    "png",
+    "jpg",
+    "gif",
+    "svg",
+    "webp",
+    "jfif",
+  ])
+): {
+  isValido: boolean;
+  errorInf?: string;
+} {
+  // ? No existe
+  if (!archivo) {
+    return {
+      isValido: false,
+      errorInf: "No se proporcionó ningún archivo.",
+    };
+  }
+
+  // ? Extension
+  const extensionArchivo = archivo.name.split(".").pop()?.toLowerCase();
+
+  // ? No valido
+  if (!extensionArchivo || !extensionesValidas.has(extensionArchivo)) {
+    return {
+      isValido: false,
+      errorInf:
+        "Tipo de archivo no válido. Las extensiones válidas son: " +
+        Array.from(extensionesValidas).join(", "),
+    };
+  }
+
+  // Tamaño
+  const tamArchivoMB = archivo.size / (1024 * 1024);
+
+  // ? Es mayor
+  if (tamArchivoMB > tamMaximo) {
+    return {
+      isValido: false,
+      errorInf:
+        "El archivo excede el tamaño máximo permitido (" +
+        tamMaximo +
+        "MB).",
+    };
+  }
+
+  // * Éxito
+  return {
+    isValido: true,
+  };
+}
+
 // * Calcular monto recaudado
 export function calcularMontoRecaudado(
   m: number,
@@ -304,7 +362,7 @@ export function calcularPaginaciones(
     paginas.push({
       desde: i * datosPorPagina,
       //asta: i === totalPaginas - 1 ? numeroDatos - 1 : (i + 1) * datosPorPagina - 1;
-      asta: datosPorPagina
+      asta: datosPorPagina,
     });
   }
 

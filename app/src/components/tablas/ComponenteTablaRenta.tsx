@@ -34,7 +34,7 @@ interface Props {
 }
 
 // Todo, Tabla Rentas
-const TablaRentas: React.FC<Props> = (props) => {
+const ComponenteTablaRenta: React.FC<Props> = (props) => {
   // * Variables
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [rentaSeleccionada, setRentaSeleccionada] = useState<Renta | null>(
@@ -181,4 +181,4 @@ const TablaRentas: React.FC<Props> = (props) => {
   );
 };
 
-export default TablaRentas;
+export default ComponenteTablaRenta;

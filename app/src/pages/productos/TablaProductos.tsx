@@ -9,25 +9,17 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import IconoBootstrap from "../global/IconoBootstrap";
+import IconoBootstrap from "../../components/global/IconoBootstrap";
 import Producto from "../../models/Producto";
 import {
   Paginacion,
   calcularPaginaciones,
 } from "../../functions/funcionesGlobales";
-import { ComponenteCargandoTabla, TextoLargoElement } from "../global/Otros";
 import {
-  regexBuscarTitulo,
-  regexNumerosEnteros,
-} from "../../functions/variables";
-
-// * Estilos
-const styles: React.CSSProperties = {
-  backgroundColor: "transparent",
-  color: "var(--color-letra)",
-  border: "none",
-  borderBottom: "1px solid white",
-};
+  ComponenteCargandoTabla,
+  TextoLargoElement,
+} from "../../components/global/Otros";
+import { regexNombre, regexNumerosEnteros } from "../../functions/variables";
 
 // * Columnas
 export interface ColumnasProducto {
@@ -38,6 +30,14 @@ export interface ColumnasProducto {
   descripcion?: boolean;
   masInf?: boolean;
 }
+
+// * Estilos
+const styles: React.CSSProperties = {
+  backgroundColor: "transparent",
+  color: "var(--color-letra)",
+  border: "none",
+  borderBottom: "1px solid white",
+};
 
 // * Props
 interface Props {
@@ -161,7 +161,7 @@ const TablaProductos: React.FC<Props> = (props) => {
             className={
               textBuscarNombre === ""
                 ? ""
-                : regexBuscarTitulo.test(textBuscarNombre)
+                : regexNombre.test(textBuscarNombre)
                 ? "is-valid"
                 : "is-invalid"
             }
@@ -170,7 +170,7 @@ const TablaProductos: React.FC<Props> = (props) => {
           />
           <div className="boton-buscar">
             <Button
-              disabled={!regexBuscarTitulo.test(textBuscarNombre)}
+              disabled={!regexNombre.test(textBuscarNombre)}
               onClick={() => {
                 setFiltroCantidad(false);
                 setFiltroNombre(true);
@@ -243,7 +243,7 @@ const TablaProductos: React.FC<Props> = (props) => {
                     {/* Descripcion */}
                     {props.columnas.descripcion && (
                       <TextoLargoElement
-                        texto={producto.descripcion}
+                        texto={producto.descripcion ?? ""}
                         i={producto.id}
                       />
                     )}
@@ -272,7 +272,7 @@ const TablaProductos: React.FC<Props> = (props) => {
         {listaPaginaciones.map((pagina, i) => {
           // Nombre
           const nombre: string | undefined =
-            regexBuscarTitulo.test(textBuscarNombre) && isFiltroNombre
+            regexNombre.test(textBuscarNombre) && isFiltroNombre
               ? textBuscarNombre
               : undefined;
 
