@@ -31,6 +31,8 @@ interface Props {
   producto?: Producto;
   setCargando: Dispatch<boolean>;
   setProductoSeleccionado: Dispatch<Producto | null>;
+  actualizarOpcionesProducto?: (p: Producto) => void;
+  recargarProductos: () => void;
   // aumentarXbox?: (x: Xbox) => void;
   // actualizarXbox?: (id: number, xboxActualizado: Xbox) => void;
 }
@@ -64,8 +66,8 @@ const FormularioProducto: React.FC<Props> = (props) => {
       // ? Es lo mismo
       if (
         p.nombre === nombre &&
-        p.precio === Number(precio) &&
-        p.stock === Number(stock) &&
+        String(p.precio) === precio &&
+        String(p.stock) === stock &&
         isDescripcionValida &&
         !imgCambiada
       ) {
@@ -81,7 +83,7 @@ const FormularioProducto: React.FC<Props> = (props) => {
     }
     // ? Precio erróneo
     if (!regexNumerosDecimales.test(precio)) {
-      throw new Error("El campo nombre no es valido");
+      throw new Error("El campo precio no es valido");
     }
     // ? Cantidad errónea
     if (!regexNumerosEnteros.test(stock)) {
@@ -121,7 +123,9 @@ const FormularioProducto: React.FC<Props> = (props) => {
       return;
     }
 
+    // Actualizamos
     props.setProductoSeleccionado(res.producto);
+    props.recargarProductos();
 
     // * Terminamos
     alertaSwal(
@@ -155,7 +159,14 @@ const FormularioProducto: React.FC<Props> = (props) => {
       return;
     }
 
+    // Actualizamos
     props.setProductoSeleccionado(res.producto);
+    props.recargarProductos();
+
+    // ? Existe
+    if (props.actualizarOpcionesProducto) {
+      props.actualizarOpcionesProducto(res.producto);
+    }
 
     // * Terminamos
     alertaSwal(

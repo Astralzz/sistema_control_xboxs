@@ -3,7 +3,7 @@ import { Table } from "react-bootstrap";
 import Producto from "../../models/Producto";
 import {
   ComponenteCargandoTablaLineas,
-  TextoLargoElement,
+  TextoLargoTablaElement,
 } from "../global/Otros";
 import Venta from "../../models/Venta";
 import {
@@ -129,7 +129,7 @@ const ComponenteTablaVentas: React.FC<Props> = (props) => {
                   {props.columnas.total && <td>{`$${venta.total}`}</td>}
                   {/* Comentario */}
                   {props.columnas.comentario && (
-                    <TextoLargoElement
+                    <TextoLargoTablaElement
                       lg={1}
                       texto={venta.comentario ?? ""}
                       i={venta.id}

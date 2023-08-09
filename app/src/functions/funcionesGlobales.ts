@@ -60,9 +60,7 @@ export function validarInputFile(
     return {
       isValido: false,
       errorInf:
-        "El archivo excede el tamaño máximo permitido (" +
-        tamMaximo +
-        "MB).",
+        "El archivo excede el tamaño máximo permitido (" + tamMaximo + "MB).",
     };
   }
 
@@ -377,4 +375,21 @@ export function truncarTexto(texto: string, longitudMaxima: number): string {
   } else {
     return texto;
   }
+}
+
+// * Generar id
+export function generateRandomId(
+  longitud: number = 12,
+  caracteres: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+): string {
+  // Respuesta
+  let r: string = "";
+
+  // Recorremos
+  for (let i = 0; i < longitud; i++) {
+    const randomIndex = Math.floor(Math.random() * caracteres.length);
+    r += caracteres.charAt(randomIndex);
+  }
+
+  return r;
 }

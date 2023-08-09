@@ -4,14 +4,14 @@ import Xbox from "../../models/Xbox";
 import Renta from "../../models/Renta";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiObtenerListaRentasPorXbox } from "../../apis/apiRentas";
-import ComponenteTablaRenta, { ColumnasRenta } from "../tablas/ComponenteTablaRenta";
+import ComponenteTablaRenta, { ColumnasRenta } from "../../components/tablas/ComponenteTablaRenta";
 import ComponentError, {
   DataError,
-} from "../global/ComponentError";
+} from "../../components/global/ComponentError";
 import FormularioXboxs from "./FormularioXboxs";
-import IconoBootstrap from "../global/IconoBootstrap";
+import IconoBootstrap from "../../components/global/IconoBootstrap";
 import { apiEliminarXbox } from "../../apis/apiXboxs";
-import ComponenteCargando from "../global/ComponenteCargando";
+import ComponenteCargando from "../../components/global/ComponenteCargando";
 import {
   alertaSwal,
   confirmacionSwal,

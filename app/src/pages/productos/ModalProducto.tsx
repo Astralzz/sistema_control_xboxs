@@ -14,6 +14,7 @@ interface Props {
   opcionesModalProducto: OpcionesModalProducto;
   setCargando: Dispatch<boolean>;
   setProductoSeleccionado: Dispatch<Producto | null>;
+  recargarProductos: () => void;
   // aumentarXbox?: (x: Xbox) => void;
   // actualizarXbox?: (id: number, xboxActualizado: Xbox) => void;
 }
@@ -67,6 +68,7 @@ const ModalProducto: React.FC<Props> = (props) => {
         <FormularioProducto
           setCargando={props.setCargando}
           setProductoSeleccionado={props.setProductoSeleccionado}
+          recargarProductos={props.recargarProductos}
         />
       );
     }
@@ -80,6 +82,10 @@ const ModalProducto: React.FC<Props> = (props) => {
             producto={opc.producto}
             setCargando={props.setCargando}
             setProductoSeleccionado={props.setProductoSeleccionado}
+            recargarProductos={props.recargarProductos}
+            actualizarOpcionesProducto={(p: Producto) => {
+              props.opcionesModalProducto.producto = p;
+            }}
           />
         );
       }

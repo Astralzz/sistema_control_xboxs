@@ -191,6 +191,7 @@ const PaginaProductos: React.FC = () => {
         opcionesModalProducto={opcionesModalProducto}
         setCargando={setCargandoAccion}
         setProductoSeleccionado={setProductoSeleccionado}
+        recargarProductos={obtenerProductos}
       />
 
       {/* CARGANDO */}

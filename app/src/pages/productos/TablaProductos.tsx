@@ -17,7 +17,7 @@ import {
 } from "../../functions/funcionesGlobales";
 import {
   ComponenteCargandoTabla,
-  TextoLargoElement,
+  TextoLargoTablaElement,
 } from "../../components/global/Otros";
 import { regexNombre, regexNumerosEnteros } from "../../functions/variables";
 
@@ -230,7 +230,7 @@ const TablaProductos: React.FC<Props> = (props) => {
                     )}
                     {/* Nombre */}
                     {props.columnas.nombre && (
-                      <TextoLargoElement
+                      <TextoLargoTablaElement
                         lg={20}
                         texto={producto.nombre}
                         i={producto.id}
@@ -242,7 +242,7 @@ const TablaProductos: React.FC<Props> = (props) => {
                     {props.columnas.stock && <td>{producto.stock}</td>}
                     {/* Descripcion */}
                     {props.columnas.descripcion && (
-                      <TextoLargoElement
+                      <TextoLargoTablaElement
                         texto={producto.descripcion ?? ""}
                         i={producto.id}
                       />

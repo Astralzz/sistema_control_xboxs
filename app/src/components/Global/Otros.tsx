@@ -2,8 +2,8 @@ import React from "react";
 import { OverlayTrigger, Placeholder, Spinner, Tooltip } from "react-bootstrap";
 import { Paginacion } from "../../functions/funcionesGlobales";
 
-// * Para textos largos
-export const TextoLargoElement = ({
+// * Para textos largos en tabla
+export const TextoLargoTablaElement = ({
   lg,
   texto,
   i,
@@ -32,6 +32,39 @@ export const TextoLargoElement = ({
     )
   ) : (
     <td>{""}</td>
+  );
+};
+
+// * Para textos largos en párrafos
+export const TextoLargoParrafoElement = ({
+  lg,
+  texto,
+  i,
+}: {
+  lg?: number;
+  texto: string | null;
+  i: number;
+}) => {
+  // Descripcion
+  return texto ? (
+    // ? Es mayor a lg
+    texto.length > (lg ?? 15) ? (
+      <OverlayTrigger
+        key={i}
+        placement="auto-start"
+        overlay={
+          <Tooltip id={`descripcion-${i}`}>
+            <strong>{texto}</strong>
+          </Tooltip>
+        }
+      >
+        <p>{texto.substring(0, lg ?? 15) + "..."}</p>
+      </OverlayTrigger>
+    ) : (
+      <p>{texto}</p>
+    )
+  ) : (
+    <p>{""}</p>
   );
 };
 

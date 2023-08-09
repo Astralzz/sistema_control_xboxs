@@ -1,9 +1,9 @@
 import React from "react";
 import BarraSuperior from "../components/BarraSuperior";
 import { useLocation } from "react-router";
-import ContenedorRentas from "../components/rentas/ContenedorRentas";
 import PaginaEscogida from "../components/global/PaginaEscogida";
-import PaginaInicio from "../pages/PaginaInicio";
+import PaginaInicio from "../pages/inicio/PaginaInicio";
+
 
 // * Obtener el titulo
 const obtenerTitulo = (ruta: string): string => {

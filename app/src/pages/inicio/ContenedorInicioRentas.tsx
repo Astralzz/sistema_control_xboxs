@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Container, Tab, Tabs } from "react-bootstrap";
-import CartaXbox from "./CartaXbox";
+import { Tab, Tabs } from "react-bootstrap";
+import CartaXbox from "../xboxs/CartaXbox";
 import Xbox from "../../models/Xbox";
 import { apiObtenerListaXboxs } from "../../apis/apiXboxs";
 import { RespuestaApi } from "../../apis/apiVariables";
-import ComponentError, { DataError } from "../global/ComponentError";
-import FormularioXboxs from "./FormularioXboxs";
+import ComponentError, {
+  DataError,
+} from "../../components/global/ComponentError";
+import FormularioXboxs from "../xboxs/FormularioXboxs";
 
 // TODO, Contenedor rentas
-const ContenedorRentas: React.FC = () => {
+const ContenedorInicioRentas: React.FC = () => {
   // * Variables
   const [keyTab, setKeyTab] = useState<string | null>(null);
   const [listaXboxs, setListaXboxs] = useState<Xbox[]>([]);
@@ -145,4 +147,4 @@ const ContenedorRentas: React.FC = () => {
   );
 };
 
-export default ContenedorRentas;
+export default ContenedorInicioRentas;
