@@ -487,7 +487,7 @@ const TarjetaVenderProducto: React.FC = () => {
                   onClick={() => setTextBuscarNombre("")}
                   className="bt-b"
                 >
-                  <IconoBootstrap nombre="X" size={20} />
+                  <IconoBootstrap nombre="X" />
                 </Button>
               </div>
             </InputGroup>
