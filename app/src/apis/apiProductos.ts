@@ -1,5 +1,9 @@
 import axios from "axios";
-import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
+import API_URL, {
+  RespuestaApi,
+  catchAxiosError,
+  comprobarApis,
+} from "./apiVariables";
 
 // * Variables
 const intermedio: string = "productos";
@@ -7,6 +11,11 @@ const intermedio: string = "productos";
 // * Crear nuevo producto
 export async function apiCrearProducto(data: FormData): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url = API_URL + `${intermedio}/opciones/crear`;
 
@@ -32,6 +41,11 @@ export async function apiActualizarProducto(
   id: number
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url = API_URL + `${intermedio}/opciones/actualizar/${id}`;
 
@@ -57,6 +71,11 @@ export async function apiAumentarStockProducto(
   n: number = 1
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url = API_URL + `${intermedio}/opciones/aumentar/stock/${id}/${n}`;
 
@@ -82,6 +101,11 @@ export async function apiDisminuirStockProducto(
   n: number = 1
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url = API_URL + `${intermedio}/opciones/disminuir/stock/${id}/${n}`;
 
@@ -107,6 +131,11 @@ export async function apiObtenerListaProductos(
   asta: number = 10
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url = API_URL + `${intermedio}/lista/global/${desde}/${asta}`;
 
@@ -133,6 +162,11 @@ export async function apiObtenerListaProductosPorNombre(
   asta: number = 10
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url =
       API_URL +
@@ -161,6 +195,11 @@ export async function apiObtenerListaProductosPorStock(
   asta: number = 10
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url =
       API_URL + `${intermedio}/lista/filtrada/stock/${stock}/${desde}/${asta}`;
@@ -184,6 +223,11 @@ export async function apiObtenerListaProductosPorStock(
 // * Eliminar producto
 export async function apiEliminarProducto(id: number): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
     // Ruta
     let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
 

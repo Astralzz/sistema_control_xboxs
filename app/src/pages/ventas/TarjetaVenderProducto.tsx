@@ -7,9 +7,11 @@ import {
   Form,
   InputGroup,
   ListGroup,
+  OverlayTrigger,
+  Popover,
   Row,
 } from "react-bootstrap";
-import { regexNombre } from "../../functions/variables";
+import { regexDescripcion, regexNombre } from "../../functions/variables";
 import IconoBootstrap from "../../components/global/IconoBootstrap";
 import Producto from "../../models/Producto";
 import ComponenteCargando from "../../components/global/ComponenteCargando";
@@ -66,19 +68,26 @@ const styles: React.CSSProperties = {
   borderBottom: "1px solid white",
 };
 
+const styleComentario: React.CSSProperties = {
+  backgroundColor: "var(--color-variant)",
+  color: "var(--color-letra)",
+  border: "none",
+};
+
 // * New producto
 interface VentaProducto extends Producto {
   IdProductoAgregado: string;
 }
 
 // TODO, Pagina de los xbox
-const ContenedorInicioVentas: React.FC = () => {
+const TarjetaVenderProducto: React.FC = () => {
   // * Variables
   const location = useLocation();
   const [isCargandoProductos, setCargandoProductos] = useState<boolean>(false);
   const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
   const [precioTotal, setPrecioTotal] = useState<number>(0);
   const [textBuscarNombre, setTextBuscarNombre] = useState<string>("");
+  const [comentario, setComentario] = useState<string>("");
   const [listaProductos, setListaProductos] = useState<VentaProducto[]>([]);
   const [listaProductosAgregados, setListaProductosAgregados] = useState<
     VentaProducto[]
@@ -103,6 +112,11 @@ const ContenedorInicioVentas: React.FC = () => {
     data.append("total", String(precioTotal));
     data.append("comentario", "Este es un comentario");
     data.append("detalles", JSON.stringify(detalles));
+
+    // ? Comentario valido
+    if (regexDescripcion.test(comentario)) {
+      data.append("comentario", comentario);
+    }
 
     return data;
   };
@@ -155,6 +169,7 @@ const ContenedorInicioVentas: React.FC = () => {
 
         // Limpiamos
         setListaProductosAgregados([]);
+        setComentario("");
       }
     } catch (error) {
       alertaSwal("Error", String(error), "error");
@@ -404,6 +419,30 @@ const ContenedorInicioVentas: React.FC = () => {
     limpiarDatos();
   }, [location.pathname]);
 
+  // * Comentario
+  const ComentarioFlotante = (
+    <Popover>
+      <Popover.Header style={styleComentario} as="h3">
+        Comentario
+      </Popover.Header>
+      <Popover.Body style={styleComentario}>
+        <InputGroup style={styles} className="placeholder-blanco">
+          <Form.Control
+            as="textarea"
+            rows={3}
+            style={styles}
+            className={
+              regexDescripcion.test(comentario) ? "is-valid" : "is-invalid"
+            }
+            value={comentario}
+            maxLength={60}
+            onChange={(t) => setComentario(t.target.value)}
+          />
+        </InputGroup>
+      </Popover.Body>
+    </Popover>
+  );
+
   return (
     <>
       {/* Tarjeta */}
@@ -558,7 +597,7 @@ const ContenedorInicioVentas: React.FC = () => {
                   {/*  Botones */}
                   <div className="botones-tarjeta">
                     <Row>
-                      <Col xs={9}>
+                      <Col xs={7}>
                         {/* Vender */}
                         <Button
                           className="bt-tr w-100"
@@ -567,14 +606,28 @@ const ContenedorInicioVentas: React.FC = () => {
                           {`$ ${precioTotal}`}
                         </Button>
                       </Col>
-                      <Col xs={3}>
-                        {/* Limpiar */}
-                        <Button
-                          className="bt-tr bt-bcr w-100"
-                          onClick={() => limpiarAgregados()}
-                        >
-                          <IconoBootstrap nombre="Trash2Fill" />
-                        </Button>
+                      <Col xs={5}>
+                        <ButtonGroup>
+                          {/* Comentario */}
+                          <OverlayTrigger
+                            trigger="click"
+                            placement="right"
+                            rootClose
+                            overlay={ComentarioFlotante}
+                          >
+                            <Button className="bt-tr bt-bcr w-100">
+                              <IconoBootstrap nombre="ChatLeftFill" />
+                            </Button>
+                          </OverlayTrigger>
+
+                          {/* Limpiar */}
+                          <Button
+                            className="bt-tr bt-bcr w-100"
+                            onClick={() => limpiarAgregados()}
+                          >
+                            <IconoBootstrap nombre="Trash2Fill" />
+                          </Button>
+                        </ButtonGroup>
                       </Col>
                     </Row>
                   </div>
@@ -591,4 +644,4 @@ const ContenedorInicioVentas: React.FC = () => {
   );
 };
 
-export default ContenedorInicioVentas;
+export default TarjetaVenderProducto;

@@ -1,7 +1,7 @@
 import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import ContenedorInicioRentas from "./ContenedorInicioRentas";
-import ContenedorInicioVentas from "./ContenedorInicioVentas";
+import TarjetaVenderProducto from "../ventas/TarjetaVenderProducto";
 
 // TODO, Pagina de los xbox
 const PaginaInicio: React.FC = () => {
@@ -13,7 +13,7 @@ const PaginaInicio: React.FC = () => {
       <Row>
         <Col>
           {/* vENTAS */}
-          <ContenedorInicioVentas />
+          <TarjetaVenderProducto />
         </Col>
         <Col>
           {/* SERVICIOS */}

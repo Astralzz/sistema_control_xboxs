@@ -1,5 +1,9 @@
 import axios from "axios";
-import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
+import API_URL, {
+  RespuestaApi,
+  catchAxiosError,
+  comprobarApis,
+} from "./apiVariables";
 
 // * Variables
 const intermedio: string = "xboxs";
@@ -7,6 +11,10 @@ const intermedio: string = "xboxs";
 // * Obtener lista de xboxs
 export async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/lista/global`;
 
@@ -28,6 +36,10 @@ export async function apiObtenerListaXboxs(): Promise<RespuestaApi> {
 // * Crear nuevo xbox
 export async function apiCrearNuevoXbox(data: FormData): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/opciones/crear`;
 
@@ -53,6 +65,11 @@ export async function apiActualizarXbox(
   id: number
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+    
     // Ruta
     let url = API_URL + `${intermedio}/opciones/actualizar/${id}`;
 
@@ -75,6 +92,10 @@ export async function apiActualizarXbox(
 // * Eliminar xbox
 export async function apiEliminarXbox(id: number): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
 

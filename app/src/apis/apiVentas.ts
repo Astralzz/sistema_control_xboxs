@@ -1,5 +1,9 @@
 import axios from "axios";
-import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
+import API_URL, {
+  RespuestaApi,
+  catchAxiosError,
+  comprobarApis,
+} from "./apiVariables";
 
 // * Variables
 const intermedio: string = "ventas";
@@ -9,6 +13,10 @@ export async function apiCrearNuevaVenta(
   data: FormData
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/opciones/crear`;
 
@@ -35,6 +43,10 @@ export async function apiObtenerListaVentasPorId(
   asta: number = 10
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url =
       API_URL + `${intermedio}/lista/filtrada/producto/${id}/${desde}/${asta}`;
@@ -61,7 +73,10 @@ export async function apiObtenerListaVentasPorId(
 //   desde: number = 0,
 //   asta: number = 10
 // ): Promise<RespuestaApi> {
-//   try {
+//   try {   // ? Url no encontrada
+// if (!comprobarApis()) {
+//   throw new Error("No se pudo encortar la url hacia el servidor");
+// }
 //     // Ruta
 //     let url =
 //       API_URL + `${intermedio}/lista/filtrada/stock/${stock}/${desde}/${asta}`;
@@ -84,7 +99,10 @@ export async function apiObtenerListaVentasPorId(
 
 // // * Eliminar producto
 // export async function apiEliminarProducto(id: number): Promise<RespuestaApi> {
-//   try {
+//   try {   // ? Url no encontrada
+// if (!comprobarApis()) {
+//   throw new Error("No se pudo encortar la url hacia el servidor");
+// }
 //     // Ruta
 //     let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
 

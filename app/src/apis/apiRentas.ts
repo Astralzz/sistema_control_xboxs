@@ -1,5 +1,5 @@
 import axios from "axios";
-import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
+import API_URL, { RespuestaApi, catchAxiosError, comprobarApis } from "./apiVariables";
 
 // * Variables
 const intermedio: string = "rentas";
@@ -9,6 +9,11 @@ export async function apiObtenerListaRentasPorXbox(
   id: number
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+    
     //Ruta
     let url = API_URL + `${intermedio}/lista/xbox/${id}`;
 
@@ -32,6 +37,10 @@ export async function apiCrearNuevaRenta(
   data: FormData
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/opciones/crear`;
 
@@ -57,6 +66,10 @@ export async function apiActualizarRenta(
   id: number
 ): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/opciones/actualizar/${id}`;
 
@@ -79,6 +92,10 @@ export async function apiActualizarRenta(
 // * Eliminar renta
 export async function apiEliminarRenta(id: number): Promise<RespuestaApi> {
   try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
     // Ruta
     let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
 

@@ -257,7 +257,7 @@ const FormularioProducto: React.FC<Props> = (props) => {
             imgProducto
               ? URL.createObjectURL(imgProducto)
               : props.producto?.enlace_img
-              ? `${URL_SERVER}/${props.producto?.enlace_img}`
+              ? `${URL_SERVER}${props.producto?.enlace_img}`
               : imgDefecto
           }
           roundedCircle

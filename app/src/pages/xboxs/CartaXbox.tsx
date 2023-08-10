@@ -5,13 +5,9 @@ import {
   Row,
   Col,
   Toast,
-  DropdownButton,
-  Dropdown,
   ButtonGroup,
   Form,
   InputGroup,
-  OverlayTrigger,
-  Popover,
   Image,
 } from "react-bootstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
@@ -31,7 +27,6 @@ import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
 import { RespuestaApi } from "../../apis/apiVariables";
 import Renta from "../../models/Renta";
 import ComponenteCargando from "../../components/global/ComponenteCargando";
-import { OverlayChildren } from "react-bootstrap/esm/Overlay";
 import { detenerAlarma, reproducirAlarma } from "../../functions/alarma";
 import iconoAlarma from "../../assets/imgs/iconoAlarma.png";
 

@@ -4,8 +4,14 @@ import Xbox from "../models/Xbox";
 import Producto from "../models/Producto";
 import Venta from "../models/Venta";
 
-// Url oficial
-export const URL_SERVER = "http://controlxbox";
+// // * Apis del servidor
+// export const URL_SERVER: string | undefined =
+//   process.env.REACT_APP_URL_SERVER ?? undefined;
+// export const API_URL: string | undefined =
+//   process.env.REACT_APP_URL_SERVER_API ?? undefined;
+
+// * Apis del servidor local
+export const URL_SERVER: string = "http://127.0.0.1:8000";
 export const API_URL: string = `${URL_SERVER}/api/`;
 
 // Respuesta
@@ -27,6 +33,15 @@ export interface RespuestaApi {
   venta?: Venta;
   // Total datos
   totalDatos?: number;
+}
+
+// * Comprobar apis
+export function comprobarApis(): boolean {
+  // ? No existe el servidor
+  if (!URL_SERVER || !API_URL) {
+    return false;
+  }
+  return true;
 }
 
 // * Respuesta axios

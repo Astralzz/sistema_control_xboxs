@@ -92,7 +92,7 @@ const TarjetaProducto: React.FC<Props> = (props) => {
           <Image
             src={
               props.producto?.enlace_img
-                ? `${URL_SERVER}/${props.producto?.enlace_img}`
+                ? `${URL_SERVER}${props.producto?.enlace_img}`
                 : iconProducto
             }
             roundedCircle

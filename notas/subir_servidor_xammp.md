@@ -1,4 +1,6 @@
-# AGREGAR UN PROYECTO DE LARAVEL EN XAMPP
+# PONER UN SERVIDOR DE LARAVEL EN XAMPP
+
+---
 
 ## 1\_ Añadir los/el host/s al archivo httpd-vhosts.conf
 
@@ -42,6 +44,8 @@
             ServerName controlxbox
         </VirtualHost>
 
+---
+
 ## 2\_ Verificar el archivo httpd.conf
 
 1. ve a la ruta
@@ -64,6 +68,8 @@
         # Virtual hosts
         Include conf/extra/httpd-vhosts.conf
 
+---
+
 ## 3\_ Añadir un nuevo hosting al archivo host
 
 1. Abre el blog de notas como administrador
@@ -83,6 +89,8 @@
     Ejemplo:
 
         127.0.0.1 controlxbox
+
+---
 
 ## 4\_ Verificar que todo salio bien
 
