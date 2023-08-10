@@ -5,7 +5,9 @@ import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
 const intermedio: string = "ventas";
 
 // * Crear nueva venta
-export async function apiCrearNuevaVenta(data: FormData): Promise<RespuestaApi> {
+export async function apiCrearNuevaVenta(
+  data: FormData
+): Promise<RespuestaApi> {
   try {
     // Ruta
     let url = API_URL + `${intermedio}/opciones/crear`;

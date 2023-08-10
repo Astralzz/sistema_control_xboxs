@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -25,6 +25,7 @@ import ReactLoading from "react-loading";
 import { TextoLargoParrafoElement } from "../../components/global/Otros";
 import { useLocation } from "react-router";
 import { DetalleVenta } from "../../models/Venta";
+import { apiCrearNuevaVenta } from "../../apis/apiVentas";
 
 // * Crear detalles
 const crearDetallesDesdeProductosAgregados = (
@@ -67,7 +68,7 @@ const styles: React.CSSProperties = {
 
 // * New producto
 interface VentaProducto extends Producto {
-  idVenta: string;
+  IdProductoAgregado: string;
 }
 
 // TODO, Pagina de los xbox
@@ -123,6 +124,37 @@ const ContenedorInicioVentas: React.FC = () => {
         // Obtenemos data
         const data: FormData = obtenerFormData();
 
+        // Hacemos request
+        const res: RespuestaApi = await apiCrearNuevaVenta(data);
+
+        // ? salio mal
+        if (!res.estado) {
+          throw new Error(
+            res.detalles_error
+              ? String(res.detalles_error)
+              : "Ocurrió un error al crear la venta, intenta mas tarde"
+          );
+        }
+
+        // ? No se puede aumentar
+        if (!res.venta) {
+          alertaSwal(
+            "Casi éxito!",
+            "La venta se creo correctamente pero no se vera reflejado el cambio asta que reinicie la sección",
+            "warning"
+          );
+          return;
+        }
+
+        // * Éxito
+        alertaSwal(
+          "Éxito!",
+          res.mensaje ?? "Venta creada correctamente",
+          "success"
+        );
+
+        // Limpiamos
+        setListaProductosAgregados([]);
       }
     } catch (error) {
       alertaSwal("Error", String(error), "error");
@@ -149,18 +181,16 @@ const ContenedorInicioVentas: React.FC = () => {
 
       // ? salio mal
       if (!res.estado) {
-        alertaSwal("Error", "Ocurrió un error inesperado", "error");
-        return;
+        throw new Error(
+          res.detalles_error
+            ? String(res.detalles_error)
+            : "Ocurrió un error al crear la venta, intenta mas tarde"
+        );
       }
 
       // ? Llego la lista
       if (!res.listaProductos) {
-        alertaSwal(
-          "Error",
-          "La lista de productos no llego correctamente",
-          "error"
-        );
-        return;
+        throw new Error("La lista de productos no llego correctamente");
       }
 
       // Lista
@@ -169,12 +199,16 @@ const ContenedorInicioVentas: React.FC = () => {
       res.listaProductos.forEach((p) => {
         newLista.push({
           ...p,
-          idVenta: generateRandomId(),
+          IdProductoAgregado: generateRandomId(),
         });
       });
 
-      // Ponemos lista
-      setListaProductos(newLista);
+      // * disminuimos stock
+      const listaDisminuida: VentaProducto[] =
+        disminuirStockListaProductos(newLista);
+
+      // Agregamos
+      setListaProductos(listaDisminuida);
     } catch (error) {
       alertaSwal("Error", String(error), "error");
     } finally {
@@ -209,7 +243,7 @@ const ContenedorInicioVentas: React.FC = () => {
       // Agrega el producto a la lista de productos agregados
       setListaProductosAgregados([
         ...listaProductosAgregados,
-        { ...producto, idVenta: generateRandomId() },
+        { ...producto, IdProductoAgregado: generateRandomId() },
       ]);
 
       // Actualiza el estado de listaProductos con el stock disminuido
@@ -238,15 +272,120 @@ const ContenedorInicioVentas: React.FC = () => {
 
     // Eliminamos de la lista de productos agregados
     const updatedListaProductosAgregados = listaProductosAgregados.filter(
-      (p) => p.idVenta !== producto.idVenta
+      (p) => p.IdProductoAgregado !== producto.IdProductoAgregado
     );
     setListaProductosAgregados(updatedListaProductosAgregados);
+  };
+
+  //  * Disminuir stock de la lista
+  const disminuirStockListaProductos = (
+    newLista: VentaProducto[]
+  ): VentaProducto[] => {
+    // Objeto para rastrear la cantidad total de cada producto
+    const cantidadPorProducto: { [key: string]: number } = {};
+
+    // Recorremos los productos agregados
+    listaProductosAgregados.forEach((productoAgregado) => {
+      // Id
+      const idProducto = productoAgregado.id;
+
+      // ? Aun no existe
+      if (!cantidadPorProducto[idProducto]) {
+        // Iniciamos en 0
+        cantidadPorProducto[idProducto] = 0;
+      }
+
+      // Incrementamos en 1
+      cantidadPorProducto[idProducto] += 1; // Para cuando hay mas de un producto
+    });
+
+    // Retornamos la lista con los stock disminuidos
+    return newLista.map((producto) => {
+      // Id
+      const idProducto = producto.id;
+
+      // ? Existe
+      if (cantidadPorProducto[idProducto]) {
+        // Cantidad a reducir
+        const cantidadEnAgregados = cantidadPorProducto[idProducto];
+        return {
+          ...producto,
+          stock: producto.stock - cantidadEnAgregados,
+        };
+      }
+
+      return producto;
+    });
+  };
+
+  // * Aumentar stock de la lista
+  const aumentarStockListaProductos = (
+    newLista: VentaProducto[]
+  ): VentaProducto[] => {
+    // Objeto para rastrear la cantidad total de cada producto
+    const cantidadPorProducto: { [key: string]: number } = {};
+
+    // Recorremos los productos agregados
+    listaProductosAgregados.forEach((productoAgregado) => {
+      // Id
+      const idProducto = productoAgregado.id;
+
+      // ? Aun no existe
+      if (!cantidadPorProducto[idProducto]) {
+        // Iniciamos en 0
+        cantidadPorProducto[idProducto] = 0;
+      }
+
+      // Incrementamos en 1
+      cantidadPorProducto[idProducto] += 1;
+    });
+
+    // Retornamos la lista con los stock aumentados
+    return newLista.map((producto) => {
+      // Id
+      const idProducto = producto.id;
+
+      // ? Existe
+      if (cantidadPorProducto[idProducto]) {
+        // Cantidad a aumentar
+        const cantidadEnAgregados = cantidadPorProducto[idProducto];
+        return {
+          ...producto,
+          stock: producto.stock + cantidadEnAgregados,
+        };
+      }
+
+      return producto;
+    });
   };
 
   // * Limpiar
   const limpiarDatos = (): void => {
     setTextBuscarNombre("");
     setListaProductos([]);
+  };
+
+  // * Limpiar agregados
+  const limpiarAgregados = async (): Promise<void> => {
+    // Confirmacion
+    const conf: boolean = await confirmacionSwal(
+      "Limpiar venta?",
+      `Estas seguro/a que deseas limpiar esta venta`,
+      "Si limpiar"
+    );
+
+    // ? Confirmado
+    if (conf) {
+      // * aumentamos stock
+      const listaAumentada: VentaProducto[] =
+        aumentarStockListaProductos(listaProductos);
+
+      // Agregamos
+      setListaProductos(listaAumentada);
+
+      // * Limpiamos
+      setListaProductosAgregados([]);
+    }
   };
 
   // * Al cambiar lista de agregados
@@ -432,17 +571,7 @@ const ContenedorInicioVentas: React.FC = () => {
                         {/* Limpiar */}
                         <Button
                           className="bt-tr bt-bcr w-100"
-                          onClick={() => {
-                            // ? Esta correcto
-                            if (regexNombre.test(textBuscarNombre)) {
-                              obtenerProductos(textBuscarNombre);
-                              setListaProductosAgregados([]);
-                              return;
-                            }
-
-                            setListaProductos([]);
-                            setListaProductosAgregados([]);
-                          }}
+                          onClick={() => limpiarAgregados()}
                         >
                           <IconoBootstrap nombre="Trash2Fill" />
                         </Button>

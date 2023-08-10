@@ -1,11 +1,13 @@
 import React, { Dispatch, useEffect, useState } from "react";
 import {
   Button,
+  Col,
   Container,
   Form,
   InputGroup,
   Navbar,
   Pagination,
+  Row,
   Spinner,
   Table,
 } from "react-bootstrap";
@@ -113,28 +115,59 @@ const TablaProductos: React.FC<Props> = (props) => {
             </Button>
           </div>
           <Navbar.Toggle />
+
           <Navbar.Collapse className="justify-content-end">
-            {/* Stock */}
-            <InputGroup className="placeholder-blanco">
-              <Form.Control
-                placeholder="buscar cantidad"
-                type="text"
-                style={styles}
-                className={
-                  textBuscarCantidad === ""
-                    ? ""
-                    : regexNumerosEnteros.test(textBuscarCantidad)
-                    ? "is-valid"
-                    : "is-invalid"
-                }
-                value={String(textBuscarCantidad)}
-                onChange={(t) => setTextBuscarCantidad(t.target.value)}
-              />
-              <div className="boton-buscar">
-                <Button
-                  disabled={!regexNumerosEnteros.test(textBuscarCantidad)}
-                  className="bt-b"
-                  onClick={() => {
+            <Row>
+              {/* Nombre */}
+              <Col xs={8}>
+                <Form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    setFiltroCantidad(false);
+                    setFiltroNombre(true);
+                    preObtenerProductos(0, 10, textBuscarNombre);
+                  }}
+                >
+                  <InputGroup className="placeholder-blanco">
+                    <Form.Control
+                      placeholder="Nombre del producto"
+                      type="text"
+                      style={styles}
+                      className={
+                        textBuscarNombre === ""
+                          ? ""
+                          : regexNombre.test(textBuscarNombre)
+                          ? "is-valid"
+                          : "is-invalid"
+                      }
+                      value={textBuscarNombre}
+                      onChange={(t) => setTextBuscarNombre(t.target.value)}
+                    />
+                    <div className="boton-buscar">
+                      <Button
+                        disabled={!regexNombre.test(textBuscarNombre)}
+                        type="submit"
+                        className="bt-b"
+                      >
+                        <IconoBootstrap nombre="Search" />
+                      </Button>
+                      {/* Eliminar */}
+                      <Button
+                        disabled={textBuscarNombre.length < 1}
+                        onClick={() => setTextBuscarNombre("")}
+                        className="bt-b"
+                      >
+                        <IconoBootstrap nombre="X" />
+                      </Button>
+                    </div>
+                  </InputGroup>
+                </Form>
+              </Col>
+              {/* Stock */}
+              <Col xs={4}>
+                <Form
+                  onSubmit={(event) => {
+                    event.preventDefault();
                     setFiltroNombre(false);
                     setFiltroCantidad(true);
                     preObtenerProductos(
@@ -145,49 +178,51 @@ const TablaProductos: React.FC<Props> = (props) => {
                     );
                   }}
                 >
-                  Buscar
-                </Button>
-              </div>
-            </InputGroup>
+                  <InputGroup className="placeholder-blanco">
+                    <Form.Control
+                      placeholder="stock"
+                      type="text"
+                      style={styles}
+                      className={
+                        textBuscarCantidad === ""
+                          ? ""
+                          : regexNumerosEnteros.test(textBuscarCantidad)
+                          ? "is-valid"
+                          : "is-invalid"
+                      }
+                      value={String(textBuscarCantidad)}
+                      onChange={(t) => setTextBuscarCantidad(t.target.value)}
+                    />
+                    <div className="boton-buscar">
+                      {/* Buscar */}
+                      <Button
+                        disabled={!regexNumerosEnteros.test(textBuscarCantidad)}
+                        className="bt-b"
+                        type="submit"
+                      >
+                        <IconoBootstrap nombre="Search" />
+                      </Button>
+                      {/* Eliminar */}
+                      <Button
+                        disabled={textBuscarCantidad.length < 1}
+                        onClick={() => setTextBuscarCantidad("")}
+                        className="bt-b"
+                      >
+                        <IconoBootstrap nombre="X" />
+                      </Button>
+                    </div>
+                  </InputGroup>
+                </Form>
+              </Col>
+            </Row>
           </Navbar.Collapse>
         </Container>
-
-        {/* Nombre */}
-        <InputGroup className="placeholder-blanco">
-          <Form.Control
-            placeholder="buscar por nombre"
-            type="text"
-            style={styles}
-            className={
-              textBuscarNombre === ""
-                ? ""
-                : regexNombre.test(textBuscarNombre)
-                ? "is-valid"
-                : "is-invalid"
-            }
-            value={textBuscarNombre}
-            onChange={(t) => setTextBuscarNombre(t.target.value)}
-          />
-          <div className="boton-buscar">
-            <Button
-              disabled={!regexNombre.test(textBuscarNombre)}
-              onClick={() => {
-                setFiltroCantidad(false);
-                setFiltroNombre(true);
-                preObtenerProductos(0, 10, textBuscarNombre);
-              }}
-              className="bt-b"
-            >
-              Buscar
-            </Button>
-          </div>
-        </InputGroup>
       </Navbar>
       {/* TABLA */}
       {props.lista.length < 1 && !props.isCargandoTabla ? (
         // ? Esta vacía y no esta cargando
         <div className="contenedor-centrado">
-          <h4>No se encontraron datos</h4>
+          <h4>No se encontraron productos</h4>
         </div>
       ) : (
         <Table responsive bordered variant="dark" style={{ marginBottom: 0 }}>

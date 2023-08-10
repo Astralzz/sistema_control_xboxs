@@ -51,6 +51,56 @@ export async function apiActualizarProducto(
   }
 }
 
+// * Aumentar stock
+export async function apiAumentarStockProducto(
+  id: number,
+  n: number = 1
+): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/aumentar/stock/${id}/${n}`;
+
+    // Enviamos
+    const res = await axios.post(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      producto: res.data.producto ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
+// * Disminuir stock
+export async function apiDisminuirStockProducto(
+  id: number,
+  n: number = 1
+): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/disminuir/stock/${id}/${n}`;
+
+    // Enviamos
+    const res = await axios.post(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      producto: res.data.producto ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
 // * Obtener lista de productos
 export async function apiObtenerListaProductos(
   desde: number = 0,
