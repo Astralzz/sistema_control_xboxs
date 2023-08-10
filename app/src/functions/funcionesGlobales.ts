@@ -1,6 +1,7 @@
 import moment from "moment";
 import "moment/locale/es";
 import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
+import Venta from "../models/Venta";
 
 // * Variables de estilos
 const colorFondo: string = "var(--color-fondo)";
@@ -392,4 +393,19 @@ export function generateRandomId(
   }
 
   return r;
+}
+
+// * para convertir detalles de una venta
+export function convertirDetalles(venta: Venta): Venta {
+  // Obtenemos json
+  const detallesJSON = JSON.parse(String(venta.detalles));
+
+  // Convertimos
+  const detallesConvertidos = detallesJSON.map((detalle: any) => {
+    return {
+      id_producto: detalle.id_producto,
+      cantidad: detalle.cantidad,
+    };
+  });
+  return { ...venta, detalles: detallesConvertidos };
 }

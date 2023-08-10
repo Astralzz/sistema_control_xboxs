@@ -18,11 +18,44 @@ import { apiObtenerListaProductosPorNombre } from "../../apis/apiProductos";
 import {
   alertaSwal,
   confirmacionSwal,
+  fechaHoraActual,
   generateRandomId,
 } from "../../functions/funcionesGlobales";
 import ReactLoading from "react-loading";
 import { TextoLargoParrafoElement } from "../../components/global/Otros";
 import { useLocation } from "react-router";
+import { DetalleVenta } from "../../models/Venta";
+
+// * Crear detalles
+const crearDetallesDesdeProductosAgregados = (
+  productosAgregados: VentaProducto[]
+): DetalleVenta[] => {
+  // Datos
+  const detalles: DetalleVenta[] = [];
+  const productoCantidadMap = new Map<number, number>();
+
+  // Recorremos
+  productosAgregados.forEach((producto) => {
+    // Id
+    const idProducto = producto.id;
+
+    // ? Ya esta en la lista?
+    if (productoCantidadMap.has(idProducto)) {
+      // Cantidad actual
+      const cantidadActual = productoCantidadMap.get(idProducto) ?? 0;
+      productoCantidadMap.set(idProducto, cantidadActual + 1);
+    } else {
+      productoCantidadMap.set(idProducto, 1);
+    }
+  });
+
+  // Recorremos y agregamos
+  productoCantidadMap.forEach((cantidad, idProducto) => {
+    detalles.push({ id_producto: idProducto, cantidad: cantidad });
+  });
+
+  return detalles;
+};
 
 // * Estilos
 const styles: React.CSSProperties = {
@@ -33,7 +66,7 @@ const styles: React.CSSProperties = {
 };
 
 // * New producto
-interface NewProducto extends Producto {
+interface VentaProducto extends Producto {
   idVenta: string;
 }
 
@@ -45,10 +78,33 @@ const ContenedorInicioVentas: React.FC = () => {
   const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
   const [precioTotal, setPrecioTotal] = useState<number>(0);
   const [textBuscarNombre, setTextBuscarNombre] = useState<string>("");
-  const [listaProductos, setListaProductos] = useState<NewProducto[]>([]);
+  const [listaProductos, setListaProductos] = useState<VentaProducto[]>([]);
   const [listaProductosAgregados, setListaProductosAgregados] = useState<
-    NewProducto[]
+    VentaProducto[]
   >([]);
+
+  // * Data
+  const obtenerFormData = (): FormData => {
+    // Fecha y hora
+    const { fecha: f, hora: h } = fechaHoraActual();
+    // Total
+    const noProductos: string = String(listaProductosAgregados.length);
+    // lista de detalles
+    const detalles: DetalleVenta[] = crearDetallesDesdeProductosAgregados(
+      listaProductosAgregados
+    );
+
+    // Datos
+    const data: FormData = new FormData();
+    data.append("fecha", f);
+    data.append("hora", h);
+    data.append("noProductos", noProductos);
+    data.append("total", String(precioTotal));
+    data.append("comentario", "Este es un comentario");
+    data.append("detalles", JSON.stringify(detalles));
+
+    return data;
+  };
 
   // * Realizar venta
   const realizarVenta = async (): Promise<void> => {
@@ -62,6 +118,11 @@ const ContenedorInicioVentas: React.FC = () => {
 
       // ? Confirmacion aceptada
       if (conf) {
+        setCargandoAccion(true);
+
+        // Obtenemos data
+        const data: FormData = obtenerFormData();
+
       }
     } catch (error) {
       alertaSwal("Error", String(error), "error");
@@ -103,7 +164,7 @@ const ContenedorInicioVentas: React.FC = () => {
       }
 
       // Lista
-      let newLista: NewProducto[] = [];
+      let newLista: VentaProducto[] = [];
       // Recorremos
       res.listaProductos.forEach((p) => {
         newLista.push({
@@ -122,7 +183,7 @@ const ContenedorInicioVentas: React.FC = () => {
   };
 
   // * Agregar producto
-  const agregarProducto = (producto: NewProducto): void => {
+  const agregarProducto = (producto: VentaProducto): void => {
     // ?No hay stock
     if (producto.stock < 1) {
       alertaSwal(
@@ -158,7 +219,7 @@ const ContenedorInicioVentas: React.FC = () => {
   };
 
   // * Eliminar de agregados
-  const eliminarProductoDeAgregados = (producto: NewProducto): void => {
+  const eliminarProductoDeAgregados = (producto: VentaProducto): void => {
     // Indice del producto en la lista listaProductos
     const productoIndex = listaProductos.findIndex((p) => p.id === producto.id);
 

@@ -4,30 +4,27 @@ import API_URL, { RespuestaApi, catchAxiosError } from "./apiVariables";
 // * Variables
 const intermedio: string = "ventas";
 
-// // * Obtener lista de productos
-// export async function apiObtenerListaProductos(
-//   desde: number = 0,
-//   asta: number = 10
-// ): Promise<RespuestaApi> {
-//   try {
-//     // Ruta
-//     let url = API_URL + `${intermedio}/lista/global/${desde}/${asta}`;
+// * Crear nueva venta
+export async function apiCrearNuevaVenta(data: FormData): Promise<RespuestaApi> {
+  try {
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/crear`;
 
-//     // Enviamos
-//     const res = await axios.get(url);
+    // Enviamos
+    const res = await axios.post(url, data);
 
-//     // * Éxito
-//     return {
-//       estado: true,
-//       listaProductos: res.data.lista ?? undefined,
-//       totalDatos: res.data.totalDatos ?? undefined,
-//     };
+    // * Éxito
+    return {
+      estado: true,
+      venta: res.data.venta ?? undefined,
+      mensaje: res.data.mensaje ?? undefined,
+    };
 
-//     // ! Error
-//   } catch (er: unknown) {
-//     return await catchAxiosError(er);
-//   }
-// }
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
 
 // * Obtener lista de ventas por id
 export async function apiObtenerListaVentasPorId(
@@ -38,8 +35,7 @@ export async function apiObtenerListaVentasPorId(
   try {
     // Ruta
     let url =
-      API_URL +
-      `${intermedio}/lista/filtrada/producto/${id}/${desde}/${asta}`;
+      API_URL + `${intermedio}/lista/filtrada/producto/${id}/${desde}/${asta}`;
 
     // Enviamos
     const res = await axios.get(url);

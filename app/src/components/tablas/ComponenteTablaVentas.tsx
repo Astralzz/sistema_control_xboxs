@@ -8,6 +8,7 @@ import {
 import Venta from "../../models/Venta";
 import {
   alertaSwal,
+  convertirDetalles,
   formatearFecha,
   formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
@@ -65,8 +66,11 @@ const ComponenteTablaVentas: React.FC<Props> = (props) => {
         throw new Error("La lista de ventas no llego correctamente");
       }
 
+      // Convertir los detalles de cada venta
+      const ventasConvertidas: Venta[] = res.listaVentas.map(convertirDetalles);
+
       // * Éxito
-      setListaVentas(res.listaVentas);
+      setListaVentas(ventasConvertidas);
     } catch (error: unknown) {
       alertaSwal("Error", String(error), "error");
     } finally {
