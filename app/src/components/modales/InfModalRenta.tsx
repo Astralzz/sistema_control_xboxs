@@ -16,7 +16,7 @@ import {
   formatearFechaConDias,
   formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
-import IconoBootstrap from "../global/IconoBootstrap";
+import IconoBootstrap from "../oters/IconoBootstrap";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiActualizarRenta, apiEliminarRenta } from "../../apis/apiRentas";
 

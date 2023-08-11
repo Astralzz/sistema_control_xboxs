@@ -9,7 +9,7 @@ import {
   ListGroup,
 } from "react-bootstrap";
 import iconProducto from "../../assets/imgs/iconProducto.png";
-import IconoBootstrap from "../../components/global/IconoBootstrap";
+import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import {
   alertaSwal,
   confirmacionSwal,

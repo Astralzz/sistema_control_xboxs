@@ -4,7 +4,7 @@ import Producto from "../../models/Producto";
 import {
   ComponenteCargandoTablaLineas,
   TextoLargoTablaElement,
-} from "../global/Otros";
+} from "../oters/Otros";
 import Venta from "../../models/Venta";
 import {
   alertaSwal,
@@ -23,6 +23,7 @@ export interface ColumnasVentas {
   noProductos?: boolean;
   total?: boolean;
   comentario?: boolean;
+  masInf?: boolean;
 }
 
 interface Props {

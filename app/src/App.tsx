@@ -4,7 +4,7 @@ import { Container } from "react-bootstrap";
 
 // * Paginas
 import { BrowserRouter } from "react-router-dom";
-import PieDePagina from "./components/PieDePagina";
+import PieDePagina from "./components/global/PieDePagina";
 
 // * Estilos
 import "./styles/_variables.scss";
@@ -14,7 +14,7 @@ import "./styles/componentes.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
-import MenuPrincipal from "./components/MenuPrincipal";
+import MenuPrincipal from "./components/global/MenuPrincipal";
 
 // TODO, App
 const App: React.FC = () => {

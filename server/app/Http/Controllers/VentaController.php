@@ -70,6 +70,7 @@ class VentaController extends Controller
         try {
             // Lista
             $lista = $this->venta::orderBy('fecha', 'desc')
+                ->orderBy('hora', 'desc')
                 ->skip($desde)
                 ->take($asta)
                 ->get();

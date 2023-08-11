@@ -3,7 +3,7 @@ import { Offcanvas } from "react-bootstrap";
 import { OpcionesModalProducto } from "./PaginaProductos";
 import ComponenteTablaVentas, {
   ColumnasVentas,
-} from "../../components/tablas/ComponenteTablaVentas";
+} from "../../components/tablas/ComponenteTablaVentasPorProducto";
 import FormularioProducto from "./FormularioProducto";
 import Producto from "../../models/Producto";
 

@@ -6,7 +6,7 @@ import { apiObtenerListaXboxs } from "../../apis/apiXboxs";
 import { RespuestaApi } from "../../apis/apiVariables";
 import ComponentError, {
   DataError,
-} from "../../components/global/ComponentError";
+} from "../../components/oters/ComponentError";
 import FormularioXboxs from "../xboxs/FormularioXboxs";
 
 // TODO, Contenedor rentas

@@ -7,11 +7,11 @@ import { apiObtenerListaRentasPorXbox } from "../../apis/apiRentas";
 import ComponenteTablaRenta, { ColumnasRenta } from "../../components/tablas/ComponenteTablaRenta";
 import ComponentError, {
   DataError,
-} from "../../components/global/ComponentError";
+} from "../../components/oters/ComponentError";
 import FormularioXboxs from "./FormularioXboxs";
-import IconoBootstrap from "../../components/global/IconoBootstrap";
+import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import { apiEliminarXbox } from "../../apis/apiXboxs";
-import ComponenteCargando from "../../components/global/ComponenteCargando";
+import ComponenteCargando from "../../components/oters/ComponenteCargando";
 import {
   alertaSwal,
   confirmacionSwal,

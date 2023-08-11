@@ -12,9 +12,9 @@ import {
   Row,
 } from "react-bootstrap";
 import { regexDescripcion, regexNombre } from "../../functions/variables";
-import IconoBootstrap from "../../components/global/IconoBootstrap";
+import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import Producto from "../../models/Producto";
-import ComponenteCargando from "../../components/global/ComponenteCargando";
+import ComponenteCargando from "../../components/oters/ComponenteCargando";
 import { RespuestaApi } from "../../apis/apiVariables";
 import { apiObtenerListaProductosPorNombre } from "../../apis/apiProductos";
 import {
@@ -24,7 +24,7 @@ import {
   generateRandomId,
 } from "../../functions/funcionesGlobales";
 import ReactLoading from "react-loading";
-import { TextoLargoParrafoElement } from "../../components/global/Otros";
+import { TextoLargoParrafoElement } from "../../components/oters/Otros";
 import { useLocation } from "react-router";
 import { DetalleVenta } from "../../models/Venta";
 import { apiCrearNuevaVenta } from "../../apis/apiVentas";

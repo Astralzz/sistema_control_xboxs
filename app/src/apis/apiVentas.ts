@@ -37,6 +37,36 @@ export async function apiCrearNuevaVenta(
 }
 
 // * Obtener lista de ventas por id
+export async function apiObtenerListaVentas(
+  desde: number = 0,
+  asta: number = 10
+): Promise<RespuestaApi> {
+  try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+    // Ruta
+    let url =
+      API_URL + `${intermedio}/lista/global/${desde}/${asta}`;
+
+    // Enviamos
+    const res = await axios.get(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      listaVentas: res.data.lista ?? undefined,
+      totalDatos: res.data.totalDatos ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
+// * Obtener lista de ventas por id
 export async function apiObtenerListaVentasPorId(
   id: number,
   desde: number = 0,

@@ -6,7 +6,7 @@ import {
   formatearFecha,
   formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
-import IconoBootstrap from "../global/IconoBootstrap";
+import IconoBootstrap from "../oters/IconoBootstrap";
 import InfModalRenta from "../modales/InfModalRenta";
 
 // * Columnas

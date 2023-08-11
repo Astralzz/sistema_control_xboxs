@@ -1,9 +1,8 @@
 import React from "react";
-import BarraSuperior from "../components/BarraSuperior";
+import BarraSuperior from "../components/global/BarraSuperior";
 import { useLocation } from "react-router";
 import PaginaEscogida from "../components/global/PaginaEscogida";
 import PaginaInicio from "../pages/inicio/PaginaInicio";
-
 
 // * Obtener el titulo
 const obtenerTitulo = (ruta: string): string => {
@@ -14,13 +13,21 @@ const obtenerTitulo = (ruta: string): string => {
     case "/":
       return "Inicio";
 
-    // Inicio
+    // Xboxs
     case "/xboxs":
       return "Xbox";
 
-    // Inicio
+    // Productos
     case "/productos":
       return "Productos";
+
+    // Productos
+    case "/rentas":
+      return "Rentas";
+
+    // Productos
+    case "/ventas":
+      return "Ventas";
 
     default:
       return "Error 404";

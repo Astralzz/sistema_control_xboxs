@@ -8,29 +8,23 @@ import {
   Navbar,
   Pagination,
   Row,
+  Spinner,
   Table,
 } from "react-bootstrap";
 import IconoBootstrap from "../../components/oters/IconoBootstrap";
-import Producto from "../../models/Producto";
+import Venta from "../../models/Venta";
 import {
   Paginacion,
   calcularPaginaciones,
+  formatearFecha,
+  formatearHoraSinSegundos,
 } from "../../functions/funcionesGlobales";
 import {
   ComponenteCargandoTabla,
   TextoLargoTablaElement,
 } from "../../components/oters/Otros";
 import { regexNombre, regexNumerosEnteros } from "../../functions/variables";
-
-// * Columnas
-export interface ColumnasProducto {
-  no?: boolean;
-  nombre?: boolean;
-  precio?: boolean;
-  stock?: boolean;
-  descripcion?: boolean;
-  masInf?: boolean;
-}
+import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPorProducto";
 
 // * Estilos
 const styles: React.CSSProperties = {
@@ -42,12 +36,12 @@ const styles: React.CSSProperties = {
 
 // * Props
 interface Props {
-  lista: Producto[];
-  totalProductos: number;
-  columnas: ColumnasProducto;
+  lista: Venta[];
+  totalVentas: number;
+  columnas: ColumnasVentas;
   setCargandoTabla: Dispatch<boolean>;
-  setProductoSeleccionado: Dispatch<Producto | null>;
-  productoSeleccionado: Producto | null;
+  setVentaSeleccionada: Dispatch<Venta | null>;
+  ventaSeleccionada: Venta | null;
   obtenerMasDatos: (
     desde: number,
     asta: number,
@@ -58,7 +52,7 @@ interface Props {
 }
 
 // Todo, Tabla Rentas
-const TablaProductos: React.FC<Props> = (props) => {
+const TablaVentas: React.FC<Props> = (props) => {
   // * Variables
   const [listaPaginaciones, setListaPaginaciones] = useState<Paginacion[]>([]);
   const [pagSeleccionada, setPaginaSeleccionada] = useState<number>(0);
@@ -73,41 +67,37 @@ const TablaProductos: React.FC<Props> = (props) => {
     setFiltroNombre(false);
   };
 
-  // * Pre obtener productos
-  const preObtenerProductos = (
-    desde: number,
-    asta: number,
-    nombre?: string,
-    stock?: number
-  ): void => props.obtenerMasDatos(desde, asta, nombre, stock);
+  // * Pre obtener ventas
+  const preObtenerVentas = (desde: number, asta: number): void =>
+    props.obtenerMasDatos(desde, asta);
 
   // * Al cambiar
   useEffect(() => {
     // Total
-    const pag: Paginacion[] = calcularPaginaciones(props.totalProductos);
+    const pag: Paginacion[] = calcularPaginaciones(props.totalVentas);
     setListaPaginaciones(pag);
-  }, [props.totalProductos]);
+  }, [props.totalVentas]);
 
   // * Al cambiar
   useEffect(() => {
     // ? No existe
-    if (!props.productoSeleccionado) {
+    if (!props.ventaSeleccionada) {
       LimpiarFiltros();
     }
-  }, [props.productoSeleccionado]);
+  }, [props.ventaSeleccionada]);
 
   return (
     <div>
       {/* BARRA SUPERIOR */}
       <Navbar className="bg-body-transparent justify-content-end">
         <Container>
-          {/* Todos los productos */}
+          {/* Todos los ventas */}
           <div className="boton-buscar">
             <Button
               className="bt-b"
               onClick={() => {
                 LimpiarFiltros();
-                preObtenerProductos(0, 10);
+                preObtenerVentas(0, 10);
               }}
             >
               Todos
@@ -124,12 +114,12 @@ const TablaProductos: React.FC<Props> = (props) => {
                     event.preventDefault();
                     setFiltroCantidad(false);
                     setFiltroNombre(true);
-                    preObtenerProductos(0, 10, textBuscarNombre);
+                    // preObtenerVentas(0, 10, textBuscarNombre);
                   }}
                 >
                   <InputGroup className="placeholder-blanco">
                     <Form.Control
-                      placeholder="Nombre del producto"
+                      placeholder="Nombre del venta"
                       type="text"
                       style={styles}
                       className={
@@ -169,12 +159,12 @@ const TablaProductos: React.FC<Props> = (props) => {
                     event.preventDefault();
                     setFiltroNombre(false);
                     setFiltroCantidad(true);
-                    preObtenerProductos(
-                      0,
-                      10,
-                      undefined,
-                      Number(textBuscarCantidad)
-                    );
+                    // preObtenerVentas(
+                    //   0,
+                    //   10,
+                    //   undefined,
+                    //   Number(textBuscarCantidad)
+                    // );
                   }}
                 >
                   <InputGroup className="placeholder-blanco">
@@ -221,7 +211,7 @@ const TablaProductos: React.FC<Props> = (props) => {
       {props.lista.length < 1 && !props.isCargandoTabla ? (
         // ? Esta vacía y no esta cargando
         <div className="contenedor-centrado">
-          <h4>No se encontraron productos</h4>
+          <h4>No se encontraron ventas</h4>
         </div>
       ) : (
         <Table responsive bordered variant="dark" style={{ marginBottom: 0 }}>
@@ -229,10 +219,11 @@ const TablaProductos: React.FC<Props> = (props) => {
           <thead>
             <tr>
               {props.columnas.no && <th>No</th>}
-              {props.columnas.nombre && <th>Nombre</th>}
-              {props.columnas.precio && <th>Precio</th>}
-              {props.columnas.stock && <th>Stock</th>}
-              {props.columnas.descripcion && <th>Descripcion</th>}
+              {props.columnas.fecha && <th>fecha</th>}
+              {props.columnas.hora && <th>Hora</th>}
+              {props.columnas.noProductos && <th>Productos</th>}
+              {props.columnas.total && <th>Total</th>}
+              {props.columnas.comentario && <th>Comentario</th>}
               {props.columnas.masInf && <th>Ver</th>}
             </tr>
           </thead>
@@ -241,16 +232,16 @@ const TablaProductos: React.FC<Props> = (props) => {
             // Componente cargando
             <ComponenteCargandoTabla
               filas={props.lista.length < 1 ? 10 : props.lista.length}
-              columnas={5}
+              columnas={6}
               pagSeleccionada={pagSeleccionada}
               paginaciones={listaPaginaciones}
               no
             />
           ) : (
-            // ? Productos
+            // ? Ventas
             <tbody>
               {/* Recorremos */}
-              {props.lista.map((producto, i) => {
+              {props.lista.map((venta, i) => {
                 // Todo, Datos tabla
                 return (
                   <tr key={i} className="text-left">
@@ -262,32 +253,30 @@ const TablaProductos: React.FC<Props> = (props) => {
                           : i + 1}
                       </td>
                     )}
-                    {/* Nombre */}
-                    {props.columnas.nombre && (
-                      <TextoLargoTablaElement
-                        lg={20}
-                        texto={producto.nombre}
-                        i={producto.id}
-                      />
+                    {/* Fecha */}
+                    {props.columnas.fecha && (
+                      <td>{formatearFecha(venta.fecha)}</td>
                     )}
-                    {/* Precio */}
-                    {props.columnas.precio && <td>{producto.precio}</td>}
-                    {/* Stock */}
-                    {props.columnas.stock && <td>{producto.stock}</td>}
+                    {/* Hora */}
+                    {props.columnas.hora && (
+                      <td>{formatearHoraSinSegundos(venta.hora)}</td>
+                    )}
+                    {/* Productos */}
+                    {props.columnas.noProductos && <td>{venta.noProductos}</td>}
+                    {/* Total */}
+                    {props.columnas.total && <td>{"$" + venta.total}</td>}
                     {/* Descripcion */}
-                    {props.columnas.descripcion && (
+                    {props.columnas.comentario && (
                       <TextoLargoTablaElement
-                        texto={producto.descripcion ?? ""}
-                        i={producto.id}
+                        texto={venta.comentario ?? ""}
+                        i={venta.id}
                       />
                     )}
                     {/* Mas información */}
                     {props.columnas.masInf && (
                       <td>
                         <IconoBootstrap
-                          onClick={() =>
-                            props.setProductoSeleccionado(producto)
-                          }
+                          onClick={() => props.setVentaSeleccionada(venta)}
                           nombre={"EyeFill"}
                         />
                       </td>
@@ -328,7 +317,7 @@ const TablaProductos: React.FC<Props> = (props) => {
                 }
 
                 setPaginaSeleccionada(i);
-                preObtenerProductos(pagina.desde, pagina.asta, nombre, stock);
+                // preObtenerVentas(pagina.desde, pagina.asta, nombre, stock);
               }}
             >
               {i + 1}
@@ -340,4 +329,4 @@ const TablaProductos: React.FC<Props> = (props) => {
   );
 };
 
-export default TablaProductos;
+export default TablaVentas;

@@ -1,43 +1,41 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import Producto from "../../models/Producto";
-import TablaProductos, { ColumnasProducto } from "./TablaProductos";
+import Venta from "../../models/Venta";
+import TablaVentas from "../ventas/TablaVentas";
 import ComponentError, {
   DataError,
 } from "../../components/oters/ComponentError";
 import ReactLoading from "react-loading";
 import { RespuestaApi } from "../../apis/apiVariables";
-import {
-  apiObtenerListaProductos,
-  apiObtenerListaProductosPorNombre,
-  apiObtenerListaProductosPorStock,
-} from "../../apis/apiProductos";
-import TarjetaProducto from "./TarjetaProducto";
+import { apiObtenerListaVentas } from "../../apis/apiVentas";
+// import TarjetaVenta from "../ventas/TarjetaVenta";
 import ComponenteCargando from "../../components/oters/ComponenteCargando";
-import ModalProducto from "./ModalProducto";
+// import ModalVenta from "../ventas/ModalVenta";
+import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPorProducto";
 
 // * Columnas de tabla
-const columnas: ColumnasProducto = {
+const columnas: ColumnasVentas = {
   no: true,
-  nombre: true,
-  precio: true,
-  stock: true,
-  descripcion: true,
+  fecha: true,
+  hora: true,
+  noProductos: true,
+  total: true,
+  comentario: true,
   masInf: true,
 };
 
-// * Accion producto
-export interface OpcionesModalProducto {
+// * Accion venta
+export interface OpcionesModalVenta {
   titulo: string;
   opcion: "CREAR" | "EDITAR" | "VENTAS" | undefined;
-  producto?: Producto;
+  venta?: Venta;
 }
 
-// TODO, Pagina de los productos
-const PaginaProductos: React.FC = () => {
+// TODO, Pagina de los ventas
+const PaginaVentas: React.FC = () => {
   // * Variables
-  const [opcionesModalProducto, setOpcionesModalProducto] =
-    useState<OpcionesModalProducto>({
+  const [opcionesModalVenta, setOpcionesModalVenta] =
+    useState<OpcionesModalVenta>({
       titulo: "???",
       opcion: undefined,
     });
@@ -45,27 +43,28 @@ const PaginaProductos: React.FC = () => {
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
   const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
   const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
-  const [productoSeleccionado, setProductoSeleccionado] =
-    useState<Producto | null>(null);
-  const [noTotalProductos, setNoTotalProductos] = useState<number>(0);
+  const [ventaSeleccionado, setVentaSeleccionado] = useState<Venta | null>(
+    null
+  );
+  const [noTotalVentas, setNoTotalVentas] = useState<number>(0);
   const [isErrorTabla, setErrorTabla] = useState<DataError>({
     estado: true,
   });
 
   // * Listas
-  const [listaProductos, setListaProductos] = useState<Producto[]>([]);
+  const [listaVentas, setListaVentas] = useState<Venta[]>([]);
 
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
 
   // * Accion Modal
-  const accionModal = (opcionesModalProducto: OpcionesModalProducto) => {
+  const accionModal = (opcionesModalVenta: OpcionesModalVenta) => {
     setEstadoModal(true);
-    setOpcionesModalProducto(opcionesModalProducto);
+    setOpcionesModalVenta(opcionesModalVenta);
   };
 
-  // * Obtener productos
-  const obtenerProductos = useCallback(
+  // * Obtener ventas
+  const obtenerVentas = useCallback(
     async (
       desde: number = 0,
       asta: number = 10,
@@ -79,15 +78,15 @@ const PaginaProductos: React.FC = () => {
         let res: RespuestaApi;
 
         // ? Llego nombre
-        if (typeof nombre !== "undefined" && nombre !== null) {
-          res = await apiObtenerListaProductosPorNombre(nombre, desde, asta);
-          // ? Llego stock
-        } else if (typeof stock !== "undefined" && stock !== null) {
-          res = await apiObtenerListaProductosPorStock(stock, desde, asta);
-          // ? Ninguno
-        } else {
-          res = await apiObtenerListaProductos(desde, asta);
-        }
+        // if (typeof nombre !== "undefined" && nombre !== null) {
+        //   res = await apiObtenerListaVentasPorNombre(nombre, desde, asta);
+        //   // ? Llego stock
+        // } else if (typeof stock !== "undefined" && stock !== null) {
+        //   res = await apiObtenerListaVentasPorStock(stock, desde, asta);
+        //   // ? Ninguno
+        // } else {
+        res = await apiObtenerListaVentas(desde, asta);
+        // }
 
         // ? salio mal
         if (!res.estado) {
@@ -98,7 +97,7 @@ const PaginaProductos: React.FC = () => {
               ? String(res.detalles_error)
               : undefined,
           });
-          setListaProductos([]);
+          setListaVentas([]);
           return;
         }
 
@@ -106,10 +105,17 @@ const PaginaProductos: React.FC = () => {
         setErrorTabla({ estado: false });
 
         // Ponemos lista
-        setListaProductos(res.listaProductos ?? []);
+        setListaVentas(res.listaVentas ?? []);
+
+        // Limitamos a los últimos 150 datos
+        const t = res.totalDatos
+          ? res.totalDatos < 150
+            ? res.totalDatos
+            : 150
+          : 0;
 
         //  Ponemos el total
-        setNoTotalProductos(res.totalDatos ?? 0);
+        setNoTotalVentas(t ?? 0);
       } catch (error) {
         console.error(String(error));
       } finally {
@@ -123,8 +129,8 @@ const PaginaProductos: React.FC = () => {
   // * Al iniciar
   useEffect(() => {
     setCargandoPagina(true);
-    obtenerProductos();
-  }, [obtenerProductos]);
+    obtenerVentas();
+  }, [obtenerVentas]);
 
   // Todo, componente principal
   return (
@@ -134,15 +140,7 @@ const PaginaProductos: React.FC = () => {
         <br className="mb-2" />
         <Row>
           {/* Tarjeta */}
-          <Col sm={4}>
-            <TarjetaProducto
-              producto={productoSeleccionado}
-              setCargandoAccion={setCargandoAccion}
-              setProductoSeleccionado={setProductoSeleccionado}
-              accionModal={accionModal}
-              recargarTabla={obtenerProductos}
-            />
-          </Col>
+          <Col sm={4}></Col>
           {/* Tabla */}
           <Col sm={8}>
             <Container>
@@ -155,27 +153,26 @@ const PaginaProductos: React.FC = () => {
               isErrorTabla.estado ? (
                 <ComponentError
                   titulo={isErrorTabla.titulo ?? "Error 404"}
-                  accionVoid={() => obtenerProductos()}
+                  accionVoid={() => obtenerVentas()}
                   detalles={
-                    isErrorTabla.detalles ??
-                    "No se pudieron cargar los productos"
+                    isErrorTabla.detalles ?? "No se pudieron cargar loas ventas"
                   }
                 />
               ) : (
-                // * Tabla de productos
-                <TablaProductos
-                  lista={listaProductos}
-                  totalProductos={noTotalProductos}
+                // * Tabla de ventas
+                <TablaVentas
+                  lista={listaVentas}
+                  totalVentas={noTotalVentas}
                   columnas={columnas}
                   setCargandoTabla={setCargandoTabla}
-                  setProductoSeleccionado={setProductoSeleccionado}
-                  productoSeleccionado={productoSeleccionado}
+                  setVentaSeleccionada={setVentaSeleccionado}
+                  ventaSeleccionada={ventaSeleccionado}
                   obtenerMasDatos={(
                     desde: number,
                     asta: number,
                     nombre?: string,
                     stock?: number
-                  ) => obtenerProductos(desde, asta, nombre, stock)}
+                  ) => obtenerVentas(desde, asta, nombre, stock)}
                   isCargandoTabla={isCargandoTabla}
                 />
               )}
@@ -185,14 +182,14 @@ const PaginaProductos: React.FC = () => {
       </Container>
 
       {/* MODAL */}
-      <ModalProducto
+      {/* <ModalVenta
         estadoModal={isEstadoModal}
         cerrarModal={cerrarModal}
-        opcionesModalProducto={opcionesModalProducto}
+        opcionesModalVenta={opcionesModalVenta}
         setCargando={setCargandoAccion}
-        setProductoSeleccionado={setProductoSeleccionado}
-        recargarProductos={obtenerProductos}
-      />
+        setVentaSeleccionado={setVentaSeleccionado}
+        recargarVentas={obtenerVentas}
+      /> */}
 
       {/* CARGANDO */}
       <ComponenteCargando tipo={"spin"} estadoModal={isCargandoAccion} />
@@ -200,4 +197,4 @@ const PaginaProductos: React.FC = () => {
   );
 };
 
-export default PaginaProductos;
+export default PaginaVentas;

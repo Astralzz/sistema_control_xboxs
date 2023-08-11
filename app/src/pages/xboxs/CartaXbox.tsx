@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -13,7 +13,7 @@ import {
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import Xbox from "../../models/Xbox";
 import ModalXbox from "./ModalXbox";
-import IconoBootstrap from "../../components/global/IconoBootstrap";
+import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import {
   alertaSwal,
   calcularMontoRecaudado,
@@ -26,7 +26,7 @@ import {
 import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
 import { RespuestaApi } from "../../apis/apiVariables";
 import Renta from "../../models/Renta";
-import ComponenteCargando from "../../components/global/ComponenteCargando";
+import ComponenteCargando from "../../components/oters/ComponenteCargando";
 import { detenerAlarma, reproducirAlarma } from "../../functions/alarma";
 import iconoAlarma from "../../assets/imgs/iconoAlarma.png";
 
@@ -514,6 +514,11 @@ const CartaXbox: React.FC<Props> = (props) => {
     );
   };
 
+  // * Al cambiar controles
+  useEffect(() => {
+    setPrecioEstimado(calcularMontoRecaudado(tiempoTotal, isControlExtra));
+  }, [isControlExtra, tiempoTotal]);
+
   // Todo, Componente principal
   return (
     <>
@@ -760,7 +765,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                     <Form.Select
                       aria-label="Pago la renta"
                       value={isPagado ? 1 : 0}
-                      disabled={!isTiempoCorriendo}
+                      // disabled={!isTiempoCorriendo}
                       onChange={(e) =>
                         setPagado(parseInt(e.target.value) === 1)
                       }
@@ -778,7 +783,7 @@ const CartaXbox: React.FC<Props> = (props) => {
                     <Form.Select
                       aria-label="Controles de renta"
                       value={!isControlExtra ? 1 : 2}
-                      disabled={!isTiempoCorriendo}
+                      // disabled={!isTiempoCorriendo}
                       onChange={(n) =>
                         setControlExtra(parseInt(n.target.value) !== 1)
                       }
