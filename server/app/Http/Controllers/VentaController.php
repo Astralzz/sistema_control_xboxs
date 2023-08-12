@@ -55,7 +55,6 @@ class VentaController extends Controller
         'detalles.*.cantidad.min' => 'La cantidad del producto en los detalles debe ser mayor o igual a 1.'
     ];
 
-
     //Constructor
     public function __construct(Venta $venta)
     {
@@ -97,7 +96,49 @@ class VentaController extends Controller
         }
     }
 
-    // * Lista por semana
+    // * Lista por los últimos n dias
+    public function ListaVentasPorDias($dias = 7): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subDays($dias);
+
+            // Lista
+            $ventasPorDia = [];
+
+            // Recorremos
+            for ($i = 0; $i < $dias; $i++) {
+                // Datos
+                $dia = $fechaInicio->format('Y-m-d');
+                $diaSiguiente = $fechaInicio->addDay()->format('Y-m-d');
+
+                // Suma de los totales de ventas para el día actual
+                $totalVentasDia = $this->venta::whereBetween('fecha', [$dia, $diaSiguiente])
+                    ->sum('total');
+
+                // Agregamos
+                $ventasPorDia[] = [
+                    'fecha' => $dia,
+                    'total' => $totalVentasDia,
+                ];
+            }
+
+            // Retornamos
+            return response()->json([
+                'ventasFiltradas' => $ventasPorDia,
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por ultimas n semanas
     public function ListaVentasSemanales($semanas = 30): JsonResponse
     {
         try {
@@ -126,7 +167,7 @@ class VentaController extends Controller
 
             // * Retornamos
             return response()->json([
-                'ventasPorSemana' => $ventasPorSemana,
+                'ventasFiltradas' => $ventasPorSemana,
             ]);
 
             // ! Error de consulta
@@ -135,6 +176,93 @@ class VentaController extends Controller
                 'error' => 'Error en la consulta, error: ' . $e->getMessage()
             ], 401);
             // ! Error desconocido
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por últimos n meses
+    public function ListaVentasMensuales($meses = 12): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subMonths($meses);
+
+            // Lista
+            $ventasPorMes = [];
+
+            // Recorremos
+            for ($i = 0; $i < $meses; $i++) {
+                // Datos
+                $mes = $fechaInicio->format('Y-m');
+                $mesSiguiente = $fechaInicio->addMonth()->format('Y-m');
+
+                // Suma de los totales de ventas para el mes actual
+                $totalVentasMes = $this->venta::whereBetween('fecha', [$mes . '-01', $mesSiguiente . '-01'])
+                    ->sum('total');
+
+                // Agregamos
+                $ventasPorMes[] = [
+                    'fecha' => $mes,
+                    'total' => $totalVentasMes,
+                ];
+            }
+
+            // Retornamos
+            return response()->json([
+                'ventasFiltradas' => $ventasPorMes,
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por últimos n años
+    public function ListaVentasAnuales($anios = 5): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subYears($anios);
+
+            // Lista
+            $ventasPorAnio = [];
+
+            // Recorremos
+            for ($i = 0; $i < $anios; $i++) {
+                // Datos
+                $anio = $fechaInicio->format('Y');
+                $anioSiguiente = $fechaInicio->copy()->addYear()->format('Y'); // Copia de la fecha
+
+                // Suma de los totales de ventas para el año actual
+                $totalVentasAnio = $this->venta::whereBetween('fecha', [$anio . '-01-01', $anioSiguiente . '-01-01'])
+                    ->sum('total');
+
+                // Agregamos
+                $ventasPorAnio[] = [
+                    'fecha' => $anio,
+                    'total' => $totalVentasAnio,
+                ];
+
+                // Actualizamos la fecha de inicio para el próximo ciclo
+                $fechaInicio->addYear();
+            }
+
+            // Retornamos
+            return response()->json([
+                'ventasFiltradas' => $ventasPorAnio,
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error desconocido, error: ' . $e->getMessage()
@@ -169,7 +297,6 @@ class VentaController extends Controller
             ], 501);
         }
     }
-
 
     // * Crear venta
     public function crear(Request $request)

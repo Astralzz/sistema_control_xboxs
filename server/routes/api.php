@@ -108,10 +108,28 @@ Route::prefix('ventas')->group(function () {
             Route::get('{desde}/{asta}', [VentaController::class, 'lista']);
         });
 
+        // ? Periodica
+        Route::prefix('periodica')->group(function () {
+            Route::get('', [VentaController::class, 'ListaVentasPorDias']);
+            Route::get('{dias}', [VentaController::class, 'ListaVentasPorDias']);
+        });
+
         // ? Semanal
         Route::prefix('semanal')->group(function () {
             Route::get('', [VentaController::class, 'ListaVentasSemanales']);
             Route::get('{semanas}', [VentaController::class, 'ListaVentasSemanales']);
+        });
+
+        // ? Mensual
+        Route::prefix('mensual')->group(function () {
+            Route::get('', [VentaController::class, 'ListaVentasMensuales']);
+            Route::get('{meses}', [VentaController::class, 'ListaVentasMensuales']);
+        });
+
+        // ? Anual
+        Route::prefix('anual')->group(function () {
+            Route::get('', [VentaController::class, 'ListaVentasAnuales']);
+            Route::get('{anios}', [VentaController::class, 'ListaVentasAnuales']);
         });
 
         // ? Filtradas

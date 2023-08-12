@@ -63,7 +63,12 @@ interface Props {
 // Todo, Gráfica de lineas
 const GraficoDeLineas: React.FC<Props> = (props) => {
   const {
-    barraDeZoom,
+    barraDeZoom = props.barraDeZoom
+      ? props.barraDeZoom
+      : props.datos.length > 40
+      ? { alto: 20, color: "#8884d8" }
+      : undefined,
+      
     colorDeFondo,
     datosEditables,
     mostrarEtiquetasEjeX = true,
@@ -72,7 +77,7 @@ const GraficoDeLineas: React.FC<Props> = (props) => {
     ancho = "100%",
     alto = 300,
     aspectRatio = 0, //16 / 9,
-    tipoDeCurva = "monotone",
+    tipoDeCurva = "bump",
     colorDeLinea = "#8884d8",
     colorDeCuadricula = "#ccc",
     patronTrasoPunteado = "5, 5",

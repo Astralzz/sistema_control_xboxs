@@ -15,6 +15,7 @@ import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import Venta from "../../models/Venta";
 import {
   Paginacion,
+  alertaSwal,
   calcularPaginaciones,
   formatearFecha,
   formatearHoraSinSegundos,
@@ -23,16 +24,27 @@ import {
   ComponenteCargandoTabla,
   TextoLargoTablaElement,
 } from "../../components/oters/Otros";
-import { regexNombre, regexNumerosEnteros } from "../../functions/variables";
+import {
+  FiltroFechasGrafica,
+  regexNombre,
+  regexNumerosEnteros,
+} from "../../functions/variables";
 import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPorProducto";
 
 // * Estilos
-const styles: React.CSSProperties = {
-  backgroundColor: "transparent",
-  color: "var(--color-letra)",
-  border: "none",
-  borderBottom: "1px solid white",
-};
+const styles: React.CSSProperties[] = [
+  {
+    backgroundColor: "var(--color-fondo)",
+    color: "var(--color-letra)",
+    border: "none",
+    borderBottom: "1px solid white",
+  },
+  {
+    backgroundColor: "var(--color-fondo-opaco)",
+    color: "var(--color-letra)",
+    border: "none",
+  },
+];
 
 // * Props
 interface Props {
@@ -42,12 +54,8 @@ interface Props {
   setCargandoTabla: Dispatch<boolean>;
   setVentaSeleccionada: Dispatch<Venta | null>;
   ventaSeleccionada: Venta | null;
-  obtenerMasDatos: (
-    desde: number,
-    asta: number,
-    nombre?: string,
-    stock?: number
-  ) => void;
+  obtenerMasDatos: (desde: number, asta: number) => void;
+  actualizarGrafica: (tipo: FiltroFechasGrafica, noDatos: number) => void;
   isCargandoTabla: boolean;
 }
 
@@ -58,6 +66,10 @@ const TablaVentas: React.FC<Props> = (props) => {
   const [pagSeleccionada, setPaginaSeleccionada] = useState<number>(0);
   const [textBuscarNombre, setTextBuscarNombre] = useState<string>("");
   const [textBuscarCantidad, setTextBuscarCantidad] = useState<string>("");
+  const [tipoDeGrafica, setTipoDeGrafica] =
+    useState<FiltroFechasGrafica>("periodica");
+  const [noDatosGrafica, setNoDatosGrafica] = useState<string>("7");
+
   const [isFiltroNombre, setFiltroNombre] = useState<boolean>(false);
   const [isFiltroCantidad, setFiltroCantidad] = useState<boolean>(false);
 
@@ -70,6 +82,48 @@ const TablaVentas: React.FC<Props> = (props) => {
   // * Pre obtener ventas
   const preObtenerVentas = (desde: number, asta: number): void =>
     props.obtenerMasDatos(desde, asta);
+
+  // * Actualizar grafica
+  const actualizarGrafica = (): void => {
+    if (
+      // ? Es valido
+      ["periodica", "semanal", "mensual", "anual"].includes(tipoDeGrafica)
+    ) {
+      // ? Numero valido
+      if (
+        regexNumerosEnteros.test(noDatosGrafica) &&
+        !isNaN(Number(noDatosGrafica)) &&
+        Number(noDatosGrafica) > 1 &&
+        Number(noDatosGrafica) < 101
+      ) {
+        // Actualizamos
+        props.actualizarGrafica(tipoDeGrafica, Number(noDatosGrafica));
+        return;
+      }
+
+      // ! Error
+      alertaSwal(
+        "Error",
+        "El numero de datos proporcionados no es valido",
+        "error"
+      );
+      return;
+    }
+    // ! Error
+    alertaSwal(
+      "Error",
+      "El tipo de grafica proporcionado no es valido",
+      "error"
+    );
+  };
+
+  // * Bloquear boton grafica
+  const isBloquearBotonGrafica = (): boolean =>
+    !regexNumerosEnteros.test(noDatosGrafica) ||
+    isNaN(Number(noDatosGrafica)) ||
+    Number(noDatosGrafica) < 2 ||
+    Number(noDatosGrafica) > 100 ||
+    !["periodica", "semanal", "mensual", "anual"].includes(tipoDeGrafica);
 
   // * Al cambiar
   useEffect(() => {
@@ -89,121 +143,85 @@ const TablaVentas: React.FC<Props> = (props) => {
   return (
     <div>
       {/* BARRA SUPERIOR */}
-      <Navbar className="bg-body-transparent justify-content-end">
-        <Container>
-          {/* Todos los ventas */}
+      <Navbar className="bg-body-transparent justify-content-start">
+        {/* Parte de la grafica */}
+        <InputGroup className="placeholder-blanco">
+          {/* Tipo de grafica */}
+          <InputGroup.Text style={styles[1]}>Grafica</InputGroup.Text>
+          <Form.Select
+            aria-label="Tipo de grafica"
+            value={tipoDeGrafica}
+            onChange={(n) => {
+              // Valor
+              const valor: FiltroFechasGrafica = n.target
+                .value as FiltroFechasGrafica;
+              if (
+                // ? Es valido
+                ["periodica", "semanal", "mensual", "anual"].includes(valor)
+              ) {
+                setTipoDeGrafica(valor);
+                return;
+              }
+
+              alertaSwal("Error", "La opcion no es valida", "error");
+            }}
+            className={"is-valid"}
+            style={styles[0]}
+          >
+            <option value="periodica">Periodica</option>
+            <option value="semanal">Semanal</option>
+            <option value="mensual">Mensual</option>
+            <option value="anual">Anual</option>
+          </Form.Select>
+          {/* Numero de datos */}
+          <InputGroup.Text style={styles[1]}>Datos</InputGroup.Text>
+          <Form.Control
+            type="text"
+            style={styles[0]}
+            min={2}
+            max={50}
+            className={
+              String(noDatosGrafica) === ""
+                ? ""
+                : regexNumerosEnteros.test(noDatosGrafica) &&
+                  Number(noDatosGrafica) > 1 &&
+                  Number(noDatosGrafica) < 101
+                ? "is-valid"
+                : "is-invalid"
+            }
+            value={noDatosGrafica}
+            onChange={(t) => setNoDatosGrafica(t.target.value)}
+          />
+          {/* Boton */}
           <div className="boton-buscar">
+            {/* Buscar */}
             <Button
+              disabled={isBloquearBotonGrafica()}
+              onClick={() => actualizarGrafica()}
               className="bt-b"
-              onClick={() => {
-                LimpiarFiltros();
-                preObtenerVentas(0, 10);
-              }}
+              type="submit"
             >
-              Todos
+              Actualizar
             </Button>
           </div>
-          <Navbar.Toggle />
+        </InputGroup>
 
+        {/* Datos de tabla */}
+        <Container>
+          <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
-            <Row>
-              {/* Nombre */}
-              <Col xs={8}>
-                <Form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    setFiltroCantidad(false);
-                    setFiltroNombre(true);
-                    // preObtenerVentas(0, 10, textBuscarNombre);
-                  }}
-                >
-                  <InputGroup className="placeholder-blanco">
-                    <Form.Control
-                      placeholder="Nombre del venta"
-                      type="text"
-                      style={styles}
-                      className={
-                        textBuscarNombre === ""
-                          ? ""
-                          : regexNombre.test(textBuscarNombre)
-                          ? "is-valid"
-                          : "is-invalid"
-                      }
-                      value={textBuscarNombre}
-                      onChange={(t) => setTextBuscarNombre(t.target.value)}
-                    />
-                    <div className="boton-buscar">
-                      <Button
-                        disabled={!regexNombre.test(textBuscarNombre)}
-                        type="submit"
-                        className="bt-b"
-                      >
-                        <IconoBootstrap nombre="Search" />
-                      </Button>
-                      {/* Eliminar */}
-                      <Button
-                        disabled={textBuscarNombre.length < 1}
-                        onClick={() => setTextBuscarNombre("")}
-                        className="bt-b"
-                      >
-                        <IconoBootstrap nombre="X" />
-                      </Button>
-                    </div>
-                  </InputGroup>
-                </Form>
-              </Col>
-              {/* Stock */}
-              <Col xs={4}>
-                <Form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    setFiltroNombre(false);
-                    setFiltroCantidad(true);
-                    // preObtenerVentas(
-                    //   0,
-                    //   10,
-                    //   undefined,
-                    //   Number(textBuscarCantidad)
-                    // );
-                  }}
-                >
-                  <InputGroup className="placeholder-blanco">
-                    <Form.Control
-                      placeholder="stock"
-                      type="text"
-                      style={styles}
-                      className={
-                        textBuscarCantidad === ""
-                          ? ""
-                          : regexNumerosEnteros.test(textBuscarCantidad)
-                          ? "is-valid"
-                          : "is-invalid"
-                      }
-                      value={String(textBuscarCantidad)}
-                      onChange={(t) => setTextBuscarCantidad(t.target.value)}
-                    />
-                    <div className="boton-buscar">
-                      {/* Buscar */}
-                      <Button
-                        disabled={!regexNumerosEnteros.test(textBuscarCantidad)}
-                        className="bt-b"
-                        type="submit"
-                      >
-                        <IconoBootstrap nombre="Search" />
-                      </Button>
-                      {/* Eliminar */}
-                      <Button
-                        disabled={textBuscarCantidad.length < 1}
-                        onClick={() => setTextBuscarCantidad("")}
-                        className="bt-b"
-                      >
-                        <IconoBootstrap nombre="X" />
-                      </Button>
-                    </div>
-                  </InputGroup>
-                </Form>
-              </Col>
-            </Row>
+            {/* Todos los ventas */}
+            <div className="boton-buscar">
+              <Button
+                className="bt-b"
+                onClick={() => {
+                  LimpiarFiltros();
+                  preObtenerVentas(0, 10);
+                }}
+              >
+                Por Defecto
+              </Button>
+            </div>
           </Navbar.Collapse>
         </Container>
       </Navbar>

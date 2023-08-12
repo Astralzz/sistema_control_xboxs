@@ -16,6 +16,14 @@
     width: 100%;
     height: 90vh;
 }
+.contenedor-centrado-grafica {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    width: 100%;
+    height: 300px;
+}
 .contenedor-centrado-auto {
     display: flex;
     align-items: center;
@@ -39,7 +47,7 @@
 .modal-izquierdo {
     background-color: $color-fondo;
     color: $color-letra;
-    width: 120%;
+    width: 130%;
 }
 
 .modal-derecho {

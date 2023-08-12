@@ -50,7 +50,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
   const [isEditar, setEditar] = useState<boolean>(false);
   const [isPagado, setPagado] = useState<boolean>(props.renta?.isPagado === 1);
   const [cliente, setCliente] = useState<string>(props.renta?.cliente ?? "");
-  const [total, setTotal] = useState<string>(props.renta?.total ?? "0");
+  const [total, setTotal] = useState<string>(String(props.renta?.total ?? "0"));
   const [comentario, setComentario] = useState<string>(
     props.renta?.comentario ?? ""
   );
@@ -204,7 +204,7 @@ const InfModalRenta: React.FC<Props> = (props) => {
     setCliente(props.renta?.cliente ?? "");
     setComentario(props.renta?.comentario ?? "");
     setPagado(props.renta?.isPagado === 1);
-    setTotal(props.renta?.total ?? "0");
+    setTotal(String(props.renta?.total ?? "0"));
   };
 
   // * Bloquear boton

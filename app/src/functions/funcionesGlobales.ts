@@ -2,6 +2,7 @@ import moment from "moment";
 import "moment/locale/es";
 import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
 import Venta from "../models/Venta";
+import { FiltroFechasGrafica } from "./variables";
 
 // * Variables de estilos
 const colorFondo: string = "var(--color-fondo)";
@@ -130,22 +131,31 @@ export function redondearNumero(numero: number): number {
 // * Formatear fecha
 export function formatearFecha(
   fecha: string,
-  conAnio: boolean = true
+  filtro?: FiltroFechasGrafica
 ): string | null {
   try {
     // Creamos fecha con Moment.js
     const date = moment(fecha);
 
-    // Obtenemos
-    const dia = date.format("DD");
-    const mes = date.format("MMM");
-    const anio = conAnio ? `/${date.format("YYYY")}` : "";
+    // ? Semanal
+    if (filtro === "semanal" || filtro === "periodica") {
+      return `${date.format("DD")}/${date.format("MMM")}`;
+    }
 
-    // Formateamos
-    const fechaFormateada = `${dia}/${mes}${anio}`;
+    // ? Mensual
+    if (filtro === "mensual") {
+      return `${date.format("MMM")}/${date.format("YYYY")}`;
+    }
 
-    return fechaFormateada;
-  } catch (error) {
+    // ? Anual
+    if (filtro === "anual") {
+      return `${date.format("YYYY")}`;
+    }
+
+    // Ninguno
+    return `${date.format("DD")}/${date.format("MMM")}/${date.format("YYYY")}`;
+  } catch (error: unknown) {
+    alertaSwal("Error", String(error), "error");
     return null;
   }
 }

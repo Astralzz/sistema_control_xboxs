@@ -4,6 +4,7 @@ import API_URL, {
   catchAxiosError,
   comprobarApis,
 } from "./apiVariables";
+import { FiltroFechasGrafica } from "../functions/variables";
 
 // * Variables
 const intermedio: string = "ventas";
@@ -67,7 +68,8 @@ export async function apiObtenerListaVentas(
 
 // * Obtener lista de ventas por id
 export async function apiObtenerListaVentasPorSemanas(
-  semanas: number = 30
+  tipo: FiltroFechasGrafica,
+  datos?: number
 ): Promise<RespuestaApi> {
   try {
     // ? Url no encontrada
@@ -75,7 +77,8 @@ export async function apiObtenerListaVentasPorSemanas(
       throw new Error("No se pudo encortar la url hacia el servidor");
     }
     // Ruta
-    let url = API_URL + `${intermedio}/lista/semanal/${semanas}`;
+    let url =
+      API_URL + `${intermedio}/lista/${tipo}${datos ? "/" + datos : ""}`;
 
     // Enviamos
     const res = await axios.get(url);
@@ -83,7 +86,7 @@ export async function apiObtenerListaVentasPorSemanas(
     // * Éxito
     return {
       estado: true,
-      listaGrafica: res.data.ventasPorSemana ?? undefined,
+      listaGrafica: res.data.ventasFiltradas ?? undefined,
     };
 
     // ! Error

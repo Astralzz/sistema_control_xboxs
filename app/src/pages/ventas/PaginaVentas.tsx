@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Card, Col, Container, Row } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 import Venta from "../../models/Venta";
 import TablaVentas from "../ventas/TablaVentas";
 import ComponentError, {
@@ -18,7 +18,8 @@ import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPor
 import GraficoDeLineas, {
   DatosGrafica,
 } from "../../components/oters/GraficoDeLineas";
-import { alertaSwal, formatearFecha } from "../../functions/funcionesGlobales";
+import { formatearFecha } from "../../functions/funcionesGlobales";
+import { FiltroFechasGrafica } from "../../functions/variables";
 
 // * Columnas de tabla
 const columnas: ColumnasVentas = {
@@ -41,16 +42,6 @@ export interface OpcionesModalVenta {
 // TODO, Pagina de los ventas
 const PaginaVentas: React.FC = () => {
   // * Variables
-  const [opcionesModalVenta, setOpcionesModalVenta] =
-    useState<OpcionesModalVenta>({
-      titulo: "???",
-      opcion: undefined,
-    });
-  const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
-  const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
-  const [isCargandoGrafica, setCargandoGrafica] = useState<boolean>(false);
-  const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
-  const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
   const [ventaSeleccionado, setVentaSeleccionado] = useState<Venta | null>(
     null
   );
@@ -58,6 +49,14 @@ const PaginaVentas: React.FC = () => {
   const [isErrorTabla, setErrorTabla] = useState<DataError>({
     estado: true,
   });
+  const [isErrorGrafica, setErrorGrafica] = useState<DataError>({
+    estado: true,
+  });
+
+  // * Cargando
+  const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
+  const [isCargandoGrafica, setCargandoGrafica] = useState<boolean>(false);
+  const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
 
   // * Listas
   const [listaVentas, setListaVentas] = useState<Venta[]>([]);
@@ -67,12 +66,7 @@ const PaginaVentas: React.FC = () => {
 
   // * Obtener ventas
   const obtenerVentas = useCallback(
-    async (
-      desde: number = 0,
-      asta: number = 10,
-      nombre?: string,
-      stock?: number
-    ) => {
+    async (desde: number = 0, asta: number = 10) => {
       try {
         setCargandoTabla(true);
 
@@ -128,52 +122,72 @@ const PaginaVentas: React.FC = () => {
     []
   );
 
-  // * Ventas por semana
-  const obtenerVentasPorSemana = useCallback(async (semanas: number = 30) => {
-    try {
-      setCargandoGrafica(true);
+  // * Obtener Grafica
+  const obtenerVentasGrafica = useCallback(
+    async (tipo: FiltroFechasGrafica, datos?: number) => {
+      try {
+        setCargandoGrafica(true);
 
-      // Respuesta
-      let res: RespuestaApi = await apiObtenerListaVentasPorSemanas(semanas);
-
-      // ? Error
-      if (!res.estado) {
-        throw new Error(
-          res.detalles_error ?? "No se pudo obtener los datos de la gráfica"
+        // Respuesta
+        let res: RespuestaApi = await apiObtenerListaVentasPorSemanas(
+          tipo,
+          datos
         );
-      }
 
-      // ? Llego la lista
-      if (!res.listaGrafica) {
-        throw new Error("La gráfica de ventas no se creo correctamente");
-      }
+        // ? Error
+        if (!res.estado) {
+          setErrorGrafica({
+            estado: true,
+            titulo: res.noEstado ? String(res.noEstado) : undefined,
+            detalles: res.detalles_error
+              ? String(res.detalles_error)
+              : undefined,
+          });
+          setListaVentasGrafica([]);
+          return;
+        }
 
-      //  Recorremos
-      const ventasGrafica: DatosGrafica[] = [];
-      res.listaGrafica.forEach((venta) => {
-        ventasGrafica.push({
-          fecha: formatearFecha(venta.fecha, false) ?? venta.fecha,
+        // ? No llego la lista
+        if (!res.listaGrafica) {
+          setErrorGrafica({
+            estado: true,
+            titulo: "Error 404",
+            detalles: "La gráfica no se creo correctamente",
+          });
+          setListaVentasGrafica([]);
+          return;
+        }
+
+        //  Recorremos
+        const ventasGrafica: DatosGrafica[] = res.listaGrafica.map((venta) => ({
+          fecha: formatearFecha(venta.fecha, tipo) ?? venta.fecha,
           total: venta.total,
-        });
-      });
+        }));
 
-      // Agregamos
-      setListaVentasGrafica(ventasGrafica);
-    } catch (error) {
-      alertaSwal("Error", String(error), "error");
-    } finally {
-      setCargandoGrafica(false);
-    }
-  }, []);
+        //  Sin errores
+        setErrorGrafica({ estado: false });
+
+        // Agregamos
+        setListaVentasGrafica(ventasGrafica);
+      } catch (error) {
+        console.error(String(error));
+      } finally {
+        setCargandoGrafica(false);
+      }
+    },
+    []
+  );
 
   // * Al iniciar
   useEffect(() => {
-    setCargandoPagina(true);
     obtenerVentas();
   }, [obtenerVentas]);
   useEffect(() => {
-    obtenerVentasPorSemana();
-  }, [obtenerVentasPorSemana]);
+    obtenerVentasGrafica("periodica");
+  }, [obtenerVentasGrafica]);
+  useEffect(() => {
+    setCargandoPagina(true);
+  }, []);
 
   // Todo, componente principal
   return (
@@ -186,59 +200,69 @@ const PaginaVentas: React.FC = () => {
           <div className="contenedor-centrado">
             <ReactLoading type={"spin"} color="#FFF" />
           </div>
-        ) : // ! Error
-        isErrorTabla.estado ? (
-          <ComponentError
-            titulo={isErrorTabla.titulo ?? "Error 404"}
-            accionVoid={() => obtenerVentas()}
-            detalles={
-              isErrorTabla.detalles ?? "No se pudieron cargar loas ventas"
-            }
-          />
         ) : (
           <>
-            <>
-              {isCargandoGrafica ? (
-                <div className="contenedor-centrado">
-                  <ReactLoading type={"balls"} color="#FFF" />
-                </div>
-              ) : (
-                <GraficoDeLineas datos={listaVentasGrafica}/>
-              )}
-            </>
-
-            {/* Tabla de ventas */}
-            <TablaVentas
-              lista={listaVentas}
-              totalVentas={noTotalVentas}
-              columnas={columnas}
-              setCargandoTabla={setCargandoTabla}
-              setVentaSeleccionada={setVentaSeleccionado}
-              ventaSeleccionada={ventaSeleccionado}
-              obtenerMasDatos={(
-                desde: number,
-                asta: number,
-                nombre?: string,
-                stock?: number
-              ) => obtenerVentas(desde, asta, nombre, stock)}
-              isCargandoTabla={isCargandoTabla}
-            />
+            {/* // * Grafica ------------------- */}
+            {isCargandoGrafica ? (
+              // ? Cargando
+              <div
+                className="contenedor-centrado-grafica"
+                style={{ minHeight: 300 }}
+              >
+                <ReactLoading type={"cubes"} color="#FFF" />
+              </div>
+            ) : isErrorGrafica.estado ? (
+              // ! Error
+              <ComponentError
+                titulo={isErrorGrafica.titulo ?? "Error 404"}
+                accionVoid={() => obtenerVentasGrafica("periodica")}
+                detalles={
+                  isErrorGrafica.detalles ?? "No se pudo crear la tabla"
+                }
+              />
+            ) : listaVentasGrafica.length < 1 ? (
+              // ? Lista vacía
+              <div className="contenedor-centrado">
+                <h5>Aun no existen datos para crear la grafica</h5>
+              </div>
+            ) : (
+              // Grafica
+              <GraficoDeLineas datos={listaVentasGrafica} />
+            )}
+            {/* // * Tabla ------------------- */}
+            {isErrorTabla.estado ? (
+              // ! Error
+              <ComponentError
+                titulo={isErrorTabla.titulo ?? "Error 404"}
+                accionVoid={() => obtenerVentas()}
+                detalles={
+                  isErrorTabla.detalles ?? "No se pudieron cargar loas ventas"
+                }
+              />
+            ) : (
+              // Tabla
+              <TablaVentas
+                lista={listaVentas}
+                totalVentas={noTotalVentas}
+                columnas={columnas}
+                setCargandoTabla={setCargandoTabla}
+                setVentaSeleccionada={setVentaSeleccionado}
+                ventaSeleccionada={ventaSeleccionado}
+                obtenerMasDatos={(desde: number, asta: number) =>
+                  obtenerVentas(desde, asta)
+                }
+                actualizarGrafica={(tipo, noDatos) =>
+                  obtenerVentasGrafica(tipo, noDatos)
+                }
+                isCargandoTabla={isCargandoTabla}
+              />
+            )}
           </>
         )}
       </Container>
 
-      {/* MODAL */}
-      {/* <ModalVenta
-        estadoModal={isEstadoModal}
-        cerrarModal={cerrarModal}
-        opcionesModalVenta={opcionesModalVenta}
-        setCargando={setCargandoAccion}
-        setVentaSeleccionado={setVentaSeleccionado}
-        recargarVentas={obtenerVentas}
-      /> */}
-
       {/* CARGANDO */}
-      <ComponenteCargando tipo={"spin"} estadoModal={isCargandoAccion} />
+      <ComponenteCargando tipo={"spin"} estadoModal={false} />
     </>
   );
 };

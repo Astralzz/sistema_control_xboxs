@@ -16,3 +16,6 @@ export const regexNumerosDecimales: RegExp =
   /^(?:\d{1,5}(?:\.\d{1,2})?|\.\d{1,2})$/;
 
 // sin 0 ->   /^(?:[1-9]\d{0,4}(?:\.\d{1,2})?|\.\d{1,2})$/;
+
+// Todo, Tipos de datos
+export type FiltroFechasGrafica = "periodica" | "semanal" | "mensual" | "anual";

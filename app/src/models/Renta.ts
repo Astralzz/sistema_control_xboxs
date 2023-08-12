@@ -8,7 +8,7 @@ interface Renta {
   inicio: string;
   final?: string;
   duracion?: string;
-  total: string;
+  total: number;
   noControles: number;
   isPagado: number;
   cliente?: string;
