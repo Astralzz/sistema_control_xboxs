@@ -97,6 +97,51 @@ class VentaController extends Controller
         }
     }
 
+    // * Lista por semana
+    public function ListaVentasSemanales($semanas = 30): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subWeeks($semanas);
+
+            // Lista
+            $ventasPorSemana = [];
+
+            // Recorremos
+            for ($i = 0; $i < $semanas; $i++) {
+                // Datos
+                $semana = $fechaInicio->format('Y-m-d');
+                $semanaSiguiente = $fechaInicio->addWeek()->format('Y-m-d');
+
+                // Suma de los totales de ventas para la semana actual
+                $totalVentasSemana = $this->venta::whereBetween('fecha', [$semana, $semanaSiguiente])
+                    ->sum('total');
+
+                // Agregamos
+                $ventasPorSemana[] = [
+                    'fecha' => $semana,
+                    'total' => $totalVentasSemana,
+                ];
+            }
+
+            // * Retornamos
+            return response()->json([
+                'ventasPorSemana' => $ventasPorSemana,
+            ]);
+
+            // ! Error de consulta
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+            // ! Error desconocido
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
     // * Lista por producto
     public function listaPorProducto($idProducto, $desde = 0, $asta = 10): JsonResponse
     {

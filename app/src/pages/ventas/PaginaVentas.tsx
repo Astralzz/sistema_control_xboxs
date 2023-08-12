@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Card, Col, Container, Row } from "react-bootstrap";
 import Venta from "../../models/Venta";
 import TablaVentas from "../ventas/TablaVentas";
 import ComponentError, {
@@ -7,11 +7,18 @@ import ComponentError, {
 } from "../../components/oters/ComponentError";
 import ReactLoading from "react-loading";
 import { RespuestaApi } from "../../apis/apiVariables";
-import { apiObtenerListaVentas } from "../../apis/apiVentas";
+import {
+  apiObtenerListaVentas,
+  apiObtenerListaVentasPorSemanas,
+} from "../../apis/apiVentas";
 // import TarjetaVenta from "../ventas/TarjetaVenta";
 import ComponenteCargando from "../../components/oters/ComponenteCargando";
 // import ModalVenta from "../ventas/ModalVenta";
 import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPorProducto";
+import GraficoDeLineas, {
+  DatosGrafica,
+} from "../../components/oters/GraficoDeLineas";
+import { alertaSwal, formatearFecha } from "../../functions/funcionesGlobales";
 
 // * Columnas de tabla
 const columnas: ColumnasVentas = {
@@ -41,6 +48,7 @@ const PaginaVentas: React.FC = () => {
     });
   const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
+  const [isCargandoGrafica, setCargandoGrafica] = useState<boolean>(false);
   const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
   const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
   const [ventaSeleccionado, setVentaSeleccionado] = useState<Venta | null>(
@@ -53,15 +61,9 @@ const PaginaVentas: React.FC = () => {
 
   // * Listas
   const [listaVentas, setListaVentas] = useState<Venta[]>([]);
-
-  // * Acciones modal
-  const cerrarModal = () => setEstadoModal(false);
-
-  // * Accion Modal
-  const accionModal = (opcionesModalVenta: OpcionesModalVenta) => {
-    setEstadoModal(true);
-    setOpcionesModalVenta(opcionesModalVenta);
-  };
+  const [listaVentasGrafica, setListaVentasGrafica] = useState<DatosGrafica[]>(
+    []
+  );
 
   // * Obtener ventas
   const obtenerVentas = useCallback(
@@ -126,11 +128,52 @@ const PaginaVentas: React.FC = () => {
     []
   );
 
+  // * Ventas por semana
+  const obtenerVentasPorSemana = useCallback(async (semanas: number = 30) => {
+    try {
+      setCargandoGrafica(true);
+
+      // Respuesta
+      let res: RespuestaApi = await apiObtenerListaVentasPorSemanas(semanas);
+
+      // ? Error
+      if (!res.estado) {
+        throw new Error(
+          res.detalles_error ?? "No se pudo obtener los datos de la gráfica"
+        );
+      }
+
+      // ? Llego la lista
+      if (!res.listaGrafica) {
+        throw new Error("La gráfica de ventas no se creo correctamente");
+      }
+
+      //  Recorremos
+      const ventasGrafica: DatosGrafica[] = [];
+      res.listaGrafica.forEach((venta) => {
+        ventasGrafica.push({
+          fecha: formatearFecha(venta.fecha, false) ?? venta.fecha,
+          total: venta.total,
+        });
+      });
+
+      // Agregamos
+      setListaVentasGrafica(ventasGrafica);
+    } catch (error) {
+      alertaSwal("Error", String(error), "error");
+    } finally {
+      setCargandoGrafica(false);
+    }
+  }, []);
+
   // * Al iniciar
   useEffect(() => {
     setCargandoPagina(true);
     obtenerVentas();
   }, [obtenerVentas]);
+  useEffect(() => {
+    obtenerVentasPorSemana();
+  }, [obtenerVentasPorSemana]);
 
   // Todo, componente principal
   return (
@@ -138,47 +181,50 @@ const PaginaVentas: React.FC = () => {
       {/* PAGINA */}
       <Container className="contenedor-completo">
         <br className="mb-2" />
-        <Row>
-          {/* Tarjeta */}
-          <Col sm={4}></Col>
-          {/* Tabla */}
-          <Col sm={8}>
-            <Container>
-              {/* Si esta cargando y esta vacía */}
-              {isCargandoPagina ? (
+        {/* Si esta cargando y esta vacía */}
+        {isCargandoPagina ? (
+          <div className="contenedor-centrado">
+            <ReactLoading type={"spin"} color="#FFF" />
+          </div>
+        ) : // ! Error
+        isErrorTabla.estado ? (
+          <ComponentError
+            titulo={isErrorTabla.titulo ?? "Error 404"}
+            accionVoid={() => obtenerVentas()}
+            detalles={
+              isErrorTabla.detalles ?? "No se pudieron cargar loas ventas"
+            }
+          />
+        ) : (
+          <>
+            <>
+              {isCargandoGrafica ? (
                 <div className="contenedor-centrado">
-                  <ReactLoading type={"bubbles"} color="#FFF" />
+                  <ReactLoading type={"balls"} color="#FFF" />
                 </div>
-              ) : // ! Error
-              isErrorTabla.estado ? (
-                <ComponentError
-                  titulo={isErrorTabla.titulo ?? "Error 404"}
-                  accionVoid={() => obtenerVentas()}
-                  detalles={
-                    isErrorTabla.detalles ?? "No se pudieron cargar loas ventas"
-                  }
-                />
               ) : (
-                // * Tabla de ventas
-                <TablaVentas
-                  lista={listaVentas}
-                  totalVentas={noTotalVentas}
-                  columnas={columnas}
-                  setCargandoTabla={setCargandoTabla}
-                  setVentaSeleccionada={setVentaSeleccionado}
-                  ventaSeleccionada={ventaSeleccionado}
-                  obtenerMasDatos={(
-                    desde: number,
-                    asta: number,
-                    nombre?: string,
-                    stock?: number
-                  ) => obtenerVentas(desde, asta, nombre, stock)}
-                  isCargandoTabla={isCargandoTabla}
-                />
+                <GraficoDeLineas datos={listaVentasGrafica}/>
               )}
-            </Container>
-          </Col>
-        </Row>
+            </>
+
+            {/* Tabla de ventas */}
+            <TablaVentas
+              lista={listaVentas}
+              totalVentas={noTotalVentas}
+              columnas={columnas}
+              setCargandoTabla={setCargandoTabla}
+              setVentaSeleccionada={setVentaSeleccionado}
+              ventaSeleccionada={ventaSeleccionado}
+              obtenerMasDatos={(
+                desde: number,
+                asta: number,
+                nombre?: string,
+                stock?: number
+              ) => obtenerVentas(desde, asta, nombre, stock)}
+              isCargandoTabla={isCargandoTabla}
+            />
+          </>
+        )}
       </Container>
 
       {/* MODAL */}

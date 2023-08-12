@@ -128,18 +128,21 @@ export function redondearNumero(numero: number): number {
 }
 
 // * Formatear fecha
-export function formatearFecha(fecha: string): string | null {
+export function formatearFecha(
+  fecha: string,
+  conAnio: boolean = true
+): string | null {
   try {
     // Creamos fecha con Moment.js
     const date = moment(fecha);
 
     // Obtenemos
     const dia = date.format("DD");
-    const mes = date.format("MM");
-    const anio = date.format("YYYY");
+    const mes = date.format("MMM");
+    const anio = conAnio ? `/${date.format("YYYY")}` : "";
 
     // Formateamos
-    const fechaFormateada = `${dia}/${mes}/${anio}`;
+    const fechaFormateada = `${dia}/${mes}${anio}`;
 
     return fechaFormateada;
   } catch (error) {

@@ -3,6 +3,7 @@ import Renta from "../models/Renta";
 import Xbox from "../models/Xbox";
 import Producto from "../models/Producto";
 import Venta from "../models/Venta";
+import { DatosGrafica } from "../components/oters/GraficoDeLineas";
 
 // // * Apis del servidor
 // export const URL_SERVER: string | undefined =
@@ -25,6 +26,7 @@ export interface RespuestaApi {
   listaProductos?: Producto[];
   listaRentas?: Renta[];
   listaVentas?: Venta[];
+  listaGrafica?: DatosGrafica[];
   // Datos
   mensaje?: string;
   xbox?: Xbox;

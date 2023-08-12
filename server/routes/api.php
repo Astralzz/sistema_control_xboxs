@@ -108,6 +108,12 @@ Route::prefix('ventas')->group(function () {
             Route::get('{desde}/{asta}', [VentaController::class, 'lista']);
         });
 
+        // ? Semanal
+        Route::prefix('semanal')->group(function () {
+            Route::get('', [VentaController::class, 'ListaVentasSemanales']);
+            Route::get('{semanas}', [VentaController::class, 'ListaVentasSemanales']);
+        });
+
         // ? Filtradas
         Route::prefix('filtrada')->group(function () {
             // Producto
@@ -117,7 +123,6 @@ Route::prefix('ventas')->group(function () {
                 Route::get('{id}/{desde}/{asta}', [VentaController::class, 'listaPorProducto']);
             });
         });
-
     });
 
     // * OTROS - Acciones en general
