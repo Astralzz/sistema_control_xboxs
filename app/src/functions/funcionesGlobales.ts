@@ -1,7 +1,7 @@
 import moment from "moment";
 import "moment/locale/es";
 import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
-import Venta from "../models/Venta";
+import Venta, { DetalleVenta } from "../models/Venta";
 import { FiltroFechasGrafica } from "./variables";
 
 // * Variables de estilos
@@ -166,7 +166,7 @@ export function formatearFechaConDias(fecha: string): string {
   const date = moment(fecha);
 
   // Formateamos con opciones de idioma
-  return date.locale("es").format("dddd, D [de] MMMM [de] YYYY");
+  return date.locale("es").format("dddd, D [de] MMMM [del] YYYY");
 }
 
 // * Formatear hora sin segundos
@@ -410,15 +410,23 @@ export function generateRandomId(
 
 // * para convertir detalles de una venta
 export function convertirDetalles(venta: Venta): Venta {
-  // Obtenemos json
-  const detallesJSON = JSON.parse(String(venta.detalles));
+  try {
+    // Obtenemos json
+    const detallesJSON = JSON.parse(String(venta.detalles));
 
-  // Convertimos
-  const detallesConvertidos = detallesJSON.map((detalle: any) => {
-    return {
-      id_producto: detalle.id_producto,
-      cantidad: detalle.cantidad,
-    };
-  });
-  return { ...venta, detalles: detallesConvertidos };
+    // Convertimos
+    const detallesConvertidos: DetalleVenta[] = detallesJSON.map(
+      (detalle: any) => {
+        return {
+          id_producto: detalle.id_producto,
+          nombre_producto: detalle.nombre_producto,
+          cantidad: detalle.cantidad,
+        };
+      }
+    );
+    return { ...venta, detalles: detallesConvertidos };
+  } catch (error) {
+    console.log(error);
+    return { ...venta, detalles: [] };
+  }
 }

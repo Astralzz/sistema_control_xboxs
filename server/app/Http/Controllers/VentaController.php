@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Producto;
 use App\Models\Venta;
 use Dotenv\Exception\ValidationException;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,6 +26,7 @@ class VentaController extends Controller
         'comentario' => 'nullable|string|min:5',
         'detalles' => 'required|json|min:1',
         'detalles.*.id_producto' => 'required|numeric|min:1',
+        'detalles.*.nombre_producto' => 'required|string|min:1',
         'detalles.*.cantidad' => 'required|integer|min:1'
     ];
 
@@ -50,6 +50,9 @@ class VentaController extends Controller
         'detalles.*.id_producto.required' => 'El ID del producto en los detalles es requerido.',
         'detalles.*.id_producto.numeric' => 'El ID del producto en los detalles debe ser numérico.',
         'detalles.*.id_producto.min' => 'El ID del producto en los detalles debe ser mayor o igual a 1.',
+        'detalles.*.nombre_producto.required' => 'El nombre del producto en los detalles es requerido.',
+        'detalles.*.nombre_producto.string' => 'El nombre del producto en los detalles debe ser una cadena de texto.',
+        'detalles.*.nombre_producto.min' => 'El nombre del producto tiene que tener al menos un carácter.',
         'detalles.*.cantidad.required' => 'La cantidad del producto en los detalles es requerida.',
         'detalles.*.cantidad.integer' => 'La cantidad del producto en los detalles debe ser un número entero.',
         'detalles.*.cantidad.min' => 'La cantidad del producto en los detalles debe ser mayor o igual a 1.'

@@ -126,6 +126,32 @@ export async function apiObtenerListaVentasPorId(
   }
 }
 
+// * Eliminar producto
+export async function apiEliminarVenta(id: number): Promise<RespuestaApi> {
+  try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
+    // Ruta
+    let url = API_URL + `${intermedio}/opciones/eliminar/${id}`;
+
+    // Enviamos
+    const res = await axios.delete(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      mensaje: res.data.mensaje ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
 // // * Obtener lista de productos por stock
 // export async function apiObtenerListaProductosPorStock(
 //   stock: number,

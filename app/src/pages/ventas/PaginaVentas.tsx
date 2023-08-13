@@ -18,7 +18,10 @@ import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPor
 import GraficoDeLineas, {
   DatosGrafica,
 } from "../../components/oters/GraficoDeLineas";
-import { formatearFecha } from "../../functions/funcionesGlobales";
+import {
+  convertirDetalles,
+  formatearFecha,
+} from "../../functions/funcionesGlobales";
 import { FiltroFechasGrafica } from "../../functions/variables";
 
 // * Columnas de tabla
@@ -28,7 +31,6 @@ const columnas: ColumnasVentas = {
   hora: true,
   noProductos: true,
   total: true,
-  comentario: true,
   masInf: true,
 };
 
@@ -42,9 +44,6 @@ export interface OpcionesModalVenta {
 // TODO, Pagina de los ventas
 const PaginaVentas: React.FC = () => {
   // * Variables
-  const [ventaSeleccionado, setVentaSeleccionado] = useState<Venta | null>(
-    null
-  );
   const [noTotalVentas, setNoTotalVentas] = useState<number>(0);
   const [isErrorTabla, setErrorTabla] = useState<DataError>({
     estado: true,
@@ -57,6 +56,7 @@ const PaginaVentas: React.FC = () => {
   const [isCargandoTabla, setCargandoTabla] = useState<boolean>(false);
   const [isCargandoGrafica, setCargandoGrafica] = useState<boolean>(false);
   const [isCargandoPagina, setCargandoPagina] = useState<boolean>(false);
+  const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
 
   // * Listas
   const [listaVentas, setListaVentas] = useState<Venta[]>([]);
@@ -97,11 +97,26 @@ const PaginaVentas: React.FC = () => {
           return;
         }
 
+        // ? Llego la lista
+        if (!res.listaVentas) {
+          setErrorTabla({
+            estado: true,
+            titulo: res.noEstado ? String(res.noEstado) : undefined,
+            detalles: "La lista de ventas no llego correctamente",
+          });
+          setListaVentas([]);
+          return;
+        }
+
         //  Sin errores
         setErrorTabla({ estado: false });
 
+        // Convertir los detalles de cada venta
+        const ventasConvertidas: Venta[] =
+          res.listaVentas.map(convertirDetalles);
+
         // Ponemos lista
-        setListaVentas(res.listaVentas ?? []);
+        setListaVentas(ventasConvertidas ?? []);
 
         // Limitamos a los últimos 150 datos
         const t = res.totalDatos
@@ -229,6 +244,7 @@ const PaginaVentas: React.FC = () => {
               // Grafica
               <GraficoDeLineas datos={listaVentasGrafica} />
             )}
+
             {/* // * Tabla ------------------- */}
             {isErrorTabla.estado ? (
               // ! Error
@@ -246,8 +262,6 @@ const PaginaVentas: React.FC = () => {
                 totalVentas={noTotalVentas}
                 columnas={columnas}
                 setCargandoTabla={setCargandoTabla}
-                setVentaSeleccionada={setVentaSeleccionado}
-                ventaSeleccionada={ventaSeleccionado}
                 obtenerMasDatos={(desde: number, asta: number) =>
                   obtenerVentas(desde, asta)
                 }
@@ -255,6 +269,7 @@ const PaginaVentas: React.FC = () => {
                   obtenerVentasGrafica(tipo, noDatos)
                 }
                 isCargandoTabla={isCargandoTabla}
+                setCargandoAccion={setCargandoAccion}
               />
             )}
           </>
@@ -262,7 +277,7 @@ const PaginaVentas: React.FC = () => {
       </Container>
 
       {/* CARGANDO */}
-      <ComponenteCargando tipo={"spin"} estadoModal={false} />
+      <ComponenteCargando tipo={"spin"} estadoModal={isCargandoAccion} />
     </>
   );
 };

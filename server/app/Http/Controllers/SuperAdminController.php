@@ -289,9 +289,11 @@ class SuperAdminController extends Controller
                     // Ajustar la cantidad y el precio para que el cálculo del subtotal esté dentro del rango permitido
                     $cantidad = $faker->numberBetween(1, 10); // Ajusta el rango de cantidades
                     $precio = $producto ? $producto->precio : 0;
+                    $nombre = $producto ? $producto->nombre : $faker->word();
 
                     $detalle = [
                         'id_producto' => $productoId,
+                        "nombre_producto" => $nombre,
                         'cantidad' => $cantidad,
                     ];
                     $detalles[] = $detalle;

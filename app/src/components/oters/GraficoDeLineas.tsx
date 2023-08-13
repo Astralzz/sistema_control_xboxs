@@ -65,10 +65,10 @@ const GraficoDeLineas: React.FC<Props> = (props) => {
   const {
     barraDeZoom = props.barraDeZoom
       ? props.barraDeZoom
-      : props.datos.length > 40
+      : props.datos.length > 25
       ? { alto: 20, color: "#8884d8" }
       : undefined,
-      
+
     colorDeFondo,
     datosEditables,
     mostrarEtiquetasEjeX = true,
@@ -120,6 +120,7 @@ const GraficoDeLineas: React.FC<Props> = (props) => {
           {mostrarEtiquetasEjeX && (
             <XAxis
               dataKey={datosEditables ? datosEditables.keyDatos : "fecha"}
+              interval="preserveStart"
             />
           )}
 

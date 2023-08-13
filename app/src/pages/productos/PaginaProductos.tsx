@@ -108,8 +108,15 @@ const PaginaProductos: React.FC = () => {
         // Ponemos lista
         setListaProductos(res.listaProductos ?? []);
 
+        // Limitamos a los últimos 150 datos
+        const t = res.totalDatos
+          ? res.totalDatos < 150
+            ? res.totalDatos
+            : 150
+          : 0;
+
         //  Ponemos el total
-        setNoTotalProductos(res.totalDatos ?? 0);
+        setNoTotalProductos(t ?? 0);
       } catch (error) {
         console.error(String(error));
       } finally {

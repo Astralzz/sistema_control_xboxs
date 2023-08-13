@@ -55,7 +55,7 @@ const TarjetaProducto: React.FC<Props> = (props) => {
           throw new Error(
             res.detalles_error
               ? String(res.detalles_error)
-              : "Ocurrió un error al eliminar el xbox, intenta mas tarde"
+              : "Ocurrió un error al eliminar el producto, intenta mas tarde"
           );
         }
 
@@ -66,8 +66,8 @@ const TarjetaProducto: React.FC<Props> = (props) => {
         // * Éxito
         alertaSwal(
           "Éxito!",
-          // res.mensaje ?? "Xbox eliminado correctamente",
-          "Xbox eliminado correctamente",
+          // res.mensaje ?? "Producto eliminado correctamente",
+          "Producto eliminado correctamente",
           "success"
         );
       }

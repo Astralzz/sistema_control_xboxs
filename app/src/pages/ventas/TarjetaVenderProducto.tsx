@@ -54,7 +54,19 @@ const crearDetallesDesdeProductosAgregados = (
 
   // Recorremos y agregamos
   productoCantidadMap.forEach((cantidad, idProducto) => {
-    detalles.push({ id_producto: idProducto, cantidad: cantidad });
+    // Buscar el producto por su id en productosAgregados
+    const productoEncontrado = productosAgregados.find(
+      (p) => p.id === idProducto
+    );
+
+    // Si se encuentra el producto, agregar el detalle con nombre y cantidad
+    if (productoEncontrado) {
+      detalles.push({
+        id_producto: idProducto,
+        nombre_producto: productoEncontrado.nombre,
+        cantidad: cantidad,
+      });
+    }
   });
 
   return detalles;
