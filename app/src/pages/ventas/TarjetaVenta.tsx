@@ -158,6 +158,7 @@ const TarjetaVenta: React.FC<Props> = (props) => {
           </div>
         </Card.Body>
       </Card>
+      <br className="mb-2"/>
     </Container>
   );
 };

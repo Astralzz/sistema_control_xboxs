@@ -99,6 +99,96 @@ class VentaController extends Controller
         }
     }
 
+    // * Lista por dias
+    public function ListaPorDiaEspecifico($dia, $desde = 0, $asta = 30): JsonResponse
+    {
+        try {
+            // ? Dia correcto
+            if ($dia !== null) {
+                $parsedDate = \DateTime::createFromFormat('Y-m-d', $dia);
+                if (!$parsedDate || $parsedDate->format('Y-m-d') !== $dia) {
+                    return response()->json([
+                        'error' => 'Fecha inválida'
+                    ], 400);
+                }
+            }
+
+            // Lista
+            $query = $this->venta::orderBy('fecha', 'desc')
+                ->orderBy('hora', 'desc')
+                ->skip($desde)
+                ->take($asta);
+
+            // Por dia
+            if ($dia !== null) {
+                $query->whereDate('fecha', $dia);
+            }
+
+            $lista = $query->get();
+
+            // Total de datos
+            $totalDatos = $this->venta->whereDate('fecha', $dia)->count();
+
+            // * Retornamos
+            return response()->json([
+                'lista' => $lista,
+                'totalDatos' => $totalDatos
+            ]);
+
+            // ! Error de consulta
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+            // ! Error desconocido
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por mes
+    public function ListaPorMesEspecifico($anio, $mes, $desde = 0, $asta = 30): JsonResponse
+    {
+        try {
+            // Validar si el año y el mes son correctos
+            if (!checkdate($mes, 1, $anio)) {
+                return response()->json([
+                    'error' => 'Fecha inválida'
+                ], 400);
+            }
+
+            // Lista
+            $query = $this->venta::orderBy('fecha', 'desc')
+                ->orderBy('hora', 'desc')
+                ->skip($desde)
+                ->take($asta);
+
+            // Filtrar por mes y año
+            $query->whereYear('fecha', $anio)->whereMonth('fecha', $mes);
+
+            $lista = $query->get();
+
+            // Total de datos para el mes específico
+            $totalDatos = $this->venta->whereYear('fecha', $anio)->whereMonth('fecha', $mes)->count();
+
+            // Retornamos la respuesta
+            return response()->json([
+                'lista' => $lista,
+                'totalDatos' => $totalDatos
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
     // * Lista por los últimos n dias
     public function ListaVentasPorDias($dias = 7): JsonResponse
     {

@@ -3,7 +3,6 @@ import {
   Button,
   Col,
   Container,
-  Form,
   InputGroup,
   Navbar,
   Pagination,
@@ -14,7 +13,6 @@ import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import Venta from "../../models/Venta";
 import {
   Paginacion,
-  alertaSwal,
   calcularPaginaciones,
   formatearFecha,
   formatearHoraSinSegundos,
@@ -23,13 +21,9 @@ import {
   ComponenteCargandoTabla,
   TextoLargoTablaElement,
 } from "../../components/oters/Otros";
-import {
-  FiltroFechasGrafica,
-  regexNombre,
-  regexNumerosEnteros,
-} from "../../functions/variables";
 import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPorProducto";
 import TarjetaVenta from "./TarjetaVenta";
+import ComponenteSelectFecha from "../../components/oters/ComponenteSelectFecha";
 
 // * Estilos
 const styles: React.CSSProperties[] = [
@@ -52,8 +46,12 @@ interface Props {
   totalVentas: number;
   columnas: ColumnasVentas;
   setCargandoTabla: Dispatch<boolean>;
-  obtenerMasDatos: (desde: number, asta: number) => void;
-  actualizarGrafica: (tipo: FiltroFechasGrafica, noDatos: number) => void;
+  obtenerMasDatos: (
+    desde: number,
+    asta: number,
+    dia?: Date,
+    mes?: Date
+  ) => void;
   setCargandoAccion: Dispatch<boolean>;
   isCargandoTabla: boolean;
 }
@@ -66,66 +64,24 @@ const TablaVentas: React.FC<Props> = (props) => {
   );
   const [listaPaginaciones, setListaPaginaciones] = useState<Paginacion[]>([]);
   const [pagSeleccionada, setPaginaSeleccionada] = useState<number>(0);
-  const [textBuscarNombre, setTextBuscarNombre] = useState<string>("");
-  const [textBuscarCantidad, setTextBuscarCantidad] = useState<string>("");
-  const [tipoDeGrafica, setTipoDeGrafica] =
-    useState<FiltroFechasGrafica>("periodica");
-  const [noDatosGrafica, setNoDatosGrafica] = useState<string>("7");
-
-  const [isFiltroNombre, setFiltroNombre] = useState<boolean>(false);
-  const [isFiltroCantidad, setFiltroCantidad] = useState<boolean>(false);
+  const [diaSeleccionado, setDiaSeleccionado] = useState<Date>(new Date());
+  const [isDiaSeleccionado, setIsDiaSeleccionado] = useState<boolean>(false);
+  const [mesSeleccionado, setMesSeleccionado] = useState<Date>(new Date());
+  const [isMesSeleccionado, setIsMesSeleccionado] = useState<boolean>(false);
 
   // * Limpiar filtros
   const LimpiarFiltros = (): void => {
-    setFiltroCantidad(false);
-    setFiltroNombre(false);
+    setIsMesSeleccionado(false);
+    setIsDiaSeleccionado(false);
   };
 
   // * Pre obtener ventas
-  const preObtenerVentas = (desde: number, asta: number): void =>
-    props.obtenerMasDatos(desde, asta);
-
-  // * Actualizar grafica
-  const actualizarGrafica = (): void => {
-    if (
-      // ? Es valido
-      ["periodica", "semanal", "mensual", "anual"].includes(tipoDeGrafica)
-    ) {
-      // ? Numero valido
-      if (
-        regexNumerosEnteros.test(noDatosGrafica) &&
-        !isNaN(Number(noDatosGrafica)) &&
-        Number(noDatosGrafica) > 1 &&
-        Number(noDatosGrafica) < 101
-      ) {
-        // Actualizamos
-        props.actualizarGrafica(tipoDeGrafica, Number(noDatosGrafica));
-        return;
-      }
-
-      // ! Error
-      alertaSwal(
-        "Error",
-        "El numero de datos proporcionados no es valido",
-        "error"
-      );
-      return;
-    }
-    // ! Error
-    alertaSwal(
-      "Error",
-      "El tipo de grafica proporcionado no es valido",
-      "error"
-    );
-  };
-
-  // * Bloquear boton grafica
-  const isBloquearBotonGrafica = (): boolean =>
-    !regexNumerosEnteros.test(noDatosGrafica) ||
-    isNaN(Number(noDatosGrafica)) ||
-    Number(noDatosGrafica) < 2 ||
-    Number(noDatosGrafica) > 100 ||
-    !["periodica", "semanal", "mensual", "anual"].includes(tipoDeGrafica);
+  const preObtenerVentas = (
+    desde: number,
+    asta: number,
+    dia?: Date,
+    mes?: Date
+  ): void => props.obtenerMasDatos(desde, asta, dia, mes);
 
   // * Al cambiar
   useEffect(() => {
@@ -134,101 +90,81 @@ const TablaVentas: React.FC<Props> = (props) => {
     setListaPaginaciones(pag);
   }, [props.totalVentas]);
 
-  // * Al cambiar
-  useEffect(() => {
-    // ? No existe
-    if (!ventaSeleccionada) {
-      LimpiarFiltros();
-    }
-  }, [ventaSeleccionada]);
-
   return (
     <Row>
       {/* // * BARRA SUPERIOR ------------------ */}
-      <div>
-        <Navbar className="bg-body-transparent justify-content-end">
-          {/* Parte de la grafica */}
-          <InputGroup className="placeholder-blanco">
-            {/* Tipo de grafica */}
-            <InputGroup.Text style={styles[1]}>Grafica</InputGroup.Text>
-            <Form.Select
-              aria-label="Tipo de grafica"
-              value={tipoDeGrafica}
-              onChange={(n) => {
-                // Valor
-                const valor: FiltroFechasGrafica = n.target
-                  .value as FiltroFechasGrafica;
-                if (
-                  // ? Es valido
-                  ["periodica", "semanal", "mensual", "anual"].includes(valor)
-                ) {
-                  setTipoDeGrafica(valor);
-                  return;
-                }
+      <Navbar className="bg-body-transparent justify-content">
+        <Container>
+          <Row>
+            {/* Seleccionar dia */}
+            <Col>
+              <InputGroup>
+                <InputGroup.Text style={styles[1]}>Dia</InputGroup.Text>
+                <ComponenteSelectFecha
+                  fechaSeleccionada={diaSeleccionado}
+                  setFechaSeleccionada={setDiaSeleccionado}
+                  opcion="PERIODICA"
+                />
+                <div className="boton-buscar">
+                  <Button
+                    className="bt-b"
+                    onClick={() => {
+                      setIsMesSeleccionado(false);
+                      setIsDiaSeleccionado(true);
+                      setPaginaSeleccionada(0);
+                      preObtenerVentas(0, 10, diaSeleccionado);
+                    }}
+                  >
+                    <IconoBootstrap nombre="Search" />
+                  </Button>
+                </div>
 
-                alertaSwal("Error", "La opcion no es valida", "error");
-              }}
-              className={"is-valid"}
-              style={styles[0]}
-            >
-              <option value="periodica">Periodica</option>
-              <option value="semanal">Semanal</option>
-              <option value="mensual">Mensual</option>
-              <option value="anual">Anual</option>
-            </Form.Select>
-            {/* Numero de datos */}
-            <InputGroup.Text style={styles[1]}>Datos</InputGroup.Text>
-            <Form.Control
-              type="text"
-              style={styles[0]}
-              min={2}
-              max={50}
-              className={
-                String(noDatosGrafica) === ""
-                  ? ""
-                  : regexNumerosEnteros.test(noDatosGrafica) &&
-                    Number(noDatosGrafica) > 1 &&
-                    Number(noDatosGrafica) < 101
-                  ? "is-valid"
-                  : "is-invalid"
-              }
-              value={noDatosGrafica}
-              onChange={(t) => setNoDatosGrafica(t.target.value)}
-            />
-            {/* Boton */}
+                <div className="separador-vertical"></div>
+
+                {/* Seleccionar mes */}
+                <InputGroup.Text style={styles[1]}>Mes</InputGroup.Text>
+                <ComponenteSelectFecha
+                  fechaSeleccionada={mesSeleccionado}
+                  setFechaSeleccionada={setMesSeleccionado}
+                  opcion="MENSUAL"
+                />
+                <div className="boton-buscar">
+                  <Button
+                    className="bt-b"
+                    onClick={() => {
+                      setIsMesSeleccionado(true);
+                      setIsDiaSeleccionado(false);
+                      setPaginaSeleccionada(0);
+                      preObtenerVentas(0, 10, undefined, mesSeleccionado);
+                    }}
+                  >
+                    <IconoBootstrap nombre="Search" />
+                  </Button>
+                </div>
+              </InputGroup>
+            </Col>
+          </Row>
+
+          <Navbar.Toggle />
+
+          {/* Boton de ultimas ventas */}
+          <Navbar.Collapse className="justify-content-end">
+            {/* ultimas ventas */}
             <div className="boton-buscar">
-              {/* Buscar */}
               <Button
-                disabled={isBloquearBotonGrafica()}
-                onClick={() => actualizarGrafica()}
                 className="bt-b"
-                type="submit"
+                onClick={() => {
+                  LimpiarFiltros();
+                  setPaginaSeleccionada(0);
+                  preObtenerVentas(0, 10);
+                }}
               >
-                Actualizar
+                Ultimas ventas
               </Button>
             </div>
-          </InputGroup>
-
-          {/* Datos de tabla */}
-          <Container>
-            <Navbar.Toggle />
-            <Navbar.Collapse className="justify-content-end">
-              {/* Todos los ventas */}
-              <div className="boton-buscar">
-                <Button
-                  className="bt-b"
-                  onClick={() => {
-                    LimpiarFiltros();
-                    preObtenerVentas(0, 10);
-                  }}
-                >
-                  Por Defecto
-                </Button>
-              </div>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
-      </div>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
       {/* // * TARJETA ------------------ */}
       <Col sm={4}>
@@ -236,8 +172,9 @@ const TablaVentas: React.FC<Props> = (props) => {
           venta={ventaSeleccionada}
           setCargandoAccion={props.setCargandoAccion}
           setVentaSeleccionada={setVentaSeleccionada}
-          recargarTabla={function (): void {
-            throw new Error("Function not implemented.");
+          recargarTabla={() => {
+            props.obtenerMasDatos(0, 10);
+            setPaginaSeleccionada(0);
           }}
         />
       </Col>
@@ -248,7 +185,7 @@ const TablaVentas: React.FC<Props> = (props) => {
           {/* TABLA */}
           {props.lista.length < 1 && !props.isCargandoTabla ? (
             // ? Esta vacía y no esta cargando
-            <div className="contenedor-centrado">
+            <div className="contenedor-centrado-grafica">
               <h4>No se encontraron ventas</h4>
             </div>
           ) : (
@@ -275,7 +212,7 @@ const TablaVentas: React.FC<Props> = (props) => {
                 // Componente cargando
                 <ComponenteCargandoTabla
                   filas={props.lista.length < 1 ? 10 : props.lista.length}
-                  columnas={6}
+                  columnas={5}
                   pagSeleccionada={pagSeleccionada}
                   paginaciones={listaPaginaciones}
                   no
@@ -339,17 +276,15 @@ const TablaVentas: React.FC<Props> = (props) => {
           <Pagination size="sm" className="pagination-tabla">
             {/* Recorremos */}
             {listaPaginaciones.map((pagina, i) => {
-              // Nombre
-              const nombre: string | undefined =
-                regexNombre.test(textBuscarNombre) && isFiltroNombre
-                  ? textBuscarNombre
-                  : undefined;
+              // Dia
+              const dia: Date | undefined = isDiaSeleccionado
+                ? diaSeleccionado
+                : undefined;
 
-              // Stock
-              const stock: number | undefined =
-                regexNumerosEnteros.test(textBuscarCantidad) && isFiltroCantidad
-                  ? Number(textBuscarCantidad)
-                  : undefined;
+              // Mes
+              const mes: Date | undefined = isMesSeleccionado
+                ? mesSeleccionado
+                : undefined;
 
               return (
                 <Pagination.Item
@@ -363,7 +298,7 @@ const TablaVentas: React.FC<Props> = (props) => {
                     }
 
                     setPaginaSeleccionada(i);
-                    // preObtenerVentas(pagina.desde, pagina.asta, nombre, stock);
+                    preObtenerVentas(pagina.desde, pagina.asta, dia, mes);
                   }}
                 >
                   {i + 1}

@@ -376,9 +376,28 @@
     }
 }
 
+// Todo ---> SEPARADORES
+.separador-vertical {
+    width: 1px;
+    height: 100%;
+    background-color: transparent;
+    margin: 0 15px;
+}
+
 // Todo ---> OTROS
 .placeholder-blanco {
     .form-control::placeholder {
         color: $color-letra-placeholder;
     }
+}
+
+.select-fecha-global {
+    background-color: transparent;
+    align-items: center;
+    text-align: center;
+    color: $color-letra;
+    border: none;
+    border-bottom: 1px solid $color-letra;
+    min-height: 35px;
+    // min-width: auto;
 }

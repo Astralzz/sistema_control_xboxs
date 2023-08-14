@@ -15,6 +15,7 @@ interface Props extends icons.IconProps {
   detalles?: string;
   accionVoid?: Dispatch<SetStateAction<void>>;
   icono?: keyof typeof icons;
+  nombreClase?: string;
 }
 
 // Todo, Tabla Rentas
@@ -32,7 +33,7 @@ const ComponentError: React.FC<Props> = (props) => {
   };
 
   return (
-    <div className="contenedor-centrado">
+    <div className={props.nombreClase ?? "contenedor-centrado"}>
       <div>
         {/* Titulo */}
         <h1>{props.titulo}</h1>

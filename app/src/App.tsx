@@ -14,6 +14,7 @@ import "./styles/componentes.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
+import "react-datepicker/dist/react-datepicker.css";
 import MenuPrincipal from "./components/global/MenuPrincipal";
 
 // TODO, App

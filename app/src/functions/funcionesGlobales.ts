@@ -3,6 +3,7 @@ import "moment/locale/es";
 import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
 import Venta, { DetalleVenta } from "../models/Venta";
 import { FiltroFechasGrafica } from "./variables";
+import { DatosGrafica } from "../components/oters/GraficoDeLineas";
 
 // * Variables de estilos
 const colorFondo: string = "var(--color-fondo)";
@@ -428,5 +429,43 @@ export function convertirDetalles(venta: Venta): Venta {
   } catch (error) {
     console.log(error);
     return { ...venta, detalles: [] };
+  }
+}
+
+// * Obtener descripcion de la grafica
+export function obtenerDescripcionGrafica(
+  tipo: FiltroFechasGrafica,
+  ventas: DatosGrafica[]
+) {
+  try {
+    // Total vendido
+    const totalVendido: number = ventas.reduce(
+      (total, venta) =>
+        total + (!isNaN(Number(venta.total)) ? Number(venta.total) : 0),
+      0
+    );
+
+    // Formatear y limitar decimales
+    const formattedTotal: string = totalVendido.toFixed(2);
+    const noDatos: number = ventas.length;
+
+    let des: string = `Se gano un total de ${parseFloat(
+      formattedTotal
+    ).toLocaleString()}`;
+
+    if (tipo === "periodica") {
+      des = des + ` en los últimos ${noDatos} dias`;
+    } else if (tipo === "semanal") {
+      des = des + `en las últimas ${noDatos} semanas`;
+    } else if (tipo === "mensual") {
+      des = des + ` en los últimos ${noDatos} meses`;
+    } else {
+      des = des + ` en los últimos ${noDatos} años`;
+    }
+
+    return des;
+  } catch (error) {
+    console.error(error);
+    return "No se pudo obtener el total de las ventas";
   }
 }

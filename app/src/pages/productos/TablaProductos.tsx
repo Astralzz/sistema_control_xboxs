@@ -107,6 +107,7 @@ const TablaProductos: React.FC<Props> = (props) => {
               className="bt-b"
               onClick={() => {
                 LimpiarFiltros();
+                setPaginaSeleccionada(0);
                 preObtenerProductos(0, 10);
               }}
             >
@@ -124,6 +125,7 @@ const TablaProductos: React.FC<Props> = (props) => {
                     event.preventDefault();
                     setFiltroCantidad(false);
                     setFiltroNombre(true);
+                    setPaginaSeleccionada(0);
                     preObtenerProductos(0, 10, textBuscarNombre);
                   }}
                 >
@@ -169,6 +171,7 @@ const TablaProductos: React.FC<Props> = (props) => {
                     event.preventDefault();
                     setFiltroNombre(false);
                     setFiltroCantidad(true);
+                    setPaginaSeleccionada(0);
                     preObtenerProductos(
                       0,
                       10,

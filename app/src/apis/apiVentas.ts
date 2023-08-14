@@ -37,7 +37,7 @@ export async function apiCrearNuevaVenta(
   }
 }
 
-// * Obtener lista de ventas por id
+// * Obtener lista de ventas
 export async function apiObtenerListaVentas(
   desde: number = 0,
   asta: number = 10
@@ -66,8 +66,81 @@ export async function apiObtenerListaVentas(
   }
 }
 
+// * Obtener lista de ventas por dia
+export async function apiObtenerListaVentasPorDia(
+  fecha: Date,
+  desde: number = 0,
+  asta: number = 10
+): Promise<RespuestaApi> {
+  try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
+    // Formatear fecha en el formato 'Y-m-d'
+    const formattedDia: string = fecha.toISOString().split("T")[0];
+
+    // Ruta
+    let url =
+      API_URL +
+      `${intermedio}/lista/filtrada/dia/${formattedDia}/${desde}/${asta}`;
+
+    // Enviamos
+    const res = await axios.get(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      listaVentas: res.data.lista ?? undefined,
+      totalDatos: res.data.totalDatos ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
+// * Obtener lista de ventas por mes
+export async function apiObtenerListaVentasPorMes(
+  fecha: Date,
+  desde: number = 0,
+  asta: number = 10
+): Promise<RespuestaApi> {
+  try {
+    // ? Url no encontrada
+    if (!comprobarApis()) {
+      throw new Error("No se pudo encortar la url hacia el servidor");
+    }
+
+    // Obtener año y mes de la fecha
+    const anio = fecha.getFullYear();
+    const mes = fecha.getMonth() + 1;
+
+    // Ruta
+    const url =
+      API_URL +
+      `${intermedio}/lista/filtrada/mes/${anio}/${mes}/${desde}/${asta}`;
+
+    // Enviamos
+    const res = await axios.get(url);
+
+    // * Éxito
+    return {
+      estado: true,
+      listaVentas: res.data.lista ?? undefined,
+      totalDatos: res.data.totalDatos ?? undefined,
+    };
+
+    // ! Error
+  } catch (er: unknown) {
+    return await catchAxiosError(er);
+  }
+}
+
 // * Obtener lista de ventas por id
-export async function apiObtenerListaVentasPorSemanas(
+export async function apiObtenerListaVentasPorGrafica(
   tipo: FiltroFechasGrafica,
   datos?: number
 ): Promise<RespuestaApi> {

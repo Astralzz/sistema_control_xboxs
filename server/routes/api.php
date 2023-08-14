@@ -140,6 +140,20 @@ Route::prefix('ventas')->group(function () {
                 Route::get('{id}/{desde}', [VentaController::class, 'listaPorProducto']);
                 Route::get('{id}/{desde}/{asta}', [VentaController::class, 'listaPorProducto']);
             });
+
+            // Dia
+            Route::prefix('dia')->group(function () {
+                Route::get('{dia}', [VentaController::class, 'ListaPorDiaEspecifico']);
+                Route::get('{dia}/{desde}', [VentaController::class, 'ListaPorDiaEspecifico']);
+                Route::get('{dia}/{desde}/{asta}', [VentaController::class, 'ListaPorDiaEspecifico']);
+            });
+
+            // Mes
+            Route::prefix('mes')->group(function () {
+                Route::get('{anio}/{mes}', [VentaController::class, 'ListaPorMesEspecifico']);
+                Route::get('{anio}/{mes}/{desde}', [VentaController::class, 'ListaPorMesEspecifico']);
+                Route::get('{anio}/{mes}/{desde}/{asta}', [VentaController::class, 'ListaPorMesEspecifico']);
+            });
         });
     });
 
