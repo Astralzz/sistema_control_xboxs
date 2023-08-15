@@ -1,0 +1,15 @@
+{
+  "appId": "com.controlxbox.astralz",
+  "productName": "Control de xboxs",
+  "directories": {
+    "output": "dist"
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "public/logo192.png"
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "public/logo192.png"
+  }
+}

@@ -78,7 +78,7 @@ const PieDePagina: React.FC = () => {
         style={{ backgroundColor: "rgba(0, 0, 0, 0.2)" }}
       >
         © 2023-2029 Copyright:{" "}
-        <a className="" href="https://mdbootstrap.com/">
+        <a className="" href="https://github.com/Astralzz">
           ByAstralz.com
         </a>
       </div>

@@ -1,24 +1,36 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
+const url = require("url"); // Agrega esta línea para manejar URLs locales
 
 // * Ventana
 function crearVentana() {
   // Componentes
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    fullscreen: false, // ? Pantalla completa
-    frame: true, // ? Barra de titulo
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-    },
+    width: 900,
+    height: 700,
+    fullscreen: false, // Pantalla completa
+    frame: true, // Barra de título
+    icon: path.join(__dirname, "logo192.png"),
+    center: true,
+    fullscreenable: true,
+    minWidth: 900,
+    minHeight: 600,
   });
 
-  // Ventana de desarrollador
-  mainWindow.webContents.openDevTools();
+  // Ventana de desarrollador (descomenta para entorno de desarrollo)
+  // mainWindow.webContents.openDevTools();
 
-  // index.html | puerto
-  mainWindow.loadURL("http://localhost:3000");
+  // * Producción
+  mainWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, "index.html"),
+      protocol: "file:",
+      slashes: true,
+    })
+  );
+
+  // Pruebas
+  // mainWindow.loadURL("http://localhost:3000");
 
   // Tamaño de la ventana automático
   mainWindow.webContents.on("did-finish-load", () => {
@@ -55,8 +67,3 @@ app.on("window-all-closed", function () {
     app.quit();
   }
 });
-
-// SUGERENCIA: Para una mejor organización, puedes separar el código específico del proceso principal en otro archivo.
-// Por ejemplo, puedes crear un archivo "main-process.js" y mover la lógica relacionada con el proceso principal allí.
-// Luego, requerir el archivo aquí:
-// require("./main-process.js");

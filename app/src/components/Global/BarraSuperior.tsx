@@ -48,7 +48,8 @@ const BarraSuperior: React.FC<Props> = (props) => {
       setNoXboxs(String(res.noXboxs));
       setNoProductos(String(res.noProductos));
     } catch (error: unknown) {
-      alertaSwal("Error", String(error), "error");
+      // alertaSwal("Error", String(error), "error");
+      console.log(error);
     } finally {
       setCargando(false);
     }
