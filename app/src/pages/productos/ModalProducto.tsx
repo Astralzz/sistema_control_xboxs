@@ -1,7 +1,7 @@
 import React, { Dispatch } from "react";
 import { Offcanvas } from "react-bootstrap";
 import { OpcionesModalProducto } from "./PaginaProductos";
-import ComponenteTablaVentas, {
+import ComponenteTablaVentasPorProducto, {
   ColumnasVentas,
 } from "../../components/tablas/ComponenteTablaVentasPorProducto";
 import FormularioProducto from "./FormularioProducto";
@@ -45,7 +45,7 @@ const ModalProducto: React.FC<Props> = (props) => {
         };
 
         return (
-          <ComponenteTablaVentas
+          <ComponenteTablaVentasPorProducto
             producto={opc.producto}
             isEstadoModal={props.estadoModal}
             columnas={columnas}

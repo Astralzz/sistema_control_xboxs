@@ -5,6 +5,7 @@ import API_URL, {
   comprobarApis,
 } from "./apiVariables";
 import { FiltroFechasGrafica } from "../functions/variables";
+import moment from "moment-timezone";
 
 // * Variables
 const intermedio: string = "ventas";
@@ -79,12 +80,13 @@ export async function apiObtenerListaVentasPorDia(
     }
 
     // Formatear fecha en el formato 'Y-m-d'
-    const formattedDia: string = fecha.toISOString().split("T")[0];
+    const fechaMoment = moment.tz(fecha, "America/Mexico_City");
+    const fechaFormateada: string = fechaMoment.format("YYYY-MM-DD");
 
     // Ruta
     let url =
       API_URL +
-      `${intermedio}/lista/filtrada/dia/${formattedDia}/${desde}/${asta}`;
+      `${intermedio}/lista/filtrada/dia/${fechaFormateada}/${desde}/${asta}`;
 
     // Enviamos
     const res = await axios.get(url);
@@ -139,7 +141,7 @@ export async function apiObtenerListaVentasPorMes(
   }
 }
 
-// * Obtener lista de ventas por id
+// * Obtener lista de ventas por grafica
 export async function apiObtenerListaVentasPorGrafica(
   tipo: FiltroFechasGrafica,
   datos?: number

@@ -1,6 +1,7 @@
 import React from "react";
 import DatePicker from "react-datepicker";
 import es from "date-fns/locale/es";
+import moment from "moment";
 
 // * Años
 const anioActual = new Date().getFullYear();
@@ -62,16 +63,16 @@ const ComponenteSelectFecha: React.FC<Props> = ({
 
   // * Cambiar año
   const cambiarAnio = (value: string) => {
-    setFechaSeleccionada(
-      (prevDate) => new Date(prevDate.setFullYear(parseInt(value)))
-    );
+    setFechaSeleccionada((prevDate) => {
+      const newDate = moment(prevDate).year(parseInt(value)).toDate();
+      return newDate;
+    });
   };
 
   // * Cambiar mes
   const cambiarMes = (value: string) => {
     setFechaSeleccionada((prevDate) => {
-      const newDate = new Date(prevDate);
-      newDate.setMonth(meses.indexOf(value));
+      const newDate = moment(prevDate).month(meses.indexOf(value)).toDate();
       return newDate;
     });
   };

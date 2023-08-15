@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router";
 import ComponentError from "../oters/ComponentError";
 import PaginaProductos from "../../pages/productos/PaginaProductos";
 import PaginaVentas from "../../pages/ventas/PaginaVentas";
+import PaginaRentas from "../../pages/rentas/PaginaRentas";
 
 // * Props pagina escogida
 interface PaginaEscogidaProps {
@@ -20,6 +21,7 @@ const PaginaEscogida: React.FC<PaginaEscogidaProps> = ({ ruta }) => {
     <Routes>
       {/* Pagina de productos */}
       <Route path="/productos" element={<PaginaProductos />} />
+      <Route path="/rentas" element={<PaginaRentas />} />
       <Route path="/ventas" element={<PaginaVentas />} />
       {/* Otras */}
       <Route

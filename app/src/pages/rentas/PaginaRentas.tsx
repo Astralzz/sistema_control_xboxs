@@ -1,26 +1,25 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Container, Form, InputGroup, Navbar } from "react-bootstrap";
-import Venta from "../../models/Venta";
-import TablaVentas from "../ventas/TablaVentas";
+import Renta from "../../models/Renta";
+import TablaRentas from "../rentas/TablaRentas";
 import ComponentError, {
   DataError,
 } from "../../components/oters/ComponentError";
 import ReactLoading from "react-loading";
 import { RespuestaApi } from "../../apis/apiVariables";
 import {
-  apiObtenerListaVentas,
-  apiObtenerListaVentasPorDia,
-  apiObtenerListaVentasPorGrafica,
-  apiObtenerListaVentasPorMes,
-} from "../../apis/apiVentas";
+  apiObtenerListaRentas,
+  apiObtenerListaRentasPorDia,
+  apiObtenerListaRentasPorGrafica,
+  apiObtenerListaRentasPorMes,
+} from "../../apis/apiRentas";
 import ComponenteCargando from "../../components/oters/ComponenteCargando";
-import { ColumnasVentas } from "../../components/tablas/ComponenteTablaVentasPorProducto";
+import { ColumnasRenta } from "../../components/tablas/ComponenteTablaRenta";
 import GraficoDeLineas, {
   DatosGrafica,
 } from "../../components/oters/GraficoDeLineas";
 import {
   alertaSwal,
-  convertirDetalles,
   formatearFecha,
   obtenerDescripcionGrafica,
 } from "../../functions/funcionesGlobales";
@@ -30,20 +29,20 @@ import {
 } from "../../functions/variables";
 
 // * Columnas de tabla
-const columnas: ColumnasVentas = {
+const columnas: ColumnasRenta = {
   no: true,
   fecha: true,
-  hora: true,
-  noProductos: true,
+  cliente: true,
+  duracion: true,
   total: true,
   masInf: true,
 };
 
-// * Accion venta
-export interface OpcionesModalVenta {
+// * Accion renta
+export interface OpcionesModalRenta {
   titulo: string;
-  opcion: "CREAR" | "EDITAR" | "VENTAS" | undefined;
-  venta?: Venta;
+  opcion: "CREAR" | "EDITAR" | "Rentas" | undefined;
+  renta?: Renta;
 }
 
 // * Estilos
@@ -61,13 +60,13 @@ const styles: React.CSSProperties[] = [
   },
 ];
 
-// TODO, Pagina de los ventas
-const PaginaVentas: React.FC = () => {
+// TODO, Pagina de los rentas
+const PaginaRentas: React.FC = () => {
   // * Variables
   const [tipoDeGrafica, setTipoDeGrafica] =
     useState<FiltroFechasGrafica>("periodica");
   const [noDatosGrafica, setNoDatosGrafica] = useState<string>("7");
-  const [noTotalVentas, setNoTotalVentas] = useState<number>(0);
+  const [noTotalRentas, setNoTotalRentas] = useState<number>(0);
   const [isErrorTabla, setErrorTabla] = useState<DataError>({
     estado: true,
   });
@@ -85,13 +84,13 @@ const PaginaVentas: React.FC = () => {
   const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
 
   // * Listas
-  const [listaVentas, setListaVentas] = useState<Venta[]>([]);
-  const [listaVentasGrafica, setListaVentasGrafica] = useState<DatosGrafica[]>(
+  const [listaRentas, setListaRentas] = useState<Renta[]>([]);
+  const [listaRentasGrafica, setListaRentasGrafica] = useState<DatosGrafica[]>(
     []
   );
 
-  // * Obtener ventas
-  const obtenerVentas = useCallback(
+  // * Obtener rentas
+  const obtenerRentas = useCallback(
     async (desde: number = 0, asta: number = 10, dia?: Date, mes?: Date) => {
       try {
         setCargandoTabla(true);
@@ -101,13 +100,13 @@ const PaginaVentas: React.FC = () => {
 
         // ? Llego dia
         if (typeof dia !== "undefined" && dia !== null) {
-          res = await apiObtenerListaVentasPorDia(dia, desde, asta);
+          res = await apiObtenerListaRentasPorDia(dia, desde, asta);
           // ? Llego mes
         } else if (typeof mes !== "undefined" && mes !== null) {
-          res = await apiObtenerListaVentasPorMes(mes, desde, asta);
+          res = await apiObtenerListaRentasPorMes(mes, desde, asta);
           // ? Ninguno
         } else {
-          res = await apiObtenerListaVentas(desde, asta);
+          res = await apiObtenerListaRentas(desde, asta);
         }
 
         // ? salio mal
@@ -119,30 +118,26 @@ const PaginaVentas: React.FC = () => {
               ? String(res.detalles_error)
               : undefined,
           });
-          setListaVentas([]);
+          setListaRentas([]);
           return;
         }
 
         // ? Llego la lista
-        if (!res.listaVentas) {
+        if (!res.listaRentas) {
           setErrorTabla({
             estado: true,
             titulo: res.noEstado ? String(res.noEstado) : undefined,
-            detalles: "La lista de ventas no llego correctamente",
+            detalles: "La lista de rentas no llego correctamente",
           });
-          setListaVentas([]);
+          setListaRentas([]);
           return;
         }
 
         //  Sin errores
         setErrorTabla({ estado: false });
 
-        // Convertir los detalles de cada venta
-        const ventasConvertidas: Venta[] =
-          res.listaVentas.map(convertirDetalles);
-
         // Ponemos lista
-        setListaVentas(ventasConvertidas ?? []);
+        setListaRentas(res.listaRentas ?? []);
 
         // Limitamos a los últimos 150 datos
         const t = res.totalDatos
@@ -152,7 +147,7 @@ const PaginaVentas: React.FC = () => {
           : 0;
 
         //  Ponemos el total
-        setNoTotalVentas(t ?? 0);
+        setNoTotalRentas(t ?? 0);
       } catch (error) {
         console.error(String(error));
       } finally {
@@ -164,13 +159,13 @@ const PaginaVentas: React.FC = () => {
   );
 
   // * Obtener Grafica
-  const obtenerVentasGrafica = useCallback(
+  const obtenerRentasGrafica = useCallback(
     async (tipo: FiltroFechasGrafica, datos?: number) => {
       try {
         setCargandoGrafica(true);
 
         // Respuesta
-        let res: RespuestaApi = await apiObtenerListaVentasPorGrafica(
+        let res: RespuestaApi = await apiObtenerListaRentasPorGrafica(
           tipo,
           datos
         );
@@ -184,7 +179,7 @@ const PaginaVentas: React.FC = () => {
               ? String(res.detalles_error)
               : undefined,
           });
-          setListaVentasGrafica([]);
+          setListaRentasGrafica([]);
           return;
         }
 
@@ -195,24 +190,24 @@ const PaginaVentas: React.FC = () => {
             titulo: "Error 404",
             detalles: "La gráfica no se creo correctamente",
           });
-          setListaVentasGrafica([]);
+          setListaRentasGrafica([]);
           return;
         }
 
         //  Recorremos
-        const ventasGrafica: DatosGrafica[] = res.listaGrafica.map((venta) => ({
-          fecha: formatearFecha(venta.fecha, tipo) ?? venta.fecha,
-          total: !isNaN(Number(venta.total)) ? Number(venta.total) : 0,
+        const rentasGrafica: DatosGrafica[] = res.listaGrafica.map((renta) => ({
+          fecha: formatearFecha(renta.fecha, tipo) ?? renta.fecha,
+          total: !isNaN(Number(renta.total)) ? Number(renta.total) : 0,
         }));
 
         // Actualizamos descripcion
-        setDescripcionGrafica(obtenerDescripcionGrafica(tipo, ventasGrafica));
+        setDescripcionGrafica(obtenerDescripcionGrafica(tipo, rentasGrafica));
 
         //  Sin errores
         setErrorGrafica({ estado: false });
 
         // Agregamos
-        setListaVentasGrafica(ventasGrafica);
+        setListaRentasGrafica(rentasGrafica);
       } catch (error) {
         console.error(String(error));
       } finally {
@@ -236,7 +231,7 @@ const PaginaVentas: React.FC = () => {
         Number(noDatosGrafica) < 101
       ) {
         // Actualizamos
-        obtenerVentasGrafica(tipoDeGrafica, Number(noDatosGrafica));
+        obtenerRentasGrafica(tipoDeGrafica, Number(noDatosGrafica));
         return;
       }
 
@@ -266,11 +261,11 @@ const PaginaVentas: React.FC = () => {
 
   // * Al iniciar
   useEffect(() => {
-    obtenerVentas();
-  }, [obtenerVentas]);
+    obtenerRentas();
+  }, [obtenerRentas]);
   useEffect(() => {
-    obtenerVentasGrafica("periodica");
-  }, [obtenerVentasGrafica]);
+    obtenerRentasGrafica("periodica");
+  }, [obtenerRentasGrafica]);
   useEffect(() => {
     setCargandoPagina(true);
   }, []);
@@ -384,13 +379,13 @@ const PaginaVentas: React.FC = () => {
               // ! Error
               <ComponentError
                 titulo={isErrorGrafica.titulo ?? "Error 404"}
-                accionVoid={() => obtenerVentasGrafica("periodica")}
+                accionVoid={() => obtenerRentasGrafica("periodica")}
                 nombreClase="contenedor-centrado-grafica"
                 detalles={
                   isErrorGrafica.detalles ?? "No se pudo crear la tabla"
                 }
               />
-            ) : listaVentasGrafica.length < 1 ? (
+            ) : listaRentasGrafica.length < 1 ? (
               // ? Lista vacía
               <div className="contenedor-centrado">
                 <h5>Aun no existen datos para crear la grafica</h5>
@@ -398,7 +393,7 @@ const PaginaVentas: React.FC = () => {
             ) : (
               // Grafica
               <GraficoDeLineas
-                datos={listaVentasGrafica}
+                datos={listaRentasGrafica}
                 descripcion={descripcionGrafica}
               />
             )}
@@ -408,17 +403,17 @@ const PaginaVentas: React.FC = () => {
               // ! Error
               <ComponentError
                 titulo={isErrorTabla.titulo ?? "Error 404"}
-                accionVoid={() => obtenerVentas()}
+                accionVoid={() => obtenerRentas()}
                 nombreClase="contenedor-centrado-grafica"
                 detalles={
-                  isErrorTabla.detalles ?? "No se pudieron cargar loas ventas"
+                  isErrorTabla.detalles ?? "No se pudieron cargar loas rentas"
                 }
               />
             ) : (
               // Tabla
-              <TablaVentas
-                lista={listaVentas}
-                totalVentas={noTotalVentas}
+              <TablaRentas
+                lista={listaRentas}
+                totalRentas={noTotalRentas}
                 columnas={columnas}
                 setCargandoTabla={setCargandoTabla}
                 obtenerMasDatos={(
@@ -426,7 +421,7 @@ const PaginaVentas: React.FC = () => {
                   asta: number,
                   dia?: Date,
                   mes?: Date
-                ) => obtenerVentas(desde, asta, dia, mes)}
+                ) => obtenerRentas(desde, asta, dia, mes)}
                 isCargandoTabla={isCargandoTabla}
                 setCargandoAccion={setCargandoAccion}
               />
@@ -441,4 +436,4 @@ const PaginaVentas: React.FC = () => {
   );
 };
 
-export default PaginaVentas;
+export default PaginaRentas;

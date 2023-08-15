@@ -72,18 +72,66 @@ Route::prefix('productos')->group(function () {
 
 // Todo, Rentas
 Route::prefix('rentas')->group(function () {
-    // * GET - Lista por Xbox
-    Route::prefix('lista/xbox')->group(function () {
-        Route::get('{id}', [RentaController::class, 'listaPorXboxs']);
-        Route::get('{id}/{desde}', [RentaController::class, 'listaPorXboxs']);
-        Route::get('{id}/{desde}/{asta}', [RentaController::class, 'listaPorXboxs']);
+
+    // * GET - Listas
+    Route::prefix('lista')->group(function () {
+
+        // ? GET - Global
+        Route::prefix('global')->group(function () {
+            Route::get('', [RentaController::class, 'lista']);
+            Route::get('{desde}', [RentaController::class, 'lista']);
+            Route::get('{desde}/{asta}', [RentaController::class, 'lista']);
+        });
+
+        // ? Periodica
+        Route::prefix('periodica')->group(function () {
+            Route::get('', [RentaController::class, 'ListaRentasPorDias']);
+            Route::get('{dias}', [RentaController::class, 'ListaRentasPorDias']);
+        });
+
+        // ? Semanal
+        Route::prefix('semanal')->group(function () {
+            Route::get('', [RentaController::class, 'ListaRentasSemanales']);
+            Route::get('{semanas}', [RentaController::class, 'ListaRentasSemanales']);
+        });
+
+        // ? Mensual
+        Route::prefix('mensual')->group(function () {
+            Route::get('', [RentaController::class, 'ListaRentasMensuales']);
+            Route::get('{meses}', [RentaController::class, 'ListaRentasMensuales']);
+        });
+
+        // ? Anual
+        Route::prefix('anual')->group(function () {
+            Route::get('', [RentaController::class, 'ListaRentasAnuales']);
+            Route::get('{anios}', [RentaController::class, 'ListaRentasAnuales']);
+        });
+
+        // ? Filtradas
+        Route::prefix('filtrada')->group(function () {
+            // GET - Xboxs
+            Route::prefix('xbox')->group(function () {
+                Route::get('{id}', [RentaController::class, 'listaPorXboxs']);
+                Route::get('{id}/{desde}', [RentaController::class, 'listaPorXboxs']);
+                Route::get('{id}/{desde}/{asta}', [RentaController::class, 'listaPorXboxs']);
+            });
+
+            // Dia
+            Route::prefix('dia')->group(function () {
+                Route::get('{dia}', [RentaController::class, 'ListaPorDiaEspecifico']);
+                Route::get('{dia}/{desde}', [RentaController::class, 'ListaPorDiaEspecifico']);
+                Route::get('{dia}/{desde}/{asta}', [RentaController::class, 'ListaPorDiaEspecifico']);
+            });
+
+            // Mes
+            Route::prefix('mes')->group(function () {
+                Route::get('{anio}/{mes}', [RentaController::class, 'ListaPorMesEspecifico']);
+                Route::get('{anio}/{mes}/{desde}', [RentaController::class, 'ListaPorMesEspecifico']);
+                Route::get('{anio}/{mes}/{desde}/{asta}', [RentaController::class, 'ListaPorMesEspecifico']);
+            });
+        });
     });
-    // * GET - Lista completa
-    Route::prefix('lista/global')->group(function () {
-        Route::get('', [RentaController::class, 'lista']);
-        Route::get('{desde}', [RentaController::class, 'lista']);
-        Route::get('{desde}/{asta}', [RentaController::class, 'lista']);
-    });
+
     // * OTROS - Acciones en general
     Route::prefix('opciones')->group(function () {
         Route::get('buscar/{id}', [RentaController::class, 'obtenerPorId']);

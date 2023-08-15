@@ -35,7 +35,7 @@ interface Props {
 }
 
 // Todo, Tabla Productos
-const ComponenteTablaVentas: React.FC<Props> = (props) => {
+const ComponenteTablaVentasPorProducto: React.FC<Props> = (props) => {
   // * Variables
   const [listaVentas, setListaVentas] = useState<Venta[]>([]);
   const [isCargando, setCargando] = useState<boolean>(false);
@@ -150,4 +150,4 @@ const ComponenteTablaVentas: React.FC<Props> = (props) => {
   );
 };
 
-export default ComponenteTablaVentas;
+export default ComponenteTablaVentasPorProducto;

@@ -41,8 +41,8 @@ class RentaController extends Controller
         'fecha.required' => 'El campo fecha es requerido.',
         'fecha.date' => 'El campo fecha debe ser una fecha válida.',
         'inicio.required' => 'El campo inicio de renta es requerido.',
-        'inicio.date_format' => 'El campo inicio de renta debe ser una hora válida.',
-        'final.date_format' => 'El campo final de renta debe ser una hora válida.',
+        'inicio.date_format' => 'El campo inicio de renta debe ser una inicio válida.',
+        'final.date_format' => 'El campo final de renta debe ser una inicio válida.',
         'duracion.numeric' => 'El campo duración debe ser numérico.',
         'duracion.min' => 'El campo duración debe ser mayor o igual a 0.',
         'total.numeric' => 'El campo total debe ser numérico.',
@@ -67,7 +67,7 @@ class RentaController extends Controller
     // * -------------- FUNCIONES --------------
 
     // * Lista completa
-    public function Lista($desde = 0, $asta = 30): JsonResponse | Collection
+    public function Lista($desde = 0, $asta = 30): JsonResponse
     {
         try {
             // Lista
@@ -80,8 +80,14 @@ class RentaController extends Controller
                 ->take($asta)
                 ->get();
 
+            // Total de datos
+            $totalDatos = $this->renta->count();
+
             // * Retornamos
-            return $lista;
+            return response()->json([
+                'lista' => $lista,
+                'totalDatos' => $totalDatos
+            ]);
 
             // ! Error de consulta
         } catch (QueryException $e) {
@@ -131,6 +137,270 @@ class RentaController extends Controller
             return response()->json([
                 'error' => 'Error en la consulta, error: ' . $e->getMessage()
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por dias
+    public function ListaPorDiaEspecifico($dia, $desde = 0, $asta = 30): JsonResponse
+    {
+        try {
+            // ? Dia correcto
+            if ($dia !== null) {
+                $parsedDate = \DateTime::createFromFormat('Y-m-d', $dia);
+                if (!$parsedDate || $parsedDate->format('Y-m-d') !== $dia) {
+                    return response()->json([
+                        'error' => 'Fecha inválida'
+                    ], 400);
+                }
+            }
+
+            // Lista
+            $query = $this->renta::orderBy('fecha', 'desc')
+                ->orderBy('inicio', 'desc')
+                ->skip($desde)
+                ->take($asta);
+
+            // Por dia
+            if ($dia !== null) {
+                $query->whereDate('fecha', $dia);
+            }
+
+            $lista = $query->get();
+
+            // Total de datos
+            $totalDatos = $this->renta->whereDate('fecha', $dia)->count();
+
+            // * Retornamos
+            return response()->json([
+                'lista' => $lista,
+                'totalDatos' => $totalDatos
+            ]);
+
+            // ! Error de consulta
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+            // ! Error desconocido
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por mes
+    public function ListaPorMesEspecifico($anio, $mes, $desde = 0, $asta = 30): JsonResponse
+    {
+        try {
+            // Validar si el año y el mes son correctos
+            if (!checkdate($mes, 1, $anio)) {
+                return response()->json([
+                    'error' => 'Fecha inválida'
+                ], 400);
+            }
+
+            // Lista
+            $query = $this->renta::orderBy('fecha', 'desc')
+                ->orderBy('inicio', 'desc')
+                ->skip($desde)
+                ->take($asta);
+
+            // Filtrar por mes y año
+            $query->whereYear('fecha', $anio)->whereMonth('fecha', $mes);
+
+            $lista = $query->get();
+
+            // Total de datos para el mes específico
+            $totalDatos = $this->renta->whereYear('fecha', $anio)->whereMonth('fecha', $mes)->count();
+
+            // Retornamos la respuesta
+            return response()->json([
+                'lista' => $lista,
+                'totalDatos' => $totalDatos
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por los últimos n dias
+    public function ListaRentasPorDias($dias = 7): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subDays($dias);
+
+            // Lista
+            $rentasPorDia = [];
+
+            // Recorremos
+            for ($i = 0; $i < $dias; $i++) {
+                // Datos
+                $dia = $fechaInicio->format('Y-m-d');
+                $diaSiguiente = $fechaInicio->addDay()->format('Y-m-d');
+
+                // Suma de los totales de rentas para el día actual
+                $totalRentasDia = $this->renta::whereBetween('fecha', [$dia, $diaSiguiente])
+                    ->sum('total');
+
+                // Agregamos
+                $rentasPorDia[] = [
+                    'fecha' => $dia,
+                    'total' => $totalRentasDia,
+                ];
+            }
+
+            // Retornamos
+            return response()->json([
+                'rentasFiltradas' => $rentasPorDia,
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por ultimas n semanas
+    public function ListaRentasSemanales($semanas = 30): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subWeeks($semanas);
+
+            // Lista
+            $rentasPorSemana = [];
+
+            // Recorremos
+            for ($i = 0; $i < $semanas; $i++) {
+                // Datos
+                $semana = $fechaInicio->format('Y-m-d');
+                $semanaSiguiente = $fechaInicio->addWeek()->format('Y-m-d');
+
+                // Suma de los totales de rentas para la semana actual
+                $totalRentasSemana = $this->renta::whereBetween('fecha', [$semana, $semanaSiguiente])
+                    ->sum('total');
+
+                // Agregamos
+                $rentasPorSemana[] = [
+                    'fecha' => $semana,
+                    'total' => $totalRentasSemana,
+                ];
+            }
+
+            // * Retornamos
+            return response()->json([
+                'rentasFiltradas' => $rentasPorSemana,
+            ]);
+
+            // ! Error de consulta
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+            // ! Error desconocido
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por últimos n meses
+    public function ListaRentasMensuales($meses = 12): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subMonths($meses);
+
+            // Lista
+            $rentasPorMes = [];
+
+            // Recorremos
+            for ($i = 0; $i < $meses; $i++) {
+                // Datos
+                $mes = $fechaInicio->format('Y-m');
+                $mesSiguiente = $fechaInicio->addMonth()->format('Y-m');
+
+                // Suma de los totales de rentas para el mes actual
+                $totalRentasMes = $this->renta::whereBetween('fecha', [$mes . '-01', $mesSiguiente . '-01'])
+                    ->sum('total');
+
+                // Agregamos
+                $rentasPorMes[] = [
+                    'fecha' => $mes,
+                    'total' => $totalRentasMes,
+                ];
+            }
+
+            // Retornamos
+            return response()->json([
+                'rentasFiltradas' => $rentasPorMes,
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error desconocido, error: ' . $e->getMessage()
+            ], 501);
+        }
+    }
+
+    // * Lista por últimos n años
+    public function ListaRentasAnuales($anios = 5): JsonResponse
+    {
+        try {
+            // Fecha de inicio
+            $fechaInicio = now()->subYears($anios);
+
+            // Lista
+            $rentasPorAnio = [];
+
+            // Recorremos
+            for ($i = 0; $i < $anios; $i++) {
+                // Datos
+                $anio = $fechaInicio->format('Y');
+                $anioSiguiente = $fechaInicio->copy()->addYear()->format('Y'); // Copia de la fecha
+
+                // Suma de los totales de rentas para el año actual
+                $totalRentasAnio = $this->renta::whereBetween('fecha', [$anio . '-01-01', $anioSiguiente . '-01-01'])
+                    ->sum('total');
+
+                // Agregamos
+                $rentasPorAnio[] = [
+                    'fecha' => $anio,
+                    'total' => $totalRentasAnio,
+                ];
+
+                // Actualizamos la fecha de inicio para el próximo ciclo
+                $fechaInicio->addYear();
+            }
+
+            // Retornamos
+            return response()->json([
+                'rentasFiltradas' => $rentasPorAnio,
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'error' => 'Error en la consulta, error: ' . $e->getMessage()
+            ], 401);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error desconocido, error: ' . $e->getMessage()
