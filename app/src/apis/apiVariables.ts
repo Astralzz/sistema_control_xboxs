@@ -35,6 +35,8 @@ export interface RespuestaApi {
   venta?: Venta;
   // Total datos
   totalDatos?: number;
+  noXboxs?: number;
+  noProductos?: number;
 }
 
 // * Comprobar apis

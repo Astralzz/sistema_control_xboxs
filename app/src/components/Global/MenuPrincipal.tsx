@@ -20,11 +20,11 @@ const paginas: Pagina[] = [
     url: "inicio",
     icono: "HouseFill",
   },
-  {
-    titulo: "Xboxs",
-    url: "xboxs",
-    icono: "Xbox",
-  },
+  // {
+  //   titulo: "Xboxs",
+  //   url: "xboxs",
+  //   icono: "Xbox",
+  // },
   {
     titulo: "Productos",
     url: "productos",
@@ -40,11 +40,11 @@ const paginas: Pagina[] = [
     url: "ventas",
     icono: "BagFill",
   },
-  {
-    titulo: "Ajustes",
-    url: "ajustes",
-    icono: "GearFill",
-  },
+  // {
+  //   titulo: "Ajustes",
+  //   url: "ajustes",
+  //   icono: "GearFill",
+  // },
 ];
 
 // Todo, Menu principal
@@ -73,18 +73,20 @@ const MenuPrincipal: React.FC = () => {
                 className="d-flex align-items-center"
               >
                 <IconoBootstrap nombre={pagina.icono} />
-
-                <Nav.Item className="ms-2">{pagina.titulo}</Nav.Item>
+                {/* d-none d-lg-block */}
+                <Nav.Item className="ms-2 d-none d-lg-block">
+                  {pagina.titulo}
+                </Nav.Item>
               </Nav.Link>
             ))}
           </Nav>
         </Container>
       </Navbar>
 
-      <hr />
+      {/* <hr /> */}
 
       {/* PIE DEL MENU */}
-      <Container className="dropdown">
+      {/* <Container className="dropdown">
         <Nav.Link
           href="#"
           className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
@@ -101,7 +103,7 @@ const MenuPrincipal: React.FC = () => {
           />
           <strong>mdo</strong>
         </Nav.Link>
-      </Container>
+      </Container> */}
     </div>
   );
 };

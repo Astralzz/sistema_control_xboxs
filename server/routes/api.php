@@ -1,11 +1,22 @@
 <?php
 
+use App\Http\Controllers\AllController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\RentaController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\XboxController;
+
+// Todo, General
+Route::prefix('all')->group(function () {
+    // * OTROS - Acciones en general
+    Route::prefix('opciones')->group(function () {
+        Route::get('totales/tablas', [AllController::class, 'noTotalDatosTablas']);
+    });
+});
+
+// ? <------------------------->
 
 // Todo, Xboxs
 Route::prefix('xboxs')->group(function () {

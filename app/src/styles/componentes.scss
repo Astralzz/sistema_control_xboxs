@@ -384,6 +384,15 @@
     margin: 0 15px;
 }
 
+// Todo -> Reloj
+.reloj-barra {
+    width: auto;
+    height: auto;
+    background-color: transparent;
+    color: $color-letra;
+    border: none;
+}
+
 // Todo ---> OTROS
 .placeholder-blanco {
     .form-control::placeholder {
@@ -400,4 +409,8 @@
     border-bottom: 1px solid $color-letra;
     min-height: 35px;
     // min-width: auto;
+}
+
+.color-letra {
+    color: $color-letra;
 }
