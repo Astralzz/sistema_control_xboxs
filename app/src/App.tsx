@@ -3,7 +3,7 @@ import RoutesController from "./routes/RoutesController";
 import { Container } from "react-bootstrap";
 
 // * Paginas
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter as Router } from "react-router-dom";
 import PieDePagina from "./components/global/PieDePagina";
 
 // * Estilos
@@ -20,7 +20,7 @@ import MenuPrincipal from "./components/global/MenuPrincipal";
 // TODO, App
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <Router>
       {/* Aplicación */}
       <div className="app">
         {/* Contenedor principal */}
@@ -34,7 +34,7 @@ const App: React.FC = () => {
 
         <PieDePagina />
       </div>
-    </BrowserRouter>
+    </Router>
   );
 };
 

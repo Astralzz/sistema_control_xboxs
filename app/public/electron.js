@@ -6,15 +6,15 @@ const url = require("url"); // Agrega esta línea para manejar URLs locales
 function crearVentana() {
   // Componentes
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
+    width: 700,
+    height: 400,
     fullscreen: false, // Pantalla completa
     frame: true, // Barra de título
     icon: path.join(__dirname, "logo192.png"),
     center: true,
     fullscreenable: true,
-    minWidth: 900,
-    minHeight: 600,
+    minWidth: 300,
+    minHeight: 300,
   });
 
   // Ventana de desarrollador (descomenta para entorno de desarrollo)

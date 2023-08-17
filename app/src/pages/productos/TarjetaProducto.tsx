@@ -8,15 +8,15 @@ import {
   Image,
   ListGroup,
 } from "react-bootstrap";
-import iconProducto from "../../assets/imgs/iconProducto.png";
 import IconoBootstrap from "../../components/oters/IconoBootstrap";
 import {
   alertaSwal,
   confirmacionSwal,
 } from "../../functions/funcionesGlobales";
-import API_URL, { RespuestaApi, URL_SERVER } from "../../apis/apiVariables";
+import { RespuestaApi, URL_SERVER } from "../../apis/apiVariables";
 import { apiEliminarProducto } from "../../apis/apiProductos";
 import { OpcionesModalProducto } from "./PaginaProductos";
+import iconProducto from "../../assets/imgs/iconProducto.png";
 
 // * Props
 interface Props {

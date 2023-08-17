@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
-import { alertaSwal } from "../../functions/funcionesGlobales";
 import { Spinner } from "react-bootstrap";
 import { apiObtenerTotalesTablas } from "../../apis/apiAll";
 import { RespuestaApi } from "../../apis/apiVariables";

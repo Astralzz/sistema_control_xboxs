@@ -1,10 +1,10 @@
 import React from "react";
 import { Container, Image, Nav, Navbar } from "react-bootstrap";
 import CardHeader from "react-bootstrap/esm/CardHeader";
-import imgIcono from "../../assets/imgs/icono.png";
 import IconoBootstrap from "../oters/IconoBootstrap";
 import * as Icono from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
+import imgIcono from "../../assets/imgs/imgIcono.png"
 
 // * Pagina
 interface Pagina {
