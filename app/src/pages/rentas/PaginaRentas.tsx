@@ -32,10 +32,11 @@ import {
 const columnas: ColumnasRenta = {
   no: true,
   fecha: true,
-  cliente: true,
+  xbox: true,
   duracion: true,
   total: true,
   masInf: true,
+  inicio: true,
 };
 
 // * Accion renta
@@ -227,7 +228,7 @@ const PaginaRentas: React.FC = () => {
       if (
         regexNumerosEnteros.test(noDatosGrafica) &&
         !isNaN(Number(noDatosGrafica)) &&
-        Number(noDatosGrafica) > 1 &&
+        Number(noDatosGrafica) > 0 &&
         Number(noDatosGrafica) < 101
       ) {
         // Actualizamos
@@ -255,7 +256,7 @@ const PaginaRentas: React.FC = () => {
   const isBloquearBotonGrafica = (): boolean =>
     !regexNumerosEnteros.test(noDatosGrafica) ||
     isNaN(Number(noDatosGrafica)) ||
-    Number(noDatosGrafica) < 2 ||
+    Number(noDatosGrafica) < 1 ||
     Number(noDatosGrafica) > 100 ||
     !["periodica", "semanal", "mensual", "anual"].includes(tipoDeGrafica);
 
@@ -334,7 +335,7 @@ const PaginaRentas: React.FC = () => {
                     String(noDatosGrafica) === ""
                       ? ""
                       : regexNumerosEnteros.test(noDatosGrafica) &&
-                        Number(noDatosGrafica) > 1 &&
+                        Number(noDatosGrafica) > 0 &&
                         Number(noDatosGrafica) < 101
                       ? "is-valid"
                       : "is-invalid"

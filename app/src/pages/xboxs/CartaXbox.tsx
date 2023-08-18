@@ -20,7 +20,6 @@ import {
   confirmacionSwal,
   fechaHoraActual,
   formatearTiempo,
-  redondearNumero,
   seleccionarTiempoManual,
 } from "../../functions/funcionesGlobales";
 import { apiActualizarRenta, apiCrearNuevaRenta } from "../../apis/apiRentas";
@@ -123,14 +122,13 @@ const CartaXbox: React.FC<Props> = (props) => {
   const [tiempoTotal, setTiempoTotal] = useState<number>(0);
   const [cliente, setCliente] = useState<string | null>(null);
   const [comentario, setComentario] = useState<string | null>(null);
-  const [recaudado, setRecaudado] = useState<number>(0);
+  // const [recaudado, setRecaudado] = useState<number>(0);
 
   // * Restante bandera
   let restanteBandera: number = 0;
-  let recaudadoBandera: number = 0;
   let tiempoTotalBandera: number = 0;
-  let banderRecaudado: boolean = true;
-  let timeRecaudadoBandera: NodeJS.Timeout;
+  // let banderRecaudado: boolean = true;
+  // let timeRecaudadoBandera: NodeJS.Timeout;
 
   // * Acciones modal
   const cerrarModal = () => setEstadoModal(false);
@@ -415,7 +413,7 @@ const CartaXbox: React.FC<Props> = (props) => {
 
   // * Limpiar datos
   const limpiarDatos = (): void => {
-    setRecaudado(calcularMontoRecaudado(tiempoTotal, isControlExtra));
+    // setRecaudado(calcularMontoRecaudado(tiempoTotal, isControlExtra));
     setCliente(null);
     setComentario(null);
     setRentaActual(null);
@@ -427,7 +425,6 @@ const CartaXbox: React.FC<Props> = (props) => {
     setPausa(false);
     setKeyTemporizador((prevKey) => prevKey + 1);
     restanteBandera = 0;
-    recaudadoBandera = 0;
     tiempoTotalBandera = 0;
   };
 
@@ -477,32 +474,28 @@ const CartaXbox: React.FC<Props> = (props) => {
     // Tiempo transcurrido
     const trascurrido: string = formatearTiempo(tr);
 
-    // ? es base 10
-    if (tr % 5 === 0 && banderRecaudado) {
-      // Ponemos false
-      banderRecaudado = false;
+    // // ? es base 10
+    // if (tr % 5 === 0 && banderRecaudado) {
+    //   // Ponemos false
+    //   banderRecaudado = false;
 
-      // Destruimos el time
-      clearTimeout(timeRecaudadoBandera);
+    //   // Destruimos el time
+    //   clearTimeout(timeRecaudadoBandera);
 
-      // Accion en 2 s
-      timeRecaudadoBandera = setTimeout(() => {
-        // Recaudado
-        const r: number = calcularMontoRecaudado(tr, isControlExtra);
-        // Redondeado
-        const rd: number = redondearNumero(r);
-        // Ponemos valor
-        setRecaudado(rd);
-        banderRecaudado = true;
-      }, 2000);
-    }
+    //   // Accion en 2 s
+    //   timeRecaudadoBandera = setTimeout(() => {
+    //     // Recaudado
+    //     const r: number = calcularMontoRecaudado(tr, isControlExtra);
+    //     // Redondeado
+    //     const rd: number = redondearNumero(r);
+    //     // Ponemos valor
+    //     setRecaudado(rd);
+    //     banderRecaudado = true;
+    //   }, 2000);
+    // }
 
     //  Restante bandera
     restanteBandera = remainingTime;
-    // Recaudado
-    recaudadoBandera = redondearNumero(
-      calcularMontoRecaudado(tr, isControlExtra)
-    );
     // Total
     tiempoTotalBandera = parseFloat((tr / 60).toFixed(2));
 
@@ -524,7 +517,7 @@ const CartaXbox: React.FC<Props> = (props) => {
     <>
       {/* TARJETA DE XBOX */}
       <Card>
-        {/* ENCABEZADO DE LA TABLA */}
+        {/* ENCABEZADO DE LA CARTA */}
         <Card.Header className="d-flex align-items-center justify-content-between">
           {/* Titulo */}
           {props.xbox.nombre}
@@ -647,13 +640,16 @@ const CartaXbox: React.FC<Props> = (props) => {
                 {/* -------- CUERPO */}
                 <div className="d-flex flex-column">
                   <br className="mb-3" />
-                  {/* -------- INFORMACIÓN */}
-                  <h3>
-                    {`Tiempo: ${
-                      tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
-                    } | Recaudado: ${recaudado} $ | Estimado: ${precioEstimado} $
-              `}
-                  </h3>
+                  <Row>
+                    <Col>
+                      <h4>{`Minutos pedidos: ${
+                        tiempoTotal > 0 ? formatearTiempo(tiempoTotal) : "00:00"
+                      }`}</h4>
+                    </Col>
+                    <Col>
+                      <h4>{`Precio a pagar: ${precioEstimado}`}</h4>
+                    </Col>
+                  </Row>
                   <br />
                   {/* -------- CONTROL DE TIEMPOS */}
                   <InputGroup className="mb-2">
@@ -874,3 +870,8 @@ const CartaXbox: React.FC<Props> = (props) => {
 };
 
 export default CartaXbox;
+
+/* // Todo - NOTA: 
+El tiempo recaudado se comento por cuestión de bugs pero esta 
+listo para usarse al descomentarlo
+*/

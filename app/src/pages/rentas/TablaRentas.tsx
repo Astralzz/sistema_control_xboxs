@@ -204,8 +204,9 @@ const TablaRentas: React.FC<Props> = (props) => {
                   {props.columnas.final && <th>Final</th>}
                   {props.columnas.duracion && <th>Min</th>}
                   {props.columnas.noControles && <th>Controles</th>}
-                  {props.columnas.total && <th>Total</th>}
                   {props.columnas.isPagado && <th>Pagado</th>}
+                  {props.columnas.total && <th>Total</th>}
+                  {props.columnas.xbox && <th>Xbox</th>}
                   {props.columnas.cliente && <th>Cliente</th>}
                   {props.columnas.comentario && <th>Comentario</th>}
                   {props.columnas.masInf && <th>Ver</th>}
@@ -216,7 +217,7 @@ const TablaRentas: React.FC<Props> = (props) => {
                 // Componente cargando
                 <ComponenteCargandoTabla
                   filas={props.lista.length < 1 ? 10 : props.lista.length}
-                  columnas={5}
+                  columnas={6}
                   pagSeleccionada={pagSeleccionada}
                   paginaciones={listaPaginaciones}
                   no
@@ -271,14 +272,27 @@ const TablaRentas: React.FC<Props> = (props) => {
                         )}
                         {/* Total */}
                         {props.columnas.total && <td>{"$" + renta.total}</td>}
+                        {/*  Xbox */}
+                        {props.columnas.xbox && renta.xbox && (
+                          <TextoLargoTablaElement
+                            texto={renta.xbox.nombre ?? ""}
+                            lg={10}
+                            i={renta.id}
+                          />
+                        )}
                         {/* Cliente */}
                         {props.columnas.cliente && (
-                          <td>{renta.cliente ? renta.cliente : ""}</td>
+                          <TextoLargoTablaElement
+                            texto={renta.cliente ?? ""}
+                            lg={10}
+                            i={renta.id}
+                          />
                         )}
                         {/* Descripcion */}
                         {props.columnas.comentario && (
                           <TextoLargoTablaElement
                             texto={renta.comentario ?? ""}
+                            lg={15}
                             i={renta.id}
                           />
                         )}

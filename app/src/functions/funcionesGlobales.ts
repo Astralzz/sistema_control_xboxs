@@ -445,22 +445,39 @@ export function obtenerDescripcionGrafica(
       0
     );
 
+    console.log("Arreglo 2: ");
+    console.log(ventas);
+
+    console.log("Total vendido: " + totalVendido);
+
     // Formatear y limitar decimales
     const formattedTotal: string = totalVendido.toFixed(2);
     const noDatos: number = ventas.length;
 
-    let des: string = `Se gano un total de ${parseFloat(
+    let des: string = `Se ha ganado un total de ${parseFloat(
       formattedTotal
-    ).toLocaleString()}`;
+    ).toLocaleString()} `;
 
-    if (tipo === "periodica") {
-      des = des + ` en los últimos ${noDatos} dias`;
-    } else if (tipo === "semanal") {
-      des = des + `en las últimas ${noDatos} semanas`;
-    } else if (tipo === "mensual") {
-      des = des + ` en los últimos ${noDatos} meses`;
+    if (noDatos > 1) {
+      if (tipo === "periodica") {
+        des = des + `en los últimos ${noDatos} dias`;
+      } else if (tipo === "semanal") {
+        des = des + `en las últimas ${noDatos} semanas`;
+      } else if (tipo === "mensual") {
+        des = des + `en los últimos ${noDatos} meses`;
+      } else {
+        des = des + `en los últimos ${noDatos} años`;
+      }
     } else {
-      des = des + ` en los últimos ${noDatos} años`;
+      if (tipo === "periodica") {
+        des = des + `en el dia actual`;
+      } else if (tipo === "semanal") {
+        des = des + `en la semana actual`;
+      } else if (tipo === "mensual") {
+        des = des + `en el mes actual`;
+      } else {
+        des = des + `en el año actual`;
+      }
     }
 
     return des;

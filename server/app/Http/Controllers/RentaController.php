@@ -160,6 +160,7 @@ class RentaController extends Controller
 
             // Lista
             $query = $this->renta::orderBy('fecha', 'desc')
+                ->with('xbox:id,nombre')
                 ->orderBy('inicio', 'desc')
                 ->skip($desde)
                 ->take($asta);
@@ -206,6 +207,7 @@ class RentaController extends Controller
 
             // Lista
             $query = $this->renta::orderBy('fecha', 'desc')
+                ->with('xbox:id,nombre')
                 ->orderBy('inicio', 'desc')
                 ->skip($desde)
                 ->take($asta);
@@ -248,10 +250,9 @@ class RentaController extends Controller
             for ($i = 0; $i < $dias; $i++) {
                 // Datos
                 $dia = $fechaInicio->format('Y-m-d');
-                $diaSiguiente = $fechaInicio->addDay()->format('Y-m-d');
 
                 // Suma de los totales de rentas para el día actual
-                $totalRentasDia = $this->renta::whereBetween('fecha', [$dia, $diaSiguiente])
+                $totalRentasDia = $this->renta::whereBetween('fecha', [$dia . ' 00:00:00', $dia . ' 23:59:59'])
                     ->sum('total');
 
                 // Agregamos
@@ -259,6 +260,9 @@ class RentaController extends Controller
                     'fecha' => $dia,
                     'total' => $totalRentasDia,
                 ];
+
+                // Pasamos al siguiente día
+                $fechaInicio->addDay();
             }
 
             // Retornamos
@@ -290,7 +294,7 @@ class RentaController extends Controller
             for ($i = 0; $i < $semanas; $i++) {
                 // Datos
                 $semana = $fechaInicio->format('Y-m-d');
-                $semanaSiguiente = $fechaInicio->addWeek()->format('Y-m-d');
+                $semanaSiguiente = $fechaInicio->copy()->addWeek()->format('Y-m-d');
 
                 // Suma de los totales de rentas para la semana actual
                 $totalRentasSemana = $this->renta::whereBetween('fecha', [$semana, $semanaSiguiente])
@@ -301,19 +305,19 @@ class RentaController extends Controller
                     'fecha' => $semana,
                     'total' => $totalRentasSemana,
                 ];
+
+                // Actualizamos la fecha de inicio para el próximo ciclo
+                $fechaInicio->addWeek();
             }
 
-            // * Retornamos
+            // Retornamos
             return response()->json([
                 'rentasFiltradas' => $rentasPorSemana,
             ]);
-
-            // ! Error de consulta
         } catch (QueryException $e) {
             return response()->json([
                 'error' => 'Error en la consulta, error: ' . $e->getMessage()
             ], 401);
-            // ! Error desconocido
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error desconocido, error: ' . $e->getMessage()
@@ -326,7 +330,7 @@ class RentaController extends Controller
     {
         try {
             // Fecha de inicio
-            $fechaInicio = now()->subMonths($meses);
+            $fechaInicio = now();
 
             // Lista
             $rentasPorMes = [];
@@ -335,10 +339,10 @@ class RentaController extends Controller
             for ($i = 0; $i < $meses; $i++) {
                 // Datos
                 $mes = $fechaInicio->format('Y-m');
-                $mesSiguiente = $fechaInicio->addMonth()->format('Y-m');
 
                 // Suma de los totales de rentas para el mes actual
-                $totalRentasMes = $this->renta::whereBetween('fecha', [$mes . '-01', $mesSiguiente . '-01'])
+                $totalRentasMes = $this->renta::whereYear('fecha', $fechaInicio->year)
+                    ->whereMonth('fecha', $fechaInicio->month)
                     ->sum('total');
 
                 // Agregamos
@@ -346,11 +350,14 @@ class RentaController extends Controller
                     'fecha' => $mes,
                     'total' => $totalRentasMes,
                 ];
+
+                // Actualizamos
+                $fechaInicio->subMonth();
             }
 
             // Retornamos
             return response()->json([
-                'rentasFiltradas' => $rentasPorMes,
+                'rentasFiltradas' => array_reverse($rentasPorMes), // Revertir el arreglo para el orden correcto
             ]);
         } catch (QueryException $e) {
             return response()->json([

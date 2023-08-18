@@ -132,17 +132,19 @@ const TarjetaRenta: React.FC<Props> = (props) => {
             </ListGroup.Item>
 
             {/* Xbox */}
-            <ListGroup.Item
-              style={{
-                backgroundColor: "transparent",
-                border: "none",
-                color: "white",
-              }}
-              className="list-group-item d-flex justify-content-between align-items-center p-1"
-            >
-              <p className="mb-0">Xbox:</p>
-              <p className="mb-0">{props.renta?.xbox.nombre ?? "N/A"}</p>
-            </ListGroup.Item>
+            {props.renta?.xbox && (
+              <ListGroup.Item
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  color: "white",
+                }}
+                className="list-group-item d-flex justify-content-between align-items-center p-1"
+              >
+                <p className="mb-0">Xbox:</p>
+                <p className="mb-0">{props.renta?.xbox.nombre ?? "N/A"}</p>
+              </ListGroup.Item>
+            )}
 
             {/* Pagado */}
             <ListGroup.Item
