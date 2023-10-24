@@ -1,13 +1,5 @@
-import React, { Dispatch, useCallback, useEffect, useState } from "react";
-import {
-  Button,
-  Container,
-  Form,
-  InputGroup,
-  ListGroup,
-  Offcanvas,
-} from "react-bootstrap";
-import ComponenteCargando from "../../components/oters/ComponenteCargando";
+import React, { FormEvent, useState } from "react";
+import { Button, Col, Form, Offcanvas, Row } from "react-bootstrap";
 import { regexNumerosEnteros } from "../../functions/variables";
 import { alertaSwal } from "../../functions/funcionesGlobales";
 import { guardarCookie, obtenerCookie } from "../../functions/cookies";
@@ -15,7 +7,7 @@ import { guardarCookie, obtenerCookie } from "../../functions/cookies";
 // * Estilos
 const styles: React.CSSProperties[] = [
   {
-    backgroundColor: "var(--color-fondo)",
+    backgroundColor: "transparent",
     color: "var(--color-letra)",
     border: "none",
     borderBottom: "1px solid white",
@@ -36,7 +28,6 @@ interface Props {
 // TODO, Pagina de los ventas
 const PageConfig: React.FC<Props> = (props) => {
   // * Variables
-  const [isCargandoAccion, setCargandoAccion] = useState<boolean>(false);
   const [precioPorHora, setPrecioPorHora] = useState<string | null>(
     obtenerCookie("p60m") || "15"
   );
@@ -51,8 +42,11 @@ const PageConfig: React.FC<Props> = (props) => {
     useState<string | null>(obtenerCookie("p30m2c") || "12");
 
   // * Guardar datos
-  const guardarDatos = (): void => {
+  const guardarDatos = (event: FormEvent<HTMLFormElement>): void => {
     try {
+      // Evitamos reinicio
+      event.preventDefault();
+
       // ? Hora correcta
       if (precioPorHora && regexNumerosEnteros.test(precioPorHora)) {
         guardarCookie("p60m", precioPorHora);
@@ -131,141 +125,114 @@ const PageConfig: React.FC<Props> = (props) => {
 
       {/* PAGINA */}
       <Offcanvas.Body className="modal-derecho">
-        {/* Lista de Ajustes */}
-        <ListGroup>
-          {/* Precio de hora */}
-          <ListGroup.Item
-            className="list-group-item d-flex p-1"
-            style={{
-              backgroundColor: "transparent",
-              justifyContent: "flex-start",
-              border: "none",
-              color: "white",
-            }}
-          >
-            <div className="mb-2">
-              {/* Cliente */}
-              <InputGroup className="mb-3">
-                <InputGroup.Text style={styles[1]}>
-                  ¿Precio de renta por 60 minutos?:
-                </InputGroup.Text>
-                <Form.Control
-                  onChange={(e) => setPrecioPorHora(e.target.value)}
-                  value={precioPorHora ?? ""}
-                  type="number"
-                  autoFocus
-                  maxLength={60}
-                  autoComplete="off"
-                  className={
-                    precioPorHora && regexNumerosEnteros.test(precioPorHora)
-                      ? "is-valid"
-                      : "is-invalid"
-                  }
-                  style={{ ...styles[0], width: 160 }}
-                />
-              </InputGroup>
-              <InputGroup className="mb-3">
-                {/* 2 controles */}
-                <InputGroup.Text style={styles[1]}>
-                  Con 2 controles:
-                </InputGroup.Text>
-                <Form.Control
-                  onChange={(e) => setPrecioPorHoraDosControles(e.target.value)}
-                  value={precioPorHoraDosControles ?? ""}
-                  type="number"
-                  autoFocus
-                  maxLength={60}
-                  autoComplete="off"
-                  className={
-                    precioPorHoraDosControles &&
-                    regexNumerosEnteros.test(precioPorHoraDosControles)
-                      ? "is-valid"
-                      : "is-invalid"
-                  }
-                  style={{ ...styles[0], width: 160 }}
-                />
-              </InputGroup>
-            </div>
-          </ListGroup.Item>
+        <Form onSubmit={guardarDatos}>
+          {/* 60 Minutos */}
+          <Row className="mb-3">
+            {/* 60 */}
+            <Form.Group className="mb-3 placeholder-blanco" as={Col}>
+              <Form.Label column>
+                ¿Precio de renta por 60 minutos?:{" "}
+                <strong style={{ color: "red" }}>*</strong>
+              </Form.Label>
+              <Form.Control
+                style={styles[0]}
+                onChange={(e) => setPrecioPorHora(e.target.value)}
+                value={precioPorHora ?? ""}
+                type="number"
+                autoFocus
+                maxLength={60}
+                autoComplete="off"
+                className={
+                  precioPorHora && regexNumerosEnteros.test(precioPorHora)
+                    ? "is-valid"
+                    : "is-invalid"
+                }
+              />
+            </Form.Group>
+            {/* 2 Controles */}
+            <Form.Group className="mb-3 placeholder-blanco" as={Col}>
+              <Form.Label column>
+                Con 2 controles: <strong style={{ color: "red" }}>*</strong>
+              </Form.Label>
+              <Form.Control
+                style={styles[0]}
+                onChange={(e) => setPrecioPorHoraDosControles(e.target.value)}
+                value={precioPorHoraDosControles ?? ""}
+                type="number"
+                autoFocus
+                maxLength={60}
+                autoComplete="off"
+                className={
+                  precioPorHoraDosControles &&
+                  regexNumerosEnteros.test(precioPorHoraDosControles)
+                    ? "is-valid"
+                    : "is-invalid"
+                }
+              />
+            </Form.Group>
+          </Row>
 
-          {/* Precio de media hora */}
-          <ListGroup.Item
-            className="list-group-item d-flex p-1"
-            style={{
-              backgroundColor: "transparent",
-              justifyContent: "flex-start",
-              border: "none",
-              color: "white",
-            }}
-          >
-            <div className="mb-2">
-              <InputGroup className="mb-3">
-                {/* 1 control */}
-                <InputGroup.Text style={styles[1]}>
-                  ¿Precio de renta por 30 minutos?:
-                </InputGroup.Text>
-                <Form.Control
-                  onChange={(e) => setPrecioPorMediaHora(e.target.value)}
-                  value={precioPorMediaHora ?? ""}
-                  type="number"
-                  autoFocus
-                  maxLength={60}
-                  autoComplete="off"
-                  className={
-                    precioPorMediaHora &&
-                    regexNumerosEnteros.test(precioPorMediaHora)
-                      ? "is-valid"
-                      : "is-invalid"
-                  }
-                  style={{ ...styles[0], width: 160 }}
-                />
-
-                {/* 2 controles */}
-                <InputGroup.Text style={styles[1]}>
-                  Con 2 controles:
-                </InputGroup.Text>
-                <Form.Control
-                  onChange={(e) =>
-                    setPrecioPorMediaHoraDosControles(e.target.value)
-                  }
-                  value={precioPorMediaHoraDosControles ?? ""}
-                  type="number"
-                  autoFocus
-                  maxLength={60}
-                  autoComplete="off"
-                  className={
-                    precioPorMediaHoraDosControles &&
-                    regexNumerosEnteros.test(precioPorMediaHoraDosControles)
-                      ? "is-valid"
-                      : "is-invalid"
-                  }
-                  style={{ ...styles[0], width: 160 }}
-                />
-              </InputGroup>
-            </div>
-          </ListGroup.Item>
+          {/* 30 Minutos */}
+          <Row className="mb-3">
+            {/* 30 */}
+            <Form.Group className="mb-3 placeholder-blanco" as={Col}>
+              <Form.Label column>
+                ¿Precio de renta por 30 minutos?:{" "}
+                <strong style={{ color: "red" }}>*</strong>
+              </Form.Label>
+              <Form.Control
+                style={styles[0]}
+                onChange={(e) => setPrecioPorMediaHora(e.target.value)}
+                value={precioPorMediaHora ?? ""}
+                type="number"
+                autoFocus
+                maxLength={60}
+                autoComplete="off"
+                className={
+                  precioPorMediaHora &&
+                  regexNumerosEnteros.test(precioPorMediaHora)
+                    ? "is-valid"
+                    : "is-invalid"
+                }
+              />
+            </Form.Group>
+            {/* 2 controles */}
+            <Form.Group className="mb-3 placeholder-blanco" as={Col}>
+              <Form.Label column>
+                Con 2 controles: <strong style={{ color: "red" }}>*</strong>
+              </Form.Label>
+              <Form.Control
+                style={styles[0]}
+                onChange={(e) =>
+                  setPrecioPorMediaHoraDosControles(e.target.value)
+                }
+                value={precioPorMediaHoraDosControles ?? ""}
+                type="number"
+                autoFocus
+                maxLength={60}
+                autoComplete="off"
+                className={
+                  precioPorMediaHoraDosControles &&
+                  regexNumerosEnteros.test(precioPorMediaHoraDosControles)
+                    ? "is-valid"
+                    : "is-invalid"
+                }
+              />
+            </Form.Group>
+          </Row>
 
           {/* Boton de guardar */}
-          <div
-            className="botones-formulario"
-            style={{
-              marginLeft: 40,
-              marginRight: 40,
-            }}
-          >
+          <div className="botones-formulario">
             <Button
-              onClick={guardarDatos}
+              type="submit"
               disabled={!bloquearBoton()}
               className="bt-fmr"
             >
               Guardar cambios
             </Button>
           </div>
-        </ListGroup>
+        </Form>
       </Offcanvas.Body>
-
-      {/* CARGANDO */}
-      <ComponenteCargando tipo={"spin"} estadoModal={isCargandoAccion} />
     </Offcanvas>
   );
 };

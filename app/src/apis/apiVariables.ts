@@ -6,14 +6,14 @@ import Venta from "../models/Venta";
 import { DatosGrafica } from "../components/oters/GraficoDeLineas";
 
 // * Apis del servidor
-// export const URL_SERVER: string | undefined =
-//   process.env.REACT_APP_URL_SERVER ?? undefined;
-// export const API_URL: string | undefined =
-//   process.env.REACT_APP_URL_SERVER_API ?? undefined;
+export const URL_SERVER: string | undefined =
+  process.env.REACT_APP_URL_SERVER ?? undefined;
+export const API_URL: string | undefined =
+  process.env.REACT_APP_URL_SERVER_API ?? undefined;
 
 // * Apis del servidor local
-export const URL_SERVER: string = "http://127.0.0.1:8000";
-export const API_URL: string = `${URL_SERVER}/api/`;
+// export const URL_SERVER: string = "http://127.0.0.1:8000";
+// export const API_URL: string = `${URL_SERVER}/api/`;
 
 // Respuesta
 export interface RespuestaApi {

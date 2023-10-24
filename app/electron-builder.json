@@ -1,5 +1,5 @@
 {
-  "appId": "com.controlxbox.astralz",
+  "appId": "com.controlxbox.astralz.dev",
   "productName": "Control de xboxs",
   "directories": {
     "output": "dist"
