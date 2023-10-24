@@ -91,6 +91,9 @@ export async function apiObtenerListaRentasPorDia(
     // Enviamos
     const res = await axios.get(url);
 
+    console.log(res);
+    
+
     // * Éxito
     return {
       estado: true,

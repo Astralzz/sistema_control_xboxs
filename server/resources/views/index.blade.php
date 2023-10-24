@@ -26,7 +26,7 @@
             <a href="https://www.linkedin.com/in/edain-jesus-cortez-ceron-23b26b155" target="_blank"><i
                     class="fab fa-linkedin"></i>
                 LinkedIn</a>
-            <a href="mailto:daiinxd13@gmail.com" target="_blank"><i class="fas fa-envelope"></i> Email</a>
+            <a href="mailto:dayind@hotmail.com" target="_blank"><i class="fas fa-envelope"></i> Email</a>
         </div>
     </div>
 </body>

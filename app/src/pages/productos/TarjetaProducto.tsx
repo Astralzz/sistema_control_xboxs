@@ -16,7 +16,14 @@ import {
 import { RespuestaApi, URL_SERVER } from "../../apis/apiVariables";
 import { apiEliminarProducto } from "../../apis/apiProductos";
 import { OpcionesModalProducto } from "./PaginaProductos";
-import iconProducto from "../../assets/imgs/iconProducto.png";
+
+// * Imagenes
+let iconProducto: string | undefined;
+try {
+  iconProducto = require("../../assets/imgs/iconProducto.png");
+} catch (error) {
+  iconProducto = undefined;
+}
 
 // * Props
 interface Props {
@@ -89,16 +96,18 @@ const TarjetaProducto: React.FC<Props> = (props) => {
 
         {/* Imagen */}
         <div className="align-items-center">
-          <Image
-            src={
-              props.producto?.enlace_img
-                ? `${URL_SERVER}${props.producto?.enlace_img}`
-                : iconProducto
-            }
-            roundedCircle
-            height={140}
-            width={140}
-          />
+          {(iconProducto || props.producto?.enlace_img) && (
+            <Image
+              src={
+                props.producto?.enlace_img
+                  ? `${URL_SERVER}${props.producto?.enlace_img}`
+                  : iconProducto
+              }
+              roundedCircle
+              height={140}
+              width={140}
+            />
+          )}
         </div>
 
         {/* Cuerpo */}

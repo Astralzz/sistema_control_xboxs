@@ -8,16 +8,16 @@ interface Enlace {
 
 const enlaces: Enlace[] = [
   {
-    leyenda: "GitHub",
-    url: "#",
+    leyenda: "gitHub",
+    url: "https://github.com/Astralzz",
   },
   {
     leyenda: "LinkedIn",
-    url: "#",
+    url: "https://www.linkedin.com/in/edain-jesus-cortez-ceron-23b26b155",
   },
   {
     leyenda: "Email",
-    url: "#",
+    url: "mailto:dayind@hotmail.com",
   },
 ];
 
@@ -32,12 +32,12 @@ const PieDePagina: React.FC = () => {
       <Container className="p-4">
         <Row>
           <Col lg={6} md={12} className="mb-4">
-            <h5 className="mb-3">Ultima nota agregada</h5>
+            <h5 className="mb-3">Desarrollado por</h5>
             <p>
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste
-              atque ea quis molestias. Fugiat pariatur maxime quis culpa
-              corporis vitae repudiandae aliquam voluptatem veniam, est atque
-              cumque eum delectus sint!
+              Edain JCC (Astralz), Ing en computación y desarrollador full
+              stack, Conocimientos en Javascript, Typescript, Java, PHP, React,
+              React native, Vue, Spring, Laravel, Mysql, Oracle, etc. Un saludo
+              a todos
             </p>
           </Col>
           <Col lg={3} md={6} className="mb-4">

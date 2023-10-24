@@ -4,6 +4,7 @@ import Swal, { SweetAlertIcon, SweetAlertResult } from "sweetalert2";
 import Venta, { DetalleVenta } from "../models/Venta";
 import { FiltroFechasGrafica } from "./variables";
 import { DatosGrafica } from "../components/oters/GraficoDeLineas";
+import { obtenerCookie } from "./cookies";
 
 // * Variables de estilos
 const colorFondo: string = "var(--color-fondo)";
@@ -79,8 +80,12 @@ export function calcularMontoRecaudado(
   noControles: boolean
 ): number {
   let minutos = m / 60;
-  const precioPorHora = !noControles ? 15 : 21;
-  const precioPorMediaHora = !noControles ? 9 : 13;
+  const precioPorHora = !noControles
+    ? Number(obtenerCookie("p60m")) || 15
+    : Number(obtenerCookie("p60m2c")) || 21;
+  const precioPorMediaHora = !noControles
+    ? Number(obtenerCookie("p30m")) || 9
+    : Number(obtenerCookie("p30m2c")) || 13;
   const precioPor3Minutos = precioPorMediaHora / 9;
   const precioPor10Minutos = precioPorMediaHora / 3;
 

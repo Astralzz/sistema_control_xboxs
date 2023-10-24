@@ -11,7 +11,7 @@ import { DatosGrafica } from "../components/oters/GraficoDeLineas";
 // export const API_URL: string | undefined =
 //   process.env.REACT_APP_URL_SERVER_API ?? undefined;
 
-// // * Apis del servidor local
+// * Apis del servidor local
 export const URL_SERVER: string = "http://127.0.0.1:8000";
 export const API_URL: string = `${URL_SERVER}/api/`;
 

@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Image, Nav, Navbar } from "react-bootstrap";
 import CardHeader from "react-bootstrap/esm/CardHeader";
 import IconoBootstrap from "../oters/IconoBootstrap";
 import * as Icono from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
-import imgIcono from "../../assets/imgs/imgIcono.png"
+import PageConfig from "../../pages/config/PageConfig";
+
+// * Imagenes
+let imgIcono: string | undefined;
+try {
+  imgIcono = require("../../assets/imgs/imgIcono.png");
+} catch (error) {
+  imgIcono = undefined;
+}
 
 // * Pagina
 interface Pagina {
@@ -40,53 +48,66 @@ const paginas: Pagina[] = [
     url: "ventas",
     icono: "BagFill",
   },
-  // {
-  //   titulo: "Ajustes",
-  //   url: "ajustes",
-  //   icono: "GearFill",
-  // },
 ];
 
 // Todo, Menu principal
 const MenuPrincipal: React.FC = () => {
+  const [isEstadoModal, setEstadoModal] = useState<boolean>(false);
+
   return (
-    <div className="text-white bg-dark menu-principal">
-      <br />
+    <>
+      <div className="text-white bg-dark menu-principal">
+        <br />
 
-      {/* ENCABEZADO */}
-      <CardHeader>
-        <Image src={imgIcono} alt="img.icono" width={70} />
-        <h6>Inovatech</h6>
-      </CardHeader>
+        {/* ENCABEZADO */}
+        <CardHeader>
+          {imgIcono && <Image src={imgIcono} alt="img.icono" width={70} />}
+          <h6
+            style={{
+              marginTop: 10,
+            }}
+          >
+            Control xbox
+          </h6>
+        </CardHeader>
 
-      <hr className="hr" />
+        <hr className="hr" />
 
-      {/* CUERPO PRINCIPAL */}
-      <Navbar data-bs-theme="dark">
-        <Container>
-          <Nav className="me-auto flex-column">
-            {paginas.map((pagina, i) => (
+        {/* CUERPO PRINCIPAL */}
+        <Navbar data-bs-theme="dark">
+          <Container>
+            <Nav className="me-auto flex-column">
+              {paginas.map((pagina, i) => (
+                <Nav.Link
+                  as={Link}
+                  to={"/" + pagina.url}
+                  key={i}
+                  className="d-flex align-items-center"
+                >
+                  <IconoBootstrap nombre={pagina.icono} />
+                  {/* d-none d-lg-block */}
+                  <Nav.Item className="ms-2 d-none d-lg-block">
+                    {pagina.titulo}
+                  </Nav.Item>
+                </Nav.Link>
+              ))}
+
               <Nav.Link
-                as={Link}
-                to={"/" + pagina.url}
-                key={i}
+                onClick={() => setEstadoModal(true)}
                 className="d-flex align-items-center"
               >
-                <IconoBootstrap nombre={pagina.icono} />
+                <IconoBootstrap nombre={"GearFill"} />
                 {/* d-none d-lg-block */}
-                <Nav.Item className="ms-2 d-none d-lg-block">
-                  {pagina.titulo}
-                </Nav.Item>
+                <Nav.Item className="ms-2 d-none d-lg-block">Ajustes</Nav.Item>
               </Nav.Link>
-            ))}
-          </Nav>
-        </Container>
-      </Navbar>
+            </Nav>
+          </Container>
+        </Navbar>
 
-      {/* <hr /> */}
+        {/* <hr /> */}
 
-      {/* PIE DEL MENU */}
-      {/* <Container className="dropdown">
+        {/* PIE DEL MENU */}
+        {/* <Container className="dropdown">
         <Nav.Link
           href="#"
           className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
@@ -104,7 +125,13 @@ const MenuPrincipal: React.FC = () => {
           <strong>mdo</strong>
         </Nav.Link>
       </Container> */}
-    </div>
+      </div>
+
+      <PageConfig
+        cerrarModal={() => setEstadoModal(false)}
+        estadoModal={isEstadoModal}
+      />
+    </>
   );
 };
 

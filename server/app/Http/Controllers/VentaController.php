@@ -203,10 +203,9 @@ class VentaController extends Controller
             for ($i = 0; $i < $dias; $i++) {
                 // Datos
                 $dia = $fechaInicio->format('Y-m-d');
-                $diaSiguiente = $fechaInicio->addDay()->format('Y-m-d');
 
                 // Suma de los totales de ventas para el día actual
-                $totalVentasDia = $this->venta::whereBetween('fecha', [$dia, $diaSiguiente])
+                $totalVentasDia = $this->venta::whereBetween('fecha', [$dia . ' 00:00:00', $dia . ' 23:59:59'])
                     ->sum('total');
 
                 // Agregamos
@@ -214,6 +213,9 @@ class VentaController extends Controller
                     'fecha' => $dia,
                     'total' => $totalVentasDia,
                 ];
+
+                // Pasamos al siguiente día
+                $fechaInicio->addDay();
             }
 
             // Retornamos
@@ -245,7 +247,7 @@ class VentaController extends Controller
             for ($i = 0; $i < $semanas; $i++) {
                 // Datos
                 $semana = $fechaInicio->format('Y-m-d');
-                $semanaSiguiente = $fechaInicio->addWeek()->format('Y-m-d');
+                $semanaSiguiente = $fechaInicio->copy()->addWeek()->format('Y-m-d');
 
                 // Suma de los totales de ventas para la semana actual
                 $totalVentasSemana = $this->venta::whereBetween('fecha', [$semana, $semanaSiguiente])
@@ -256,19 +258,19 @@ class VentaController extends Controller
                     'fecha' => $semana,
                     'total' => $totalVentasSemana,
                 ];
+
+                // Actualizamos la fecha de inicio para el próximo ciclo
+                $fechaInicio->addWeek();
             }
 
-            // * Retornamos
+            // Retornamos
             return response()->json([
                 'ventasFiltradas' => $ventasPorSemana,
             ]);
-
-            // ! Error de consulta
         } catch (QueryException $e) {
             return response()->json([
                 'error' => 'Error en la consulta, error: ' . $e->getMessage()
             ], 401);
-            // ! Error desconocido
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error desconocido, error: ' . $e->getMessage()
@@ -281,7 +283,7 @@ class VentaController extends Controller
     {
         try {
             // Fecha de inicio
-            $fechaInicio = now()->subMonths($meses);
+            $fechaInicio = now();
 
             // Lista
             $ventasPorMes = [];
@@ -290,10 +292,10 @@ class VentaController extends Controller
             for ($i = 0; $i < $meses; $i++) {
                 // Datos
                 $mes = $fechaInicio->format('Y-m');
-                $mesSiguiente = $fechaInicio->addMonth()->format('Y-m');
 
                 // Suma de los totales de ventas para el mes actual
-                $totalVentasMes = $this->venta::whereBetween('fecha', [$mes . '-01', $mesSiguiente . '-01'])
+                $totalVentasMes = $this->venta::whereYear('fecha', $fechaInicio->year)
+                    ->whereMonth('fecha', $fechaInicio->month)
                     ->sum('total');
 
                 // Agregamos
@@ -301,11 +303,14 @@ class VentaController extends Controller
                     'fecha' => $mes,
                     'total' => $totalVentasMes,
                 ];
+
+                // Actualizamos
+                $fechaInicio->subMonth();
             }
 
             // Retornamos
             return response()->json([
-                'ventasFiltradas' => $ventasPorMes,
+                'ventasFiltradas' => array_reverse($ventasPorMes), // Revertir el arreglo para el orden correcto
             ]);
         } catch (QueryException $e) {
             return response()->json([

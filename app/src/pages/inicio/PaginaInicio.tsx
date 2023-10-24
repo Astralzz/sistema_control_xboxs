@@ -12,12 +12,8 @@ const PaginaInicio: React.FC = () => {
       <hr className="hr" />
       <Row>
         <Col>
-          {/* vENTAS */}
+          {/* VENTAS */}
           <TarjetaVenderProducto />
-        </Col>
-        <Col>
-          {/* SERVICIOS */}
-          <h4>Servicios</h4>
         </Col>
       </Row>
     </Container>
