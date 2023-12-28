@@ -53,7 +53,7 @@ Puedes utilizar los comandos de Linux para navegar por el sistema de archivos y 
 Aparecerá algo como:
 
 ```cmd
-Welcome to Ubuntu 22.04.2 LTS (GNU/Linux 5.15.0-60-generic x86_64)
+Welcome to Ubuntu 00.00.0 LTS (GNU/Linux 0.0.0-60-generic x86_64)
 
 - Documentation: https://help.ubuntu.com
 - Management: https://landscape.canonical.com
