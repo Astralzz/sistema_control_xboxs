@@ -35,7 +35,7 @@ Si encuentras útil este proyecto y deseas contribuir o expresar tu aprecio, con
 
 ## Contacto
 
-Mantente conectado y actualizado a través de nuestras redes sociales:
+Si necesitas ayuda o contactarme:
 
 - [Facebook](https://www.facebook.com/lAstralz)
 - [LinkedIn](https://www.linkedin.com/in/edain-jesus-cortez-ceron-23b26b155)
