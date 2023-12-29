@@ -19,13 +19,13 @@ La aplicación está diseñada para gestionar ventas y tiempos de renta. Permite
 
 ## Instalación
 
-> Setup en .exe listo para instalar:
+Setup en .exe listo para instalar:
 
-- [Setup](https://drive.google.com/file/d/1QQxlE7kzC2rgqVlZLw5Z8cceTro7jIL2/view?usp=sharing)
+> [Setup](https://drive.google.com/file/d/1QQxlE7kzC2rgqVlZLw5Z8cceTro7jIL2/view?usp=sharing)
 
-> Si modificas el codigo fuente del frondend:
+Si modificas el codigo fuente del frondend:
 
-- La instalación de la aplicación se encuentra detallada en la carpeta de ***notas***, acompañada de archivos adicionales que pueden ser útiles durante este proceso.
+> La instalación de la aplicación se encuentra detallada en la carpeta de ***notas***, acompañada de archivos adicionales que pueden ser útiles durante este proceso.
 
 ## Donaciones
 
