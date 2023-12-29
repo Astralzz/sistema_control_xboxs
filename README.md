@@ -20,9 +20,13 @@ una visión detallada de las ventas en períodos de tiempo específicos (días, 
 - Configuración de precios por hora, media hora, etc.
 - Cálculos automáticos y lógica de precios.
 
+## Instalacion
+
+La instalación de esta aplicación se encuentra detallada en la carpeta de notas, junto con algunos archivos adicionales que pueden ser de utilidad.
+
 ## Contacto
 - [faceebok](https://www.facebook.com/lAstralz)
 - [LinkedIn](https://www.linkedin.com/in/edain-jesus-cortez-ceron-23b26b155)
-- [Paypal](https://www.paypal.me/Astralz)
+- [PayPal](https://www.paypal.me/Astralz)
 
 
