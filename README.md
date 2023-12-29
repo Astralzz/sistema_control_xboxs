@@ -23,6 +23,6 @@ una visión detallada de las ventas en períodos de tiempo específicos (días, 
 ## Contacto
 - [faceebok](https://www.facebook.com/lAstralz)
 - [LinkedIn](https://www.linkedin.com/in/edain-jesus-cortez-ceron-23b26b155)
-- [Paypal]( https://www.facebook.com/lAstralz)
+- [Paypal](https://www.paypal.me/Astralz)
 
 
